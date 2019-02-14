@@ -71,7 +71,7 @@ def rubikstask():
     survival = 0.2
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-    task = RubiksTask()
+    task = RubiksTask(batch_size=128)
     result = population.epoch(evaluator = task, generations = 1000, solution = task)
     print(result['champions'][-1].neuron_genes)
     print(result['champions'][-1].connection_genes)
@@ -125,7 +125,7 @@ def xortask():
     stop_when_solved = True
     tournament_selection_k = 3
     verbose = True
-    max_cores = 1
+    max_cores = 8
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
     target_species = 12
@@ -159,11 +159,12 @@ if __name__ == "__main__":
     genome.neuron_genes = [[0, 'tanh', 1.0, 0, 0, 1.0], [1, 'tanh', 1.0, 0, 2048, 1.0], [2, 'sigmoid', -1.7126596576379352, 2048, 4096, 1.0], [3, 'tanh', -0.8893340119071926, 1, 2048.0, 1.0], [4, 'tanh', 2.354260308870598, 1, 3072.0, 1.0], [5, 'identity', 0.644710733714112, 1, 3072.0, 1.0], [6, 'identity', 1.4286189036280563, 1, 1536.0, 1.0], [7, 'sigmoid', 2.5686020859248497, 1, 2560.0, 1.0], [8, 'sigmoid', 1.0, 2, 3584.0, 1.0]]
     genome.connection_genes = {(0, 2): [0, 0, 2, 0.9570420296626129, True], (1, 2): [1, 1, 2, 6.394578277464045, True], (3, 2): [3, 3, 2, 5.0302733690649895, True], (0, 4): [4, 0, 4, -5.599159832810173, True], (4, 2): [5, 4, 2, -8.128200451027551, True], (1, 4): [6, 1, 4, 7.973423212790442, True], (5, 2): [8, 5, 2, 3.452690602189743, True], (0, 5): [9, 0, 5, -1.7373626007990397, True], (0, 6): [13, 0, 6, 8.990206888452919, True], (1, 7): [15, 1, 7, 2.209906926826694, True], (7, 2): [18, 7, 2, 2.290157694853284, True], (3, 8): [22, 3, 8, 0.5174994659566082, True], (8, 2): [23, 8, 2, 5.256223627935843, True], (5, 8): [28, 5, 8, 4.100292144020446, True]}
 
-    print(genome.neuron_genes)
-    print(genome.connection_genes)
+    # print(genome.neuron_genes)
+    # print(genome.connection_genes)
 
     network = NeuralNetwork(genome)
-    print(network(np.array([[0,0]])))
-    output = network(np.array([[0,0],[0,1],[1,0],[1,1]]))
-    print(output)
+    # print(network(np.array([[0,0]])))
+
+
+    # print(output)
     rubikstask()

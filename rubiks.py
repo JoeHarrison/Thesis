@@ -353,10 +353,10 @@ class RubiksEnv(gym.Env):
         sides = [self.U, self.L, self.F, self.R, self.B, self.D]
         
         for index, side in enumerate(sides):
-            if not np.all(side==index):
-                return  False
+            if not np.all(side == index):
+                return 0
             
-        return True
+        return 1
     
     def pretty_print(self):
         """"""

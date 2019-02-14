@@ -174,7 +174,8 @@ class NeuralNetwork(nn.Module):
         self.outputs = torch.zeros(self.batch_size, self.n_outputs, dtype=self.dtype)
 
     def forward(self, x):
-        inputs = torch.tensor(x, dtype=self.dtype)
+        # inputs = torch.tensor(x, dtype=self.dtype)
+        inputs = x.type(self.dtype)
 
         activations_for_output = self.activations
         if self.n_hidden > 0:
