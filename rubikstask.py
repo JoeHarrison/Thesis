@@ -1,3 +1,8 @@
+import rubiks
+from feedforwardnetwork import NeuralNetwork
+import numpy as np
+import torch
+
 class RubiksTask(object):
     def __init__(self):
         self.difficulty = 1
@@ -8,10 +13,13 @@ class RubiksTask(object):
 
     def evaluate(self, network, verbose=False):
         if not isinstance(network, NeuralNetwork):
-            network = NeuralNetwork.create(network)
+            network = NeuralNetwork(network)
 
         fitness = 0.000001
 
+        #batch here?
+        #instead of range 100 do batch in network
+        #RL loop here?
         for i in range(100):
             done = False
             tries = 0
@@ -21,8 +29,8 @@ class RubiksTask(object):
 
             while tries < max_tries and not done:
 
-                action_probabilities = network.activate(np.array([state]))
-                action = np.argmax(action_probabilities)
+                action_probabilities = network(np.array([state]))
+                action = torch.max(action_probabilities, 1)[1]
 
                 next_state, reward, done, info = self.env.step(int(action))
 
@@ -39,4 +47,4 @@ class RubiksTask(object):
         return {'fitness' : fitness, 'info' : self.difficulty}
 
     def solve(self, network):
-        return int(self.evaluate(network)['fitness'] > 0.5)
+        return int(self.evaluate(network)['fitness'] > 0.99)
