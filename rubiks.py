@@ -39,7 +39,7 @@ class RubiksEnv(gym.Env):
     Episode terminates when either a cube is in the solved state (i.e. each side only has tiles of one colour) or when the step limit is reached.
     """
     
-    def __init__(self, size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0):
+    def __init__(self, size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0, seed=None):
         self.size = size
         
         #Allocate space for Rubik's Cube sides. Each side get's a corresponding integer.
@@ -75,7 +75,7 @@ class RubiksEnv(gym.Env):
         self.solved_reward = solved_reward
         self.unsolved_reward = unsolved_reward
         
-        self.seed()
+        self.seed(seed)
         
     def seed(self, seed=None):
         """"""
@@ -92,8 +92,8 @@ class RubiksEnv(gym.Env):
         self.D = (5*np.ones((self.size,self.size))).astype(int)
         
         for step in range(steps):
-            action = random.sample(self._action_set,1)[0]
-            self.step(action)
+            action = self.np_random.choice(self._action_set)
+            self.step(int(action))
         observation = self.get_observation()
         return observation
         
@@ -490,10 +490,6 @@ ACTION_MEANING_HALF_METRIC_POMDP = {
     21 : "East",
     22 : "Antipode"
 }
-
-
-# In[11]:
-
 
 
 
