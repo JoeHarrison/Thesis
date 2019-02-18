@@ -5,8 +5,10 @@ import torch
 import time
 
 class RubiksTask(object):
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, device):
         self.batch_size = batch_size
+        self.device = device
+
         self.difficulty = 1
 
         self.envs = [rubiks.RubiksEnv(2) for _ in range(self.batch_size)]
@@ -19,7 +21,7 @@ class RubiksTask(object):
 
     def evaluate(self, network, verbose=False):
         if not isinstance(network, NeuralNetwork):
-            network = NeuralNetwork(network)
+            network = NeuralNetwork(network,device=self.device)
 
         fitness = 0.000001
 
@@ -31,7 +33,7 @@ class RubiksTask(object):
         max_tries = self.difficulty
         tries = 0
         fitness = torch.zeros(self.batch_size, 1, dtype=torch.float32)
-        state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)])
+        state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device)
         network.reset()
 
         while tries < max_tries:
@@ -40,7 +42,7 @@ class RubiksTask(object):
 
             next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, actions)])
             done = torch.tensor(done, dtype=torch.float32).view(-1, 1)
-            next_state = torch.tensor(next_state)
+            next_state = torch.tensor(next_state, device=self.device)
             fitness += done
             state = next_state
             tries += 1

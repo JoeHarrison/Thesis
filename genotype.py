@@ -101,12 +101,19 @@ class Genotype(object):
                 self.neuron_genes.append([(self.inputs + i), random.choice(self.nonlinearities),1.0,self.max_layer, (self.inputs + i) * 2048, self.response_default])
                 self.output_keys.append((self.inputs + i))
             # Initialise connections
+            # innovation_number = 0
+            # for i in range(self.inputs):
+            #     for j in range(self.inputs,self.inputs + self.outputs):
+            #         weight = self._initialise_weight(self.inputs,self.outputs)
+            #         self.connection_genes[(i,j)] = [innovation_number, i, j, weight ,True]
+            #         innovation_number += 1
+
             innovation_number = 0
-            for i in range(self.inputs):
-                for j in range(self.inputs,self.inputs + self.outputs):
-                    weight = self._initialise_weight(self.inputs,self.outputs)
-                    self.connection_genes[(i,j)] = [innovation_number, i, j, weight ,True]
-                    innovation_number += 1
+            for i in range(self.inputs, self.inputs + self.outputs):
+                random_input_neuron = np.random.randint(0, self.inputs)
+                weight = self._initialise_weight(self.inputs, self.outputs)
+                self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight ,True]
+                innovation_number += 1
         else:
             raise NotImplementedError
 

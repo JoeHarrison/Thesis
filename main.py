@@ -8,7 +8,7 @@ from feedforwardnetwork import NeuralNetwork
 from xortask import XORTask
 from rubikstask import RubiksTask
 
-def rubikstask():
+def rubikstask(device):
     first_name_generator = NameGenerator('names.csv', 3, 12)
     new_individual_name = first_name_generator.generate_name()
     surname_generator = NameGenerator('surnames.csv', 3, 12)
@@ -16,28 +16,28 @@ def rubikstask():
 
     inputs = 144
     outputs = 12
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'leaky_relu', 'identity']
+    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
     topology = None
     feedforward = True
     max_depth = None
     max_nodes = float('inf')
     response_default = 1.0
     bias_as_node = False
-    initial_weight_stdev = 2.0
-    p_add_neuron = 0.05
+    initial_weight_stdev = 1.0
+    p_add_neuron = 0.1
     p_add_connection = 0.25
-    p_mutate_weight = 0.5
+    p_mutate_weight = 0.75
     p_reset_weight = 0.1
     p_reenable_connection = 0.01
     p_disable_connection = 0.01
     p_reenable_parent = 0.25
-    p_mutate_bias = 0.2
+    p_mutate_bias = 0.25
     p_mutate_response = 0.0
-    p_mutate_type = 0.1
-    stdev_mutate_weight = 1.5
-    stdev_mutate_bias = 0.5
+    p_mutate_type = 0.05
+    stdev_mutate_weight = 1.0
+    stdev_mutate_bias = 1.0
     stdev_mutate_response = 0.5
-    weight_range = (-50.,50.)
+    weight_range = (-1., 1.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
@@ -52,7 +52,7 @@ def rubikstask():
                                   weight_range, distance_excess_weight, distance_disjoint_weight,
                                   distance_weight)
 
-    population_size = 100
+    population_size = 128
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -60,7 +60,7 @@ def rubikstask():
     max_cores = 1
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
-    target_species = 12
+    target_species = 16
     minimum_elitism_size = 5
     young_age = 10
     young_multiplier = 1.2
@@ -71,7 +71,7 @@ def rubikstask():
     survival = 0.2
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-    task = RubiksTask(batch_size=128)
+    task = RubiksTask(batch_size=128, device=device)
     result = population.epoch(evaluator = task, generations = 1000, solution = task)
     print(result['champions'][-1].neuron_genes)
     print(result['champions'][-1].connection_genes)
@@ -84,7 +84,7 @@ def xortask():
 
     inputs = 2
     outputs = 1
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'leaky_relu', 'identity']
+    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
     topology = None
     feedforward = True
     max_depth = None
@@ -105,7 +105,7 @@ def xortask():
     stdev_mutate_weight = 1.5
     stdev_mutate_bias = 0.5
     stdev_mutate_response = 0.5
-    weight_range = (-50.,50.)
+    weight_range = (-1., 1.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
@@ -120,15 +120,15 @@ def xortask():
                                   weight_range, distance_excess_weight, distance_disjoint_weight,
                                   distance_weight)
 
-    population_size = 100
+    population_size = 128
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
     verbose = True
-    max_cores = 8
+    max_cores = 1
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
-    target_species = 12
+    target_species = 16
     minimum_elitism_size = 5
     young_age = 10
     young_multiplier = 1.2
@@ -149,6 +149,14 @@ if __name__ == "__main__":
     # torch.manual_seed(3)
     # random.seed(3)
 
+    device = torch.device('cpu')
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+
+    print('Using %s' % device)
+    if device.type == 'cuda':
+        print(torch.cuda.get_device_name(0))
+
     first_name_generator = NameGenerator('names.csv', 3, 12)
     new_individual_name = first_name_generator.generate_name()
     surname_generator = NameGenerator('surnames.csv', 3, 12)
@@ -167,4 +175,4 @@ if __name__ == "__main__":
 
 
     # print(output)
-    rubikstask()
+    rubikstask(device)

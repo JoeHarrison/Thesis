@@ -43,5 +43,10 @@ class NameGenerator():
                     terms.append(next_letter)
                 else:
                     break
-            yield ''.join(terms[self.markov_order:])
-            n+= 1
+
+            letters = terms[self.markov_order:]
+            letters[0] = letters[0].capitalize()
+            name = ''.join(letters)
+
+            yield name
+            n += 1
