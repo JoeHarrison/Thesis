@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-import random
 from genotype import Genotype
 from namegenerator import NameGenerator
 from population import Population
@@ -71,7 +70,7 @@ def rubikstask(device):
     survival = 0.2
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-    task = RubiksTask(batch_size=128, device=device)
+    task = RubiksTask(batch_size=128, device=device, lamarckism=True)
     result = population.epoch(evaluator = task, generations = 1000, solution = task)
     print(result['champions'][-1].neuron_genes)
     print(result['champions'][-1].connection_genes)
@@ -120,7 +119,7 @@ def xortask():
                                   weight_range, distance_excess_weight, distance_disjoint_weight,
                                   distance_weight)
 
-    population_size = 128
+    population_size = 512
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3

@@ -89,36 +89,36 @@ class NeuralNetwork(nn.Module):
         # Build list of neurons that are required for output excluding input neurons
         required = required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)
 
-        input_keys = genome.input_keys
-        hidden_keys = [k[0] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys]
+        self.input_keys = genome.input_keys
+        self.hidden_keys = [k[0] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys]
 
-        output_keys = genome.output_keys
+        self.output_keys = genome.output_keys
 
-        n_inputs = len(input_keys)
-        self.n_hidden = len(hidden_keys)
-        self.n_outputs = len(output_keys)
+        self.n_inputs = len(self.input_keys)
+        self.n_hidden = len(self.hidden_keys)
+        self.n_outputs = len(self.output_keys)
 
         if self.n_hidden >0:
             self.n_layers = max([k[3] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys])
-            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in hidden_keys], dtype=dtype, device=self.device)
+            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device)
             #activations here?
-            self.hidden_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in hidden_keys]
+            self.hidden_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.hidden_keys]
 
-        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in output_keys], dtype=dtype, device=self.device)
+        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device)
         #Activations here?
-        self.output_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in output_keys]
+        self.output_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.output_keys]
 
-        input_key_to_idx = {k: i for i, k in enumerate(input_keys)}
-        hidden_key_to_idx = {k: i for i, k in enumerate(hidden_keys)}
-        output_key_to_idx = {k: i for i, k in enumerate(output_keys)}
+        self.input_key_to_idx = {k: i for i, k in enumerate(self.input_keys)}
+        self.hidden_key_to_idx = {k: i for i, k in enumerate(self.hidden_keys)}
+        self.output_key_to_idx = {k: i for i, k in enumerate(self.output_keys)}
 
         def key_to_idx(key):
-            if key in input_keys:
-                return input_key_to_idx[key]
-            elif key in hidden_keys:
-                return hidden_key_to_idx[key]
-            elif key in output_keys:
-                return output_key_to_idx[key]
+            if key in self.input_keys:
+                return self.input_key_to_idx[key]
+            elif key in self.hidden_keys:
+                return self.hidden_key_to_idx[key]
+            elif key in self.output_keys:
+                return self.output_key_to_idx[key]
 
         input_to_output = ([], [])
         input_to_hidden = ([], [])
@@ -135,31 +135,31 @@ class NeuralNetwork(nn.Module):
             input_key = connection[1]
             output_key = connection[2]
 
-            if input_key in input_keys and output_key in hidden_keys:
+            if input_key in self.input_keys and output_key in self.hidden_keys:
                 idxs, vals = input_to_hidden
-            elif input_key in hidden_keys and output_key in hidden_keys:
+            elif input_key in self.hidden_keys and output_key in self.hidden_keys:
                 idxs, vals = hidden_to_hidden
-            elif input_key in output_keys and output_key in hidden_keys:
+            elif input_key in self.output_keys and output_key in self.hidden_keys:
                 idxs, vals = output_to_hidden
-            elif input_key in input_keys and output_key in output_keys:
+            elif input_key in self.input_keys and output_key in self.output_keys:
                 idxs, vals = input_to_output
-            elif input_key in hidden_keys and output_key in output_keys:
+            elif input_key in self.hidden_keys and output_key in self.output_keys:
                 idxs, vals = hidden_to_output
-            elif input_key in output_keys and output_key in output_keys:
+            elif input_key in self.output_keys and output_key in self.output_keys:
                 idxs, vals = output_to_output
 
             idxs.append((key_to_idx(connection[2]), key_to_idx(connection[1])))  # to, from
             vals.append(connection[3])
 
-        i2o_weights = dense_from_coo((self.n_outputs, n_inputs), input_to_output, dtype=dtype, device=self.device)
-        self.input_to_output = WeightLinear(n_inputs, self.n_outputs, weights=i2o_weights)
+        i2o_weights = dense_from_coo((self.n_outputs, self.n_inputs), input_to_output, dtype=dtype, device=self.device)
+        self.input_to_output = WeightLinear(self.n_inputs, self.n_outputs, weights=i2o_weights)
 
         o2o_weights = dense_from_coo((self.n_outputs, self.n_outputs), output_to_output, dtype=dtype, device=self.device)
         self.output_to_output = WeightLinear(self.n_outputs, self.n_outputs, weights=o2o_weights)
 
         if self.n_hidden > 0:
-            i2h_weights = dense_from_coo((self.n_hidden, n_inputs), input_to_hidden, dtype=dtype, device=self.device)
-            self.input_to_hidden = WeightLinear(n_inputs, self.n_hidden, weights=i2h_weights)
+            i2h_weights = dense_from_coo((self.n_hidden, self.n_inputs), input_to_hidden, dtype=dtype, device=self.device)
+            self.input_to_hidden = WeightLinear(self.n_inputs, self.n_hidden, weights=i2h_weights)
 
             h2h_weights = dense_from_coo((self.n_hidden, self.n_hidden), hidden_to_hidden, dtype=dtype, device=self.device)
             self.hidden_to_hidden = WeightLinear(self.n_hidden, self.n_hidden, weights=h2h_weights)

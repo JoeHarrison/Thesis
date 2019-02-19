@@ -94,6 +94,8 @@ class RubiksEnv(gym.Env):
         for step in range(steps):
             action = self.np_random.choice(self._action_set)
             self.step(int(action))
+        if self.solved():
+            self.reset(steps, orientation)
         observation = self.get_observation()
         return observation
         

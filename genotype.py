@@ -305,3 +305,44 @@ class Genotype(object):
         return (self.distance_excess_weight * e +
                self.distance_disjoint_weight * d +
                self.distance_weight * w)
+
+    def weights_to_genotype(self, network):
+        input_keys = network.input_keys
+        hidden_keys = network.hidden_keys
+        output_keys = network.output_keys
+
+        input_key_to_idx = network.input_key_to_idx
+        hidden_key_to_idx = network.hidden_key_to_idx
+        output_key_to_idx = network.output_key_to_idx
+
+        def key_to_idx(key):
+            if key in input_keys:
+                return input_key_to_idx[key]
+            elif key in hidden_keys:
+                return hidden_key_to_idx[key]
+            elif key in output_keys:
+                return output_key_to_idx[key]
+
+        for cg in self.connection_genes:
+            # If connection enabled
+            if self.connection_genes[cg][4]:
+                input_node, output_node = cg
+                layer_input = self.neuron_genes[input_node][3]
+                layer_output = self.neuron_genes[output_node][3]
+                input_node = key_to_idx(input_node)
+                output_node = key_to_idx(output_node)
+
+                if layer_input == 0 and layer_output == self.max_layer:
+                    self.connection_genes[cg][3] = network.input_to_output.linear.weight.data[output_node, input_node].item()
+                elif layer_input == 0:
+                    self.connection_genes[cg][3] = network.input_to_hidden.linear.weight.data[output_node, input_node].item()
+                elif layer_input is not self.max_layer and layer_output is not self.max_layer:
+                    self.connection_genes[cg][3] = network.hidden_to_hidden.linear.weight.data[output_node, input_node].item()
+                elif layer_input == self.max_layer and layer_output is not self.max_layer:
+                    self.connection_genes[cg][3] = network.output_to_hidden.linear.weight.data[output_node, input_node].item()
+                elif layer_input is not self.max_layer and layer_output == self.max_layer:
+                    self.connection_genes[cg][3] = network.hidden_to_output.linear.weight.data[output_node, input_node].item()
+                elif layer_input == self.max_layer and layer_output == self.max_layer:
+                    self.connection_genes[cg][3] = network.output_to_output.linear.weight.data[output_node, input_node].item()
+                else:
+                    raise Exception('One of the layers does not exist')

@@ -10,3 +10,6 @@ class Species(object):
         self.max_fitness_previous = 0.0
         self.stagnation = 0
         self.has_best = False
+
+    def reset_stagnation(self):
+        self.stagnation = 0
