@@ -31,6 +31,23 @@ def train(network, optimizer, batch_size, discount_factor, state, action, reward
     return loss.item()
 
 
+def select_action(qactions, epsilon):
+    if np.random.rand() < epsilon:
+        return np.random.randint(len(qactions))
+    else:
+        _, idx = torch.max(qactions, 0)
+        return idx.item()
+
+
+def select_actions(model, state, epsilon, device):
+    with torch.no_grad():
+        action_probabilities = model(state)
+
+        max_action = torch.max(action_probabilities, 1)[1]
+        rand_action = torch.randint(0, action_probabilities.size(1), size=([action_probabilities.size(0)]), device=device)
+
+        return torch.gather(torch.cat((max_action.view(-1, 1), rand_action.view(-1, 1)), 1), 1, torch.bernoulli(torch.ones(action_probabilities.size(0), device=device)*0.05).long().view(-1,1)).view(-1)
+
 class RubiksTask(object):
     def __init__(self, batch_size, device, lamarckism = False):
         self.batch_size = batch_size
@@ -51,16 +68,18 @@ class RubiksTask(object):
 
         optimizer = optim.Adam(network.parameters(), amsgrad=True)
 
-        max_tries = self.difficulty
+        max_tries = self.difficulty + 5
         tries = 0
         fitness = torch.zeros(self.batch_size, 1, dtype=torch.float32, device=self.device)
         state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device)
         network.reset()
 
         while tries < max_tries:
-            action_probabilities = network(state)
-            # Not taking epsilon steps
-            actions = torch.max(action_probabilities, 1)[1]
+            # action_probabilities = network(state)
+            # # Not taking epsilon steps
+            # actions = torch.max(action_probabilities, 1)[1]
+            actions = select_actions(network, state, 0.05, self.device)
+
 
             next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, actions)])
             done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
