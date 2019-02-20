@@ -19,7 +19,7 @@ def rubikstask(device, batch_size):
     outputs = 12
     nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
     topology = None
-    feedforward = True
+    feedforward = False
     max_depth = None
     max_nodes = float('inf')
     response_default = 1.0
@@ -54,7 +54,7 @@ def rubikstask(device, batch_size):
                                   distance_weight)
 
     # Population parameters
-    population_size = 32
+    population_size = 256
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3

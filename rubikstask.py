@@ -13,6 +13,7 @@ class RubiksTask(object):
 
         self.difficulty = 1
 
+        # TODO set cube size from parameter
         self.envs = [rubiks.RubiksEnv(2) for _ in range(self.batch_size)]
 
     def _increase_difficulty(self):
@@ -31,7 +32,7 @@ class RubiksTask(object):
             bernoulli = torch.bernoulli(torch.ones(action_probabilities.size(0), device=self.device)*epsilon).long().view(-1, 1)
             return torch.gather(torch.cat((max_action.view(-1, 1), rand_action.view(-1, 1)), 1), 1, bernoulli).view(-1)
 
-    def evaluate(self, genome, verbose=False):
+    def evaluate(self, genome):
         # Should always be a genome
         if not isinstance(genome, NeuralNetwork):
             network = NeuralNetwork(genome, device=self.device)
@@ -71,6 +72,7 @@ class RubiksTask(object):
 
         fitness = float((fitness > 0).sum().item()) / self.batch_size
 
+        # TODO: set threshold in init
         if fitness > 0.8:
             self._increase_difficulty()
 

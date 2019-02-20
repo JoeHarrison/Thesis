@@ -167,6 +167,9 @@ class NeuralNetwork(nn.Module):
             h2o_weights = dense_from_coo((self.n_outputs, self.n_hidden), hidden_to_output, dtype=dtype, device=self.device)
             self.hidden_to_output = WeightLinear(self.n_hidden, self.n_outputs, weights=h2o_weights)
 
+            o2h_weights = dense_from_coo((self.n_hidden, self.n_outputs), output_to_hidden, dtype=dtype, device=self.device)
+            self.output_to_hidden = WeightLinear(self.n_outputs, self.n_hidden, weights=o2h_weights)
+
         self.reset()
 
     def reset(self):
@@ -186,6 +189,7 @@ class NeuralNetwork(nn.Module):
             for i in range(self.n_layers):
                 hidden_inputs = self.input_to_hidden(inputs) + \
                                   self.hidden_to_hidden(self.activations) + \
+                                  self.output_to_hidden(self.outputs) + \
                                   self.hidden_biases
 
                 self.activations = torch.cat(([self.hidden_activations[i](hidden_inputs[:,i]).view(-1,1) for i in range(self.n_hidden)]), dim=1)

@@ -244,10 +244,10 @@ class Genotype(object):
             connection_gene = [innovation, fr, to, self._initialise_weight(2,2), True]
             self.connection_genes[(fr, to)] = connection_gene
     
-    def mutate(self, innovations = {}, global_innovation_number = 0):
+    def mutate(self, innovations={}, global_innovation_number = 0):
         
         maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connection_genes.values()))
-        # TODO: move to separate functions
+
         if len(self.neuron_genes) < self.max_nodes and np.random.rand() < self.p_add_neuron:
             self.add_neuron(maximum_innovation_number, innovations)
                 
