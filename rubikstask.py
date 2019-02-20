@@ -27,9 +27,9 @@ class RubiksTask(object):
             action_probabilities = model(state)
 
             max_action = torch.max(action_probabilities, 1)[1]
-            rand_action = torch.randint(0, action_probabilities.size(1), size=([action_probabilities.size(0)]), device=self.device)
-
-            return torch.gather(torch.cat((max_action.view(-1, 1), rand_action.view(-1, 1)), 1), 1, torch.bernoulli(torch.ones(action_probabilities.size(0), device=self.device)*epsilon).long().view(-1, 1)).view(-1)
+            rand_action = torch.randint(0, action_probabilities.size(1), size=([action_probabilities.size(0)]), device=self.device, dtype=torch.long)
+            bernoulli = torch.bernoulli(torch.ones(action_probabilities.size(0), device=self.device)*epsilon).long().view(-1, 1)
+            return torch.gather(torch.cat((max_action.view(-1, 1), rand_action.view(-1, 1)), 1), 1, bernoulli).view(-1)
 
     def evaluate(self, genome, verbose=False):
         # Should always be a genome
@@ -41,7 +41,7 @@ class RubiksTask(object):
         max_tries = self.difficulty + 10
         tries = 0
         fitness = torch.zeros(self.batch_size, 1, dtype=torch.float32, device=self.device)
-        state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device)
+        state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
         network.reset()
 
         while tries < max_tries:

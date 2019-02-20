@@ -38,7 +38,7 @@ class RubiksEnv(gym.Env):
     Episode terminates when either a cube is in the solved state (i.e. each side only has tiles of one colour) or when the step limit is reached.
     """
     
-    def __init__(self, size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=-1.0, seed=None):
+    def __init__(self, size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0, seed=None):
         self.size = size
         
         #Allocate space for Rubik's Cube sides. Each side get's a corresponding integer.
