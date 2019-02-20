@@ -6,9 +6,9 @@ from copy import deepcopy
 class Genotype(object):
     def __init__(self, 
                  new_individual_name,
-                 inputs = 144, 
-                 outputs = 12, 
-                 nonlinearities = ['relu','sigmoid','tanh'],
+                 inputs=144,
+                 outputs=12,
+                 nonlinearities = ['relu', 'sigmoid', 'tanh'],
                  topology = None,
                  feedforward = True,
                  max_depth = None,
@@ -100,7 +100,8 @@ class Genotype(object):
             for i in range(self.outputs):
                 self.neuron_genes.append([(self.inputs + i), random.choice(self.nonlinearities),1.0,self.max_layer, (self.inputs + i) * 2048, self.response_default])
                 self.output_keys.append((self.inputs + i))
-            # Initialise connections
+
+            # All inputs connected with all outputs
             # innovation_number = 0
             # for i in range(self.inputs):
             #     for j in range(self.inputs,self.inputs + self.outputs):
@@ -108,12 +109,21 @@ class Genotype(object):
             #         self.connection_genes[(i,j)] = [innovation_number, i, j, weight ,True]
             #         innovation_number += 1
 
+            # All outputs connected to one random input
+            # innovation_number = 0
+            # for i in range(self.inputs, self.inputs + self.outputs):
+            #     random_input_neuron = np.random.randint(0, self.inputs)
+            #     weight = self._initialise_weight(self.inputs, self.outputs)
+            #     self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight ,True]
+            #     innovation_number += 1
+
+            # One initial connection
             innovation_number = 0
-            for i in range(self.inputs, self.inputs + self.outputs):
-                random_input_neuron = np.random.randint(0, self.inputs)
-                weight = self._initialise_weight(self.inputs, self.outputs)
-                self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight ,True]
-                innovation_number += 1
+            random_input_neuron = np.random.randint(0, self.inputs)
+            weight = self._initialise_weight(self.inputs, self.outputs)
+            self.connection_genes[(random_input_neuron, 144)] = [innovation_number, random_input_neuron, 144, weight, True]
+            innovation_number += 1
+
         else:
             raise NotImplementedError
 
@@ -326,11 +336,11 @@ class Genotype(object):
         for cg in self.connection_genes:
             # If connection enabled
             if self.connection_genes[cg][4]:
-                input_node, output_node = cg
-                layer_input = self.neuron_genes[input_node][3]
-                layer_output = self.neuron_genes[output_node][3]
-                input_node = key_to_idx(input_node)
-                output_node = key_to_idx(output_node)
+                input_node_og, output_node_og = cg
+                layer_input = self.neuron_genes[input_node_og][3]
+                layer_output = self.neuron_genes[output_node_og][3]
+                input_node = key_to_idx(input_node_og)
+                output_node = key_to_idx(output_node_og)
 
                 if layer_input == 0 and layer_output == self.max_layer:
                     self.connection_genes[cg][3] = network.input_to_output.linear.weight.data[output_node, input_node].item()
@@ -346,3 +356,9 @@ class Genotype(object):
                     self.connection_genes[cg][3] = network.output_to_output.linear.weight.data[output_node, input_node].item()
                 else:
                     raise Exception('One of the layers does not exist')
+
+                if layer_output == self.max_layer:
+                    self.neuron_genes[output_node_og][2] = network.output_biases[output_node].item()
+                elif layer_output > 0:
+                    self.neuron_genes[output_node_og][2] = network.hidden_biases[output_node].item()
+

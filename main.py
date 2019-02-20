@@ -1,18 +1,20 @@
-import numpy as np
 import torch
+from torch import optim
 from genotype import Genotype
 from namegenerator import NameGenerator
 from population import Population
-from feedforwardnetwork import NeuralNetwork
 from xortask import XORTask
 from rubikstask import RubiksTask
+from vanillarl import VanillaRL
 
 def rubikstask(device):
+    # Name Generators
     first_name_generator = NameGenerator('names.csv', 3, 12)
     new_individual_name = first_name_generator.generate_name()
     surname_generator = NameGenerator('surnames.csv', 3, 12)
     new_specie_name = surname_generator.generate_name()
 
+    # Genotype Parameters
     inputs = 144
     outputs = 12
     nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
@@ -36,7 +38,7 @@ def rubikstask(device):
     stdev_mutate_weight = 1.0
     stdev_mutate_bias = 1.0
     stdev_mutate_response = 0.5
-    weight_range = (-1., 1.)
+    weight_range = (-50., 50.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
@@ -51,6 +53,7 @@ def rubikstask(device):
                                   weight_range, distance_excess_weight, distance_disjoint_weight,
                                   distance_weight)
 
+    # Population paramaters
     population_size = 128
     elitism = True
     stop_when_solved = True
@@ -70,10 +73,15 @@ def rubikstask(device):
     survival = 0.2
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-    task = RubiksTask(batch_size=128, device=device, lamarckism=True)
-    result = population.epoch(evaluator = task, generations = 1000, solution = task)
-    print(result['champions'][-1].neuron_genes)
-    print(result['champions'][-1].connection_genes)
+
+    # RL parameters
+    memory = None
+    discount_factor = 0.99
+
+    rl_method = VanillaRL(memory, discount_factor, device)
+
+    task = RubiksTask(batch_size=128, device=device, rl_method=rl_method, lamarckism=True)
+    result = population.epoch(evaluator=task, generations=1000, solution=task)
 
 def xortask():
     first_name_generator = NameGenerator('names.csv', 3, 12)
@@ -156,22 +164,4 @@ if __name__ == "__main__":
     if device.type == 'cuda':
         print(torch.cuda.get_device_name(0))
 
-    first_name_generator = NameGenerator('names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-    surname_generator = NameGenerator('surnames.csv', 3, 12)
-    new_specie_name = surname_generator.generate_name()
-
-    genome = Genotype(new_individual_name, 2, 1)
-
-    genome.neuron_genes = [[0, 'tanh', 1.0, 0, 0, 1.0], [1, 'tanh', 1.0, 0, 2048, 1.0], [2, 'sigmoid', -1.7126596576379352, 2048, 4096, 1.0], [3, 'tanh', -0.8893340119071926, 1, 2048.0, 1.0], [4, 'tanh', 2.354260308870598, 1, 3072.0, 1.0], [5, 'identity', 0.644710733714112, 1, 3072.0, 1.0], [6, 'identity', 1.4286189036280563, 1, 1536.0, 1.0], [7, 'sigmoid', 2.5686020859248497, 1, 2560.0, 1.0], [8, 'sigmoid', 1.0, 2, 3584.0, 1.0]]
-    genome.connection_genes = {(0, 2): [0, 0, 2, 0.9570420296626129, True], (1, 2): [1, 1, 2, 6.394578277464045, True], (3, 2): [3, 3, 2, 5.0302733690649895, True], (0, 4): [4, 0, 4, -5.599159832810173, True], (4, 2): [5, 4, 2, -8.128200451027551, True], (1, 4): [6, 1, 4, 7.973423212790442, True], (5, 2): [8, 5, 2, 3.452690602189743, True], (0, 5): [9, 0, 5, -1.7373626007990397, True], (0, 6): [13, 0, 6, 8.990206888452919, True], (1, 7): [15, 1, 7, 2.209906926826694, True], (7, 2): [18, 7, 2, 2.290157694853284, True], (3, 8): [22, 3, 8, 0.5174994659566082, True], (8, 2): [23, 8, 2, 5.256223627935843, True], (5, 8): [28, 5, 8, 4.100292144020446, True]}
-
-    # print(genome.neuron_genes)
-    # print(genome.connection_genes)
-
-    network = NeuralNetwork(genome)
-    # print(network(np.array([[0,0]])))
-
-
-    # print(output)
     rubikstask(device)

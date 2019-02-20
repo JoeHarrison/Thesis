@@ -14,7 +14,6 @@
 import numpy as np
 import copy
 import gym
-import random
 from gym import spaces
 from gym.utils import seeding
 
@@ -39,7 +38,7 @@ class RubiksEnv(gym.Env):
     Episode terminates when either a cube is in the solved state (i.e. each side only has tiles of one colour) or when the step limit is reached.
     """
     
-    def __init__(self, size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0, seed=None):
+    def __init__(self, size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=-1.0, seed=None):
         self.size = size
         
         #Allocate space for Rubik's Cube sides. Each side get's a corresponding integer.
@@ -323,11 +322,11 @@ class RubiksEnv(gym.Env):
             
             if action in [12, 18]:
                 orientation = "North"
-            if action in [13,19]:
+            if action in [13, 19]:
                 orientation = "West"
-            if action in [14,20]:
+            if action in [14, 20]:
                 orientation = "South"
-            if action in [15,21]:
+            if action in [15, 21]:
                 orientation = "East"
             if action is 22:
                 orientation = "Antipode"

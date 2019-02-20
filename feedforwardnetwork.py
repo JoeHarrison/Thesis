@@ -100,11 +100,11 @@ class NeuralNetwork(nn.Module):
 
         if self.n_hidden >0:
             self.n_layers = max([k[3] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys])
-            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device)
+            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad = True)
             #activations here?
             self.hidden_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.hidden_keys]
 
-        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device)
+        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device, requires_grad = True)
         #Activations here?
         self.output_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.output_keys]
 
