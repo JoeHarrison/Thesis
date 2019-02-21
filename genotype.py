@@ -144,12 +144,12 @@ class Genotype(object):
             #     self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight ,True]
             #     innovation_number += 1
 
-            # One initial connection
-            innovation_number = 0
-            random_input_neuron = np.random.randint(0, self.inputs)
-            weight = self._initialise_weight(self.inputs, self.outputs)
-            self.connection_genes[(random_input_neuron, 144)] = [innovation_number, random_input_neuron, 144, weight, True]
-            innovation_number += 1
+            # # One initial connection
+            # innovation_number = 0
+            # random_input_neuron = np.random.randint(0, self.inputs)
+            # weight = self._initialise_weight(self.inputs, self.outputs)
+            # self.connection_genes[(random_input_neuron, 144)] = [innovation_number, random_input_neuron, 144, weight, True]
+            # innovation_number += 1
 
         else:
             raise NotImplementedError
@@ -180,30 +180,31 @@ class Genotype(object):
             
         self_connections = dict(((c[0], c) for c in self.connection_genes.values()))
         other_connections = dict(((c[0], c) for c in other.connection_genes.values()))
-        max_innovation_number = max(list(self_connections.keys()) + list(other_connections.keys()))
-        
-        for i in range(max_innovation_number + 1):
-            connection_gene = None
-            if i in self_connections and i in other_connections:
-                connection_gene = random.choice((self_connections[i],other_connections[i]))
-                enabled = self_connections[i][4] and other_connections[i][4]
-            else:
-                if i in self_connections:
-                    connection_gene = self_connections[i]
-                    enabled = connection_gene[4]
-                elif i in other_connections:
-                    connection_gene = other_connections[i]
-                    enabled = connection_gene[4]
-            if connection_gene is not None:
-                child.connection_genes[(connection_gene[1], connection_gene[2])] = deepcopy(connection_gene)
-                child.connection_genes[(connection_gene[1], connection_gene[2])][4] = enabled or np.random.rand() < self.p_reenable_parent
+        if len(self_connections) > 0 or len(other_connections) > 0:
+            max_innovation_number = max(list(self_connections.keys()) + list(other_connections.keys()))
 
-            def is_feedforward(item):
-                ((fr, to), cg) = item
-                return child.neuron_genes[fr][3] < child.neuron_genes[to][3] and child.neuron_genes[fr][4] < child.neuron_genes[to][4]
+            for i in range(max_innovation_number + 1):
+                connection_gene = None
+                if i in self_connections and i in other_connections:
+                    connection_gene = random.choice((self_connections[i],other_connections[i]))
+                    enabled = self_connections[i][4] and other_connections[i][4]
+                else:
+                    if i in self_connections:
+                        connection_gene = self_connections[i]
+                        enabled = connection_gene[4]
+                    elif i in other_connections:
+                        connection_gene = other_connections[i]
+                        enabled = connection_gene[4]
+                if connection_gene is not None:
+                    child.connection_genes[(connection_gene[1], connection_gene[2])] = deepcopy(connection_gene)
+                    child.connection_genes[(connection_gene[1], connection_gene[2])][4] = enabled or np.random.rand() < self.p_reenable_parent
 
-            if self.feedforward:
-                child.connection_genes = dict(filter(is_feedforward, child.connection_genes.items()))
+                def is_feedforward(item):
+                    ((fr, to), cg) = item
+                    return child.neuron_genes[fr][3] < child.neuron_genes[to][3] and child.neuron_genes[fr][4] < child.neuron_genes[to][4]
+
+                if self.feedforward:
+                    child.connection_genes = dict(filter(is_feedforward, child.connection_genes.items()))
 
         # Child gets average of hyperparameter gene value and sigmas
         for hk in self.hyperparameter_genes:
@@ -280,8 +281,11 @@ class Genotype(object):
     
     def mutate(self, innovations={}, global_innovation_number=0):
         self._update_hyperparameters()
-        
-        maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connection_genes.values()))
+
+        maximum_innovation_number = global_innovation_number
+
+        if len(self.connection_genes.values()):
+            maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connection_genes.values()))
 
         if len(self.neuron_genes) < self.max_nodes and np.random.rand() < self.hyperparameter_genes['p_add_neuron'][0]:
             self.add_neuron(maximum_innovation_number, innovations)
@@ -324,6 +328,9 @@ class Genotype(object):
         other_connections = dict(((c[0], c) for c in other.connection_genes.values()))
 
         all_innovations = list(self_connections.keys()) + list(other_connections.keys())
+
+        if len(all_innovations)==0:
+            return 0
 
         minimum_innovation = min(all_innovations)
         

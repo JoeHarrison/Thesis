@@ -54,7 +54,7 @@ def rubikstask(device, batch_size):
                                   distance_weight)
 
     # Population parameters
-    population_size = 256
+    population_size = 128
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -168,6 +168,6 @@ if __name__ == "__main__":
     if device.type == 'cuda':
         print(torch.cuda.get_device_name(0))
 
-    batch_size = 128
+    batch_size = 100
 
     rubikstask(device, batch_size)
