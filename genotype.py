@@ -74,20 +74,47 @@ class Genotype(object):
         self.neuron_genes = []
         # Tuples of: innovation number, input, output, weight, enabled
         self.connection_genes = {}
-        # Hyperparameter genes
-        self.hyperparameter_genes = []
         
         self.input_keys = []
         self.output_keys = []
-        
+
+        self._initialise_hyperparameters()
         self._initialise_topology(topology)
+
+    def _initialise_hyperparameters(self):
+        self.hyperparameter_genes = {}
+        self.hyperparameter_genes['p_add_neuron'] = [self.p_add_neuron, 0.05, True]
+        self.hyperparameter_genes['p_add_connection'] = [self.p_add_connection, 0.05, True]
+        self.hyperparameter_genes['p_mutate_weight'] = [self.p_mutate_weight, 0.05, True]
+        self.hyperparameter_genes['p_reset_weight'] = [self.p_reset_weight, 0.05, True]
+        self.hyperparameter_genes['p_reenable_connection'] = [self.p_reenable_connection, 0.05, True]
+        self.hyperparameter_genes['p_disable_connection'] = [self.p_disable_connection, 0.05, True]
+        self.hyperparameter_genes['p_reenable_parent'] = [self.p_reenable_parent, 0.05, True]
+        self.hyperparameter_genes['p_mutate_bias'] = [self.p_mutate_bias, 0.05, True]
+        self.hyperparameter_genes['p_mutate_response'] = [self.p_mutate_response, 0.05, True]
+        self.hyperparameter_genes['p_mutate_type'] = [self.p_mutate_type, 0.05, True]
+
+        self.hyperparameter_genes['distance_excess_weight'] = [self.distance_excess_weight, 0.05, False]
+        self.hyperparameter_genes['distance_disjoint_weight'] = [self.distance_disjoint_weight, 0.05, False]
+        self.hyperparameter_genes['distance_weight'] = [self.distance_weight, 0.05, False]
+
+    def _update_hyperparameters(self):
+        for hk in self.hyperparameter_genes:
+            self.hyperparameter_genes[hk][1] = self.hyperparameter_genes[hk][1]*np.exp(0.1*np.random.randn())
+            self.hyperparameter_genes[hk][0] += np.random.randn()*self.hyperparameter_genes[hk][1]
+
+            # If hyperparam is a probability or clip between zero and one
+            if self.hyperparameter_genes[hk][2]:
+                self.hyperparameter_genes[hk][0] = np.clip(self.hyperparameter_genes[hk][0], 0.0, 1.0)
+            else:
+                self.hyperparameter_genes[hk][0] = np.clip(self.hyperparameter_genes[hk][0], 0.0)
     
-    def change_specie(self,specie):
+    def change_specie(self, specie):
         self.specie = specie
         
     def _initialise_topology(self, topology):
-#         if self.bias_as_node:
-#             self.inputs += 1
+        #         if self.bias_as_node:
+        #             self.inputs += 1
         
         self.max_layer = 2048 if (self.max_depth is None) else (self.max_depth - 1)
         
@@ -127,7 +154,6 @@ class Genotype(object):
         else:
             raise NotImplementedError
 
-                
     def _initialise_weight(self, input_neurons, output_neurons):
         weight = np.random.rand()*np.sqrt(1/(input_neurons + output_neurons))
         return weight
@@ -136,6 +162,7 @@ class Genotype(object):
         child = deepcopy(self)
         child.neuron_genes = []
         child.connection_genes = {}
+        child.hyperparameter_genes = {}
         
         max_neurons = max(len(self.neuron_genes), len(other.neuron_genes))
         min_neurons = min(len(self.neuron_genes), len(other.neuron_genes))
@@ -168,8 +195,8 @@ class Genotype(object):
                     connection_gene = other_connections[i]
                     enabled = connection_gene[4]
             if connection_gene is not None:
-                child.connection_genes[(connection_gene[1],connection_gene[2])] = deepcopy(connection_gene)
-                child.connection_genes[(connection_gene[1],connection_gene[2])][4] = enabled or np.random.rand() < self.p_reenable_parent
+                child.connection_genes[(connection_gene[1], connection_gene[2])] = deepcopy(connection_gene)
+                child.connection_genes[(connection_gene[1], connection_gene[2])][4] = enabled or np.random.rand() < self.p_reenable_parent
 
             def is_feedforward(item):
                 ((fr, to), cg) = item
@@ -177,6 +204,13 @@ class Genotype(object):
 
             if self.feedforward:
                 child.connection_genes = dict(filter(is_feedforward, child.connection_genes.items()))
+
+        # Child gets average of hyperparameter gene value and sigmas
+        for hk in self.hyperparameter_genes:
+            parameter_value = (self.hyperparameter_genes[hk][0] + other.hyperparameter_genes[hk][0])/2
+            sigma = (self.hyperparameter_genes[hk][1] + other.hyperparameter_genes[hk][1])/2
+            child.hyperparameter_genes[hk] = [parameter_value, sigma, True]
+
         return child
     
     def add_neuron(self, maximum_innovation_number, innovations):
@@ -208,10 +242,10 @@ class Genotype(object):
             self.neuron_genes.append(neuron)
 
             if (input_neuron, new_id) in innovations:
-                innovation_number = innovations[(input_neuron,new_id)]
+                innovation_number = innovations[(input_neuron, new_id)]
             else:
                 maximum_innovation_number += 1
-                innovation_number = innovations[(input_neuron,new_id)] = maximum_innovation_number
+                innovation_number = innovations[(input_neuron, new_id)] = maximum_innovation_number
 
             # 1.0 to initialise_weight?
             self.connection_genes[(input_neuron, new_id)] = [innovation_number, input_neuron, new_id, 1.0, True]
@@ -241,42 +275,43 @@ class Genotype(object):
                 maximum_innovation_number += 1
                 innovation = innovations[(fr, to)] = maximum_innovation_number
             # get number of neurons in layers of fr and to
-            connection_gene = [innovation, fr, to, self._initialise_weight(2,2), True]
+            connection_gene = [innovation, fr, to, self._initialise_weight(2, 2), True]
             self.connection_genes[(fr, to)] = connection_gene
     
-    def mutate(self, innovations={}, global_innovation_number = 0):
+    def mutate(self, innovations={}, global_innovation_number=0):
+        self._update_hyperparameters()
         
         maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connection_genes.values()))
 
-        if len(self.neuron_genes) < self.max_nodes and np.random.rand() < self.p_add_neuron:
+        if len(self.neuron_genes) < self.max_nodes and np.random.rand() < self.hyperparameter_genes['p_add_neuron'][0]:
             self.add_neuron(maximum_innovation_number, innovations)
                 
-        elif np.random.rand() < self.p_add_connection:
+        elif np.random.rand() < self.hyperparameter_genes['p_add_connection'][0]:
             self.add_connection(global_innovation_number, innovations)
             
         else:
             for cg in self.connection_genes.values():
-                if np.random.rand() < self.p_mutate_weight:
+                if np.random.rand() < self.hyperparameter_genes['p_mutate_weight'][0]:
                     cg[3] += np.random.normal(0.0, self.stdev_mutate_weight)
                     cg[3] = np.clip(cg[3], self.weight_range[0], self.weight_range[1])
                     # clipping?
-                if np.random.rand() < self.p_reset_weight:
-                    cg[3] = np.random.normal(0.0,self.stdev_mutate_weight)
+                if np.random.rand() < self.hyperparameter_genes['p_reset_weight'][0]:
+                    cg[3] = np.random.normal(0.0, self.stdev_mutate_weight)
                     
                 # bigger chance to disable in this way
-                if np.random.rand() < self.p_reenable_connection:
+                if np.random.rand() < self.hyperparameter_genes['p_reenable_connection'][0]:
                     cg[4] = True
                     
-                if np.random.rand() < self.p_disable_connection:
+                if np.random.rand() < self.hyperparameter_genes['p_disable_connection'][0]:
                     cg[4] = False
                     
             for neuron_gene in self.neuron_genes[self.inputs:]:
-                if np.random.rand() < self.p_mutate_bias:
+                if np.random.rand() < self.hyperparameter_genes['p_mutate_bias'][0]:
                     neuron_gene[2] += np.random.normal(0.0, 1)
 
                     neuron_gene[2] = np.clip(neuron_gene[2], self.weight_range[0], self.weight_range[1])
                 
-                if np.random.rand() < self.p_mutate_type:
+                if np.random.rand() < self.hyperparameter_genes['p_mutate_type'][0]:
                     neuron_gene[1] = random.choice(self.nonlinearities)
                     
                 # if np.random.rand() < self.p_mutate_response:
@@ -310,11 +345,11 @@ class Genotype(object):
                     e += 1
                     
         # Average weight differences of matching genes
-        w = (w/m) if m>0 else w
+        w = (w/m) if m > 0 else w
         
         return (self.distance_excess_weight * e +
-               self.distance_disjoint_weight * d +
-               self.distance_weight * w)
+                self.distance_disjoint_weight * d +
+                self.distance_weight * w)
 
     def weights_to_genotype(self, network):
         input_keys = network.input_keys

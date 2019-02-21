@@ -56,6 +56,7 @@ def required_for_output(inputs, outputs, connections):
 
     return list(required)
 
+
 def dense_from_coo(shape, conns, dtype=torch.float32, device=torch.device('cpu')):
     mat = torch.zeros(shape, dtype=dtype, device=device)
     idxs, weights = conns
@@ -67,6 +68,7 @@ def dense_from_coo(shape, conns, dtype=torch.float32, device=torch.device('cpu')
 
     return mat
 
+
 class WeightLinear(nn.Module):
     def __init__(self, in_features, out_features, weights):
         super(WeightLinear, self).__init__()
@@ -77,6 +79,7 @@ class WeightLinear(nn.Module):
 
     def forward(self, x):
         return self.linear(x)
+
 
 class NeuralNetwork(nn.Module):
     def __init__(self, genome, batch_size=1, device=torch.device('cpu'), dtype=torch.float32):
@@ -101,11 +104,11 @@ class NeuralNetwork(nn.Module):
         if self.n_hidden >0:
             self.n_layers = max([k[3] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys])
             self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad = True)
-            #activations here?
+            # activations here?
             self.hidden_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.hidden_keys]
 
         self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device, requires_grad = True)
-        #Activations here?
+        # Activations here?
         self.output_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.output_keys]
 
         self.input_key_to_idx = {k: i for i, k in enumerate(self.input_keys)}
@@ -206,30 +209,3 @@ class NeuralNetwork(nn.Module):
         self.outputs = torch.cat(([self.output_activations[i](output_inputs[:,i]).view(-1,1) for i in range(self.n_outputs)]), dim=1)
 
         return self.outputs
-
-# np.random.seed(3)
-# torch.manual_seed(3)
-# random.seed(3)
-#
-# first_name_generator = NameGenerator('names.csv', 3, 12)
-# new_individual_name = first_name_generator.generate_name()
-# surname_generator = NameGenerator('surnames.csv', 3, 12)
-# new_specie_name = surname_generator.generate_name()
-#
-# genome = Genotype(new_individual_name, 2, 1)
-#
-# # genome.neuron_genes = [[0, 'sigmoid', 5.0, 0, 0, 1.0], [1, 'tanh', 6.0, 0, 2048, 1.0], [2, 'sigmoid', 0.5, 2048, 4096, 1.0], [3, 'tanh', 3.0, 1, 2048, 1.0]]
-# # genome.connection_genes = {(0, 2): [0, 0, 2, 2.0, False], (1, 2): [1, 1, 2, 4.0, True], (0,3): [2, 0, 3, 2.5, True], (3,2): [3, 3, 2, 3.5, True]}
-#
-# genome.neuron_genes = [[0, 'sigmoid', 0.1, 0, 1],[1, 'sigmoid', 0.2, 0, 1],[2, 'tanh', 0.3, 2048, 1],[3, 'sigmoid', 0.2, 1, 1],[4, 'tanh', 0.1, 1, 1],[5, 'sigmoid', 0.2, 2, 1],[6, 'tanh', 0.3, 2, 1],[7, 'sigmoid', 0.2, 2, 1]]
-# genome.connection_genes = {(0,3): [1,0,3,0.5,True],(1,4): [1,1,4,0.6,True],(1,7): [1,1,7,0.7,True],(1,6): [1,1,6,0.6,True],(3,5): [1,3,5,0.5,True],(3,6): [1,3,6,0.6,True],(4,6): [1,4,6,0.7,True],(5,2): [1,5,2,0.6,True],(6,2): [1,6,2,0.5,True]}
-#
-# print(genome.neuron_genes)
-# print(genome.connection_genes)
-#
-# network = NeuralNetwork(genome)
-# input = np.array([[0,0],[0,1],[1,0],[1,1]])
-# output = network(np.array([[0,0],[0,1],[1,0],[1,1]]))
-# # output = network(np.array([[0,0],[0,1],[1,0],[1,1]]))
-# print(input)
-# print(output)

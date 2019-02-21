@@ -19,7 +19,7 @@ def rubikstask(device, batch_size):
     outputs = 12
     nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
     topology = None
-    feedforward = False
+    feedforward = True
     max_depth = None
     max_nodes = float('inf')
     response_default = 1.0
