@@ -40,7 +40,7 @@ def rubikstask(device, batch_size):
     stdev_mutate_weight = 1.0
     stdev_mutate_bias = 1.0
     stdev_mutate_response = 0.5
-    weight_range = (-50., 50.)
+    weight_range = (-5., 5.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
@@ -107,10 +107,10 @@ def xortask(device, batch_size):
     max_nodes = float('inf')
     response_default = 1.0
     bias_as_node = False
-    initial_weight_stdev = 2.0
-    p_add_neuron = 0.05
-    p_add_connection = 0.25
-    p_mutate_weight = 0.5
+    initial_weight_stdev = 0.5
+    p_add_neuron = 0.03
+    p_add_connection = 0.3
+    p_mutate_weight = 0.8
     p_reset_weight = 0.1
     p_reenable_connection = 0.01
     p_disable_connection = 0.01
@@ -118,10 +118,10 @@ def xortask(device, batch_size):
     p_mutate_bias = 0.1
     p_mutate_response = 0.0
     p_mutate_type = 0.1
-    stdev_mutate_weight = 1.5
+    stdev_mutate_weight = 0.5
     stdev_mutate_bias = 0.5
     stdev_mutate_response = 0.5
-    weight_range = (-50., 50.)
+    weight_range = (-3., 3.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
@@ -159,7 +159,7 @@ def xortask(device, batch_size):
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
     task = XORTask(batch_size, device)
-    result = population.epoch(evaluator=task, generations=25, solution=task)
+    result = population.epoch(evaluator=task, generations=1000, solution=task)
     print(result['champions'][-1].neuron_genes)
     print(result['champions'][-1].connection_genes)
     net = NeuralNetwork(result['champions'][-1], device=device)

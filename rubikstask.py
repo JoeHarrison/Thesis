@@ -60,6 +60,7 @@ class RubiksTask(object):
             # print('After', network.output_biases)
 
             # Reset each state that is done
+
             next_state = torch.tensor([env.reset(self.difficulty) if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
             state = next_state

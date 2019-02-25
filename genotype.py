@@ -108,16 +108,17 @@ class Genotype(object):
 
     def _update_hyperparameters(self):
         for hk in self.hyperparameter_genes:
-
-            self.hyperparameter_genes[hk][1] = self.hyperparameter_genes[hk][1]*np.exp(0.1*np.random.randn())
+            before = self.hyperparameter_genes[hk][0]
+            self.hyperparameter_genes[hk][1] = self.hyperparameter_genes[hk][1]*np.exp(0.005*np.random.randn())
             self.hyperparameter_genes[hk][0] += np.random.randn()*self.hyperparameter_genes[hk][1]
 
             # If hyperparameter is a probability or clip between zero and one
             if self.hyperparameter_genes[hk][2]:
-                self.hyperparameter_genes[hk][0] = self._np_sigmoid(self.hyperparameter_genes[hk][0])
+                # self.hyperparameter_genes[hk][0] = self._np_sigmoid(self.hyperparameter_genes[hk][0])
+                self.hyperparameter_genes[hk][0] = np.clip(self.hyperparameter_genes[hk][0], 0.0, 1.0)
             else:
                 self.hyperparameter_genes[hk][0] = np.clip(self.hyperparameter_genes[hk][0], 0.0)
-    
+
     def change_specie(self, specie):
         self.specie = specie
         
@@ -211,7 +212,7 @@ class Genotype(object):
 
         # Child gets average of hyperparameter gene value and sigmas
         for hk in self.hyperparameter_genes:
-            parameter_value = (self.hyperparameter_genes[hk][0] + other.hyperparameter_genes[hk][0])/2
+            parameter_value = np.random.choice([self.hyperparameter_genes[hk][0], other.hyperparameter_genes[hk][0]])
             sigma = (self.hyperparameter_genes[hk][1] + other.hyperparameter_genes[hk][1])/2
             child.hyperparameter_genes[hk] = [parameter_value, sigma, True]
 
@@ -332,7 +333,7 @@ class Genotype(object):
 
         all_innovations = list(self_connections.keys()) + list(other_connections.keys())
 
-        if len(all_innovations)==0:
+        if len(all_innovations) == 0:
             return 0
 
         minimum_innovation = min(all_innovations)
