@@ -6,6 +6,8 @@ from xortask import XORTask
 from rubikstask import RubiksTask
 from vanillarl import VanillaRL
 from replaymemory import ReplayMemory
+from feedforwardnetwork import NeuralNetwork
+import numpy as np
 
 def rubikstask(device, batch_size):
     # Name Generators
@@ -44,6 +46,9 @@ def rubikstask(device, batch_size):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
+    initialisation_type='fully_connected'
+    initial_sigma = 0.0
+
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
                                   max_depth, max_nodes, response_default, initial_weight_stdev,
                                   bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
@@ -51,7 +56,7 @@ def rubikstask(device, batch_size):
                                   p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
                                   stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
                                   weight_range, distance_excess_weight, distance_disjoint_weight,
-                                  distance_weight)
+                                  distance_weight, initialisation_type, initial_sigma)
 
     # Population parameters
     population_size = 128
@@ -103,24 +108,27 @@ def xortask(device, batch_size):
     response_default = 1.0
     bias_as_node = False
     initial_weight_stdev = 2.0
-    p_add_neuron = 0.03
-    p_add_connection = 0.3
-    p_mutate_weight = 0.8
+    p_add_neuron = 0.05
+    p_add_connection = 0.25
+    p_mutate_weight = 0.5
     p_reset_weight = 0.1
     p_reenable_connection = 0.01
     p_disable_connection = 0.01
-    p_reenable_parent=0.25
-    p_mutate_bias = 0.2
+    p_reenable_parent = 0.25
+    p_mutate_bias = 0.1
     p_mutate_response = 0.0
-    p_mutate_type = 0.2
+    p_mutate_type = 0.1
     stdev_mutate_weight = 1.5
     stdev_mutate_bias = 0.5
     stdev_mutate_response = 0.5
-    weight_range = (-1., 1.)
+    weight_range = (-50., 50.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
+
+    initialisation_type ='fully_connected'
+    initial_sigma = 0.0
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
                                   max_depth, max_nodes, response_default, initial_weight_stdev,
@@ -129,9 +137,9 @@ def xortask(device, batch_size):
                                   p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
                                   stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
                                   weight_range, distance_excess_weight, distance_disjoint_weight,
-                                  distance_weight)
+                                  distance_weight,initialisation_type, initial_sigma)
 
-    population_size = 512
+    population_size = 128
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -151,9 +159,13 @@ def xortask(device, batch_size):
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
     task = XORTask(batch_size, device)
-    result = population.epoch(evaluator = task, generations = 1000, solution = task)
+    result = population.epoch(evaluator=task, generations=25, solution=task)
     print(result['champions'][-1].neuron_genes)
     print(result['champions'][-1].connection_genes)
+    net = NeuralNetwork(result['champions'][-1], device=device)
+    print(type(result['champions'][-1]))
+    output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
+    print(output)
 
 if __name__ == "__main__":
     # np.random.seed(3)

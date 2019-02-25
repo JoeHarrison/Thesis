@@ -108,6 +108,7 @@ class Genotype(object):
 
     def _update_hyperparameters(self):
         for hk in self.hyperparameter_genes:
+
             self.hyperparameter_genes[hk][1] = self.hyperparameter_genes[hk][1]*np.exp(0.1*np.random.randn())
             self.hyperparameter_genes[hk][0] += np.random.randn()*self.hyperparameter_genes[hk][1]
 
@@ -261,7 +262,7 @@ class Genotype(object):
             self.connection_genes[(new_id, output_neuron)] = [innovation_number, new_id, output_neuron, weight, True]
     
     def add_connection(self, maximum_innovation_number, innovations):
-        potential_connections = product(range(len(self.neuron_genes)),range(self.inputs, len(self.neuron_genes)))
+        potential_connections = product(range(len(self.neuron_genes)), range(self.inputs, len(self.neuron_genes)))
         potential_connections = (connection for connection in potential_connections if connection not in self.connection_genes)
 
         if self.feedforward:
@@ -292,7 +293,7 @@ class Genotype(object):
             self.add_neuron(maximum_innovation_number, innovations)
 
         # Noio/Stanley use elif here
-        if np.random.rand() < self.hyperparameter_genes['p_add_connection'][0]:
+        elif np.random.rand() < self.hyperparameter_genes['p_add_connection'][0]:
             self.add_connection(global_innovation_number, innovations)
             
         else:
