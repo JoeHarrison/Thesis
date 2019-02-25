@@ -57,17 +57,17 @@ class RubiksEnv(gym.Env):
         if self.metric is 'quarter':
             if self.pomdp:
                 self.action_space = spaces.Discrete(16)
-                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(3,self.size,self.size))
+                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(3, self.size, self.size))
             else:
                 self.action_space = spaces.Discrete(12)
-                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(6,self.size,self.size))
+                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(6, self.size, self.size))
         else:
             if self.pomdp:
                 self.action_space = spaces.Discrete(23)
-                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(3,self.size,self.size))
+                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(3, self.size, self.size))
             else:
                 self.action_space = spaces.Discrete(18)
-                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(6,self.size,self.size))
+                self.observation_space = spaces.Box(low=0, high=5, dtype=np.uint8, shape=(6, self.size, self.size))
         
         self._action_set = [i for i in range(self.action_space.n)]        
                 
