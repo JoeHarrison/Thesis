@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import torch
+from torch import optim
 from feedforwardnetwork import NeuralNetwork
 
 class XORTask(object):
