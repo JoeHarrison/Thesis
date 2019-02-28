@@ -4,9 +4,10 @@ from namegenerator import NameGenerator
 from population import Population
 from xortask import XORTask
 from rubikstask import RubiksTask
-from cartpoletask import CartpoleTask
+# from cartpoletask import CartpoleTask
+from rl import CartpoleTask
 from vanillarl import VanillaRL
-from replaymemory import ReplayMemory
+from memory import ReplayMemory
 from feedforwardnetwork import NeuralNetwork
 import numpy as np
 
@@ -205,7 +206,7 @@ def cartpoletask(device, batch_size):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type='fully_connected'
+    initialisation_type= ''
     initial_sigma = 0.0
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
@@ -218,15 +219,15 @@ def cartpoletask(device, batch_size):
                                   distance_weight, initialisation_type, initial_sigma)
 
     # Population parameters
-    population_size = 1
+    population_size = 16
     elitism = True
-    stop_when_solved = True
+    stop_when_solved = False
     tournament_selection_k = 3
     verbose = True
     max_cores = 1
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
-    target_species = 1
+    target_species = 4
     minimum_elitism_size = 5
     young_age = 10
     young_multiplier = 1.2
@@ -248,7 +249,8 @@ def cartpoletask(device, batch_size):
     # Task parameters
     lamarckism = True
 
-    task = CartpoleTask(batch_size, device, rl_method, lamarckism)
+    task = CartpoleTask(batch_size, device, 0.99, memory, True)
+    # task = CartpoleTask(batch_size, device, rl_method, lamarckism)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
 
 if __name__ == "__main__":
@@ -267,8 +269,8 @@ if __name__ == "__main__":
     batch_size = 100
 
     # For testing Reinforcement Learning
-    # cartpoletask(device, batch_size)
+    cartpoletask(device, batch_size)
 
     # For testing NEAT
-    xortask(device, batch_size)
+    # xortask(device, batch_size)
     # rubikstask(device, batch_size)

@@ -19,7 +19,7 @@ class XORTask(object):
         outputs = network(self.INPUTS)
 
         loss = 1.0/(1.0+torch.sqrt(self.criterion(outputs, self.TARGETS)))
-
+        
         return {'fitness': loss.item(), 'info': 0}
 
     def solve(self, network):

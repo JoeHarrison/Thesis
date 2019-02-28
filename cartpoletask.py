@@ -2,6 +2,7 @@ import cartpole
 from feedforwardnetwork import NeuralNetwork
 import torch
 from torch import optim
+import gym
 
 class CartpoleTask(object):
     def __init__(self, batch_size, device, rl_method, lamarckism=False):
@@ -10,7 +11,7 @@ class CartpoleTask(object):
         self.rl_method = rl_method
         self.lamarckism = lamarckism
 
-        self.envs = [cartpole.CartPoleEnv() for _ in range(self.batch_size)]
+        self.envs = [gym.make('CartPole-v0') for _ in range(self.batch_size)]
 
     def select_actions(self, model, state, epsilon):
         with torch.no_grad():
@@ -49,18 +50,17 @@ class CartpoleTask(object):
             # print('After', network.output_biases)
 
             # Reset each state that is done
-            next_state = state
-            #next_state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
+            next_state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
             state = next_state
-            fitness += reward.view(-1, 1)
+            fitness += done
             tries += 1
 
         # Moves trained weights to genes
         if self.lamarckism:
             genome.weights_to_genotype(network)
 
-        fitness = float((fitness).sum().item()) / (self.batch_size*max_tries)
+        fitness = ((self.batch_size*max_tries) - float((fitness).sum().item())) / (self.batch_size*max_tries)
 
         return {'fitness': fitness, 'info': 0}
 
