@@ -29,7 +29,7 @@ class CartpoleTask(object):
 
         optimiser = optim.Adam(network.parameters(), amsgrad=True)
 
-        max_tries = 1000
+        max_tries = 10
         tries = 0
         fitness = torch.zeros(self.batch_size, 1, dtype=torch.float32, device=self.device)
         state = torch.tensor([self.envs[i].reset() for i in range(self.batch_size)], device=self.device, dtype=torch.float32)

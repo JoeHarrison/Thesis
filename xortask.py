@@ -9,11 +9,12 @@ class XORTask(object):
         self.INPUTS = torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]], device=device)
         self.TARGETS = torch.tensor([[0.0], [1.0], [1.0], [0.0]], device=device)
         self.criterion = torch.nn.MSELoss()
+        self.batch_size = batch_size
         self.device = device
 
     def evaluate(self, genome):
         if not isinstance(genome, NeuralNetwork):
-            network = NeuralNetwork(genome, device=self.device)
+            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
         network.reset()
 
         outputs = network(self.INPUTS)

@@ -78,75 +78,6 @@ class DQNAgent:
 
         return loss.item()
 
-# if __name__ == '__main__':
-#     batch_size = 64
-#     envs = [gym.make('CartPole-v0') for _ in range(batch_size)]
-#     epochs = 1000
-#     max_tries = 200
-#     discount_factor = 0.99
-#
-#     model = QNetwork(4, 2)
-#     memory = ReplayMemory(100000)
-#
-#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#     print(device)
-#
-#     agent = DQNAgent(model, discount_factor, memory, 2, device)
-#
-#     for epoch in range(epochs):
-#         state = torch.tensor([envs[i].reset() for i in range(batch_size)], device=device, dtype=torch.float32)
-#         total_done = torch.zeros([batch_size,1], device=device)
-#         for i in range(max_tries):
-#             action = agent.select_actions(state, 0.01)
-#
-#             next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
-#             done = torch.tensor(done, dtype=torch.float32, device=device).view(-1, 1)
-#             next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
-#             reward = torch.tensor(reward, dtype=torch.float32, device=device)
-#
-#             total_done += done
-#
-#             agent.memory.push(state, action, next_state, reward, done)
-#
-#             agent.train()
-#
-#             state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(envs, next_state, done)], dtype=torch.float32, device=device)
-#
-#         # state = torch.tensor([envs[i].reset() for i in range(batch_size)], device=device, dtype=torch.float32)
-#         # total_done = torch.zeros([batch_size, 1], device=device)
-#         # for i in range(max_tries):
-#         #     action = agent.select_actions(state, 0.0)
-#         #
-#         #     next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
-#         #     done = torch.tensor(done, dtype=torch.float32, device=device).view(-1, 1)
-#         #     next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
-#         #
-#         #     total_done += done
-#         #
-#         #     state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(envs, next_state, done)], dtype=torch.float32, device=device)
-#
-#         print(epoch, (max_tries-(total_done.sum().item()/batch_size))/max_tries)
-#
-#     step_list = []
-#     for i in range(100):
-#         done = False
-#         envs = [gym.make('CartPole-v0')]
-#         state = torch.tensor([envs[0].reset()], device=device, dtype=torch.float32)
-#         steps = 0
-#         while not done:
-#             action = agent.select_actions(state, 0.0)
-#
-#             next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
-#             done = done[0]
-#             next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
-#
-#             state = next_state
-#             steps += 1
-#             # envs[0].render()
-#         step_list.append(steps)
-#         # envs[0].close()
-#     print(np.array(step_list).sum()/100)
-
 class CartpoleTask(object):
     def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False):
         self.batch_size = batch_size
@@ -158,14 +89,15 @@ class CartpoleTask(object):
 
     def evaluate(self, genome):
         if not isinstance(genome, NeuralNetwork):
-            network = NeuralNetwork(genome, device=self.device)
-
+            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
+        network.reset()
         agent = DQNAgent(network, self.discount_factor, self.memory, self.batch_size, self.device)
 
         max_tries = 100
 
         state = torch.tensor([self.envs[i].reset() for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
-        total_done = torch.zeros([self.batch_size,1], device=self.device)
+        total_done = torch.zeros([self.batch_size, 1], device=self.device)
+
         for i in range(max_tries):
             action = agent.select_actions(state, 0.01)
 
@@ -182,12 +114,34 @@ class CartpoleTask(object):
 
             state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
-        fitness = (max_tries - (total_done.sum().item()/self.batch_size))/max_tries
-
         if self.lamarckism:
             genome.weights_to_genotype(network)
+
+        network = NeuralNetwork(genome, batch_size=1, device=self.device)
+
+        agent = DQNAgent(network, self.discount_factor, self.memory, 1, self.device)
+
+        max_tries = 200
+        tries = 0
+
+        for _ in range(10):
+            network.reset()
+            state = torch.tensor([self.envs[0].reset()], device=self.device, dtype=torch.float32)
+            for _ in range(max_tries):
+                action = agent.select_actions(state, 0.0)
+
+                next_state, reward, done, info = (self.envs[0].step(int(action[0])))
+                next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
+                state = next_state
+
+                tries += 1
+
+                if done:
+                    break
+
+        fitness = (tries/10)/max_tries
 
         return {'fitness': fitness, 'info': 0}
 
     def solve(self, network):
-        return int(self.evaluate(network)['fitness'] > 0.99)
+        return int(self.evaluate(network)['fitness'] > 0.999)

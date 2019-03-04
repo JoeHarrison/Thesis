@@ -5,11 +5,12 @@ from population import Population
 from xortask import XORTask
 from rubikstask import RubiksTask
 # from cartpoletask import CartpoleTask
-from rl import CartpoleTask
+from rl import CartpoleTask, DQNAgent
 from vanillarl import VanillaRL
 from memory import ReplayMemory
 from feedforwardnetwork import NeuralNetwork
 import numpy as np
+import gym
 
 def rubikstask(device, batch_size):
     # Name Generators
@@ -206,7 +207,7 @@ def cartpoletask(device, batch_size):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type= ''
+    initialisation_type= 'partially_connected'
     initial_sigma = 0.0
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
@@ -219,15 +220,15 @@ def cartpoletask(device, batch_size):
                                   distance_weight, initialisation_type, initial_sigma)
 
     # Population parameters
-    population_size = 16
+    population_size = 32
     elitism = True
-    stop_when_solved = False
+    stop_when_solved = True
     tournament_selection_k = 3
     verbose = True
     max_cores = 1
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
-    target_species = 4
+    target_species = 8
     minimum_elitism_size = 5
     young_age = 10
     young_multiplier = 1.2
@@ -249,9 +250,29 @@ def cartpoletask(device, batch_size):
     # Task parameters
     lamarckism = True
 
-    task = CartpoleTask(batch_size, device, 0.99, memory, True)
+    task = CartpoleTask(batch_size, device, 0.99, memory, lamarckism)
     # task = CartpoleTask(batch_size, device, rl_method, lamarckism)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
+    while True:
+        done = False
+        envs = [gym.make('CartPole-v0')]
+        state = torch.tensor([envs[0].reset()], device=device, dtype=torch.float32)
+        steps = 0
+        network = NeuralNetwork(result['champions'][-1], device=device)
+        network.reset()
+        agent = DQNAgent(network, discount_factor, memory, 1, device)
+        while not done:
+            action = agent.select_actions(state, 0.0)
+
+            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
+            done = done[0]
+            next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
+
+            state = next_state
+            steps += 1
+            envs[0].render()
+        print(steps)
+        envs[0].close()
 
 if __name__ == "__main__":
     # np.random.seed(3)
@@ -272,5 +293,5 @@ if __name__ == "__main__":
     cartpoletask(device, batch_size)
 
     # For testing NEAT
-    # xortask(device, batch_size)
+    # xortask(device, 4)
     # rubikstask(device, batch_size)
