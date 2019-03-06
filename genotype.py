@@ -126,7 +126,7 @@ class Genotype(object):
         #         if self.bias_as_node:
         #             self.inputs += 1
         
-        self.max_layer = 2048 if (self.max_depth is None) else (self.max_depth - 1)
+        self.max_layer = 2**10 if (self.max_depth is None) else (self.max_depth - 1)
         
         if topology is None:
             # Initialise inputs
@@ -159,8 +159,8 @@ class Genotype(object):
             raise NotImplementedError
 
     def _initialise_weight(self, input_neurons, output_neurons):
-        weight = np.random.rand()*np.sqrt(1/(input_neurons + output_neurons))
-        return weight
+        # return np.random.randn()*np.sqrt(1/(input_neurons + output_neurons))
+        return np.random.normal(0.0, self.initial_weight_stdev)
         
     def recombinate(self, other):
         child = deepcopy(self)

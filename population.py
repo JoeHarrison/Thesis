@@ -135,7 +135,7 @@ class Population(object):
                     found = True
                     break
             if not found:
-                s = Species(self.new_specie_name,individual)
+                s = Species(self.new_specie_name, individual)
                 individual.change_specie(s.name)
                 self.species.append(s)
         
