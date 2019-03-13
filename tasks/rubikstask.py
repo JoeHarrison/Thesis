@@ -59,10 +59,11 @@ class DQNAgent:
         return loss.item()
 
 class RubiksTask(object):
-    def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False):
+    def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False, rl=False):
         self.batch_size = batch_size
         self.device = device
         self.lamarckism = lamarckism
+        self.rl = rl
         self.discount_factor = discount_factor
         self.memory = memory
         self.difficulty = 1
@@ -89,21 +90,22 @@ class RubiksTask(object):
 
         state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
 
-        for i in range(max_tries):
-            action = agent.select_actions(state, 0.1)
+        if self.rl:
+            for i in range(max_tries):
+                action = agent.select_actions(state, 0.1)
 
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
-            done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
-            next_state = torch.tensor(next_state, device=self.device)
-            reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
+                next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
+                done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
+                next_state = torch.tensor(next_state, device=self.device)
+                reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
 
-            agent.memory.push(state, action, next_state, reward, done)
+                agent.memory.push(state, action, next_state, reward, done)
 
-            agent.train()
+                agent.train()
 
-            # Reset each state that is done
+                # Reset each state that is done
 
-            state = torch.tensor([env.reset(self.difficulty) if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
+                state = torch.tensor([env.reset(self.difficulty) if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
         # Moves trained weights to genes
         if self.lamarckism:
@@ -119,7 +121,7 @@ class RubiksTask(object):
 
         network.reset()
         state = state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
-        for _ in range(max_tries):
+        for _ in range(self.difficulty + 2):
             action = agent.select_actions(state, 0.0)
 
             next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
@@ -132,7 +134,7 @@ class RubiksTask(object):
         fitness = ((total_done>1).sum().item())/float(self.batch_size)
 
         # TODO: set threshold in init
-        if fitness > 0.8:
+        if fitness > 0.95:
             self._increase_difficulty()
 
         return {'fitness': fitness, 'info': self.difficulty}

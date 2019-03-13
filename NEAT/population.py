@@ -1,6 +1,6 @@
 import multiprocessing
 from collections import defaultdict
-from species import Species
+from NEAT.species import Species
 import random
 import time
 import numpy as np

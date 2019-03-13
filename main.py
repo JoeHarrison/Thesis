@@ -1,13 +1,13 @@
 import torch
-from genotype import Genotype
+from NEAT.genotype import Genotype
 from naming.namegenerator import NameGenerator
-from population import Population
+from NEAT.population import Population
 from tasks.xortask import XORTask
 from tasks.rubikstask import RubiksTask
 from tasks.cartpoletask import CartpoleTask, DQNAgent
 from tasks.acrobottask import AcrobotTask
-from vanillarl import VanillaRL
-from memory import ReplayMemory
+from reinforcement_learning.vanillarl import VanillaRL
+from reinforcement_learning.memory import ReplayMemory
 from feedforwardnetwork import NeuralNetwork
 import gym
 
@@ -29,27 +29,27 @@ def rubikstask(device, batch_size):
     response_default = 1.0
     bias_as_node = False
     initial_weight_stdev = 2.0
-    p_add_neuron = 0.1
-    p_add_connection = 0.25
-    p_mutate_weight = 0.75
+    p_add_neuron = 0.03
+    p_add_connection = 0.3
+    p_mutate_weight = 0.8
     p_reset_weight = 0.1
     p_reenable_connection = 0.01
     p_disable_connection = 0.01
     p_reenable_parent = 0.25
-    p_mutate_bias = 0.25
+    p_mutate_bias = 0.2
     p_mutate_response = 0.0
-    p_mutate_type = 0.05
-    stdev_mutate_weight = 1.0
-    stdev_mutate_bias = 1.0
+    p_mutate_type = 0.2
+    stdev_mutate_weight = 1.5
+    stdev_mutate_bias = 0.5
     stdev_mutate_response = 0.5
-    weight_range = (-5., 5.)
+    weight_range = (-3., 3.)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type ='partially_connected'
-    initial_sigma = 0.0
+    initialisation_type = 'partially_connected'
+    initial_sigma = 0.01
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
                                   max_depth, max_nodes, response_default, initial_weight_stdev,
@@ -90,8 +90,9 @@ def rubikstask(device, batch_size):
 
     # Task parameters
     lamarckism = True
+    rl = True
 
-    task = RubiksTask(batch_size, device, 0.99, memory, lamarckism)
+    task = RubiksTask(batch_size, device, 0.99, memory, lamarckism, rl)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
 
 def xortask(device, batch_size):
@@ -360,11 +361,11 @@ def cartpoletask(device, batch_size):
     rl_method = VanillaRL(memory, discount_factor, device, batch_size)
 
     # Task parameters
-    lamarckism = False
+    lamarckism = True
+    rl= True
 
     task = CartpoleTask(batch_size, device, 0.99, memory, lamarckism)
-    # task = CartpoleTask(batch_size, device, rl_method, lamarckism)
-    result = population.epoch(evaluator=task, generations=1000, solution=task)
+    result = population.epoch(evaluator=task, generations=10, solution=task)
     while True:
         done = False
         envs = [gym.make('CartPole-v0')]
@@ -506,8 +507,8 @@ if __name__ == "__main__":
     batch_size = 100
 
     # For testing Reinforcement Learning
-    #cartpoletask(device, batch_size)
-    acrobottask(device, batch_size)
+    # cartpoletask(device, batch_size)
+    # acrobottask(device, batch_size)
     # For testing NEAT
     # xortask(device, 4)
-    # rubikstask(device, batch_size)
+    rubikstask(device, batch_size)

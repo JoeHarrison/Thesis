@@ -98,7 +98,7 @@ class NeuralNetwork(nn.Module):
         self.n_hidden = len(self.hidden_keys)
         self.n_outputs = len(self.output_keys)
 
-        if self.n_hidden >0:
+        if self.n_hidden > 0:
             self.n_layers = max([k[3] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys])
             self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad = True)
             # activations here?
@@ -186,7 +186,8 @@ class NeuralNetwork(nn.Module):
         activations_for_output = self.activations
         if self.n_hidden > 0:
             #self.n_hidden needs to be n_hidden_layers
-            for i in range(self.n_layers):
+            for i in range(1):
+            # for i in range(self.n_layers):
                 hidden_inputs = self.input_to_hidden(inputs) + \
                                   self.hidden_to_hidden(self.activations) + \
                                   self.output_to_hidden(self.outputs) + \
@@ -209,7 +210,7 @@ class NeuralNetwork(nn.Module):
 
 if __name__ == "__main__":
     from naming.namegenerator import NameGenerator
-    from genotype import Genotype
+    from NEAT.genotype import Genotype
 
     first_name_generator = NameGenerator('naming/names.csv', 3, 12)
     new_individual_name = first_name_generator.generate_name()

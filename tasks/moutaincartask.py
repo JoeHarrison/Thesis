@@ -1,25 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 from feedforwardnetwork import NeuralNetwork
 
 import gym
-
-class QNetwork(nn.Module):
-    """Network that maps states to q_values of actions."""
-    def __init__(self, input_size, num_actions=2):
-        super(QNetwork, self).__init__()
-        self.layer1 = nn.Linear(input_size, 4)
-        self.layer2 = nn.Linear(4, 4)
-        self.layer3 = nn.Linear(4, num_actions)
-
-    def forward(self, x):
-        x = F.relu(self.layer1(x))
-        x = F.relu(self.layer2(x))
-        x = self.layer3(x)
-
-        return x
 
 class DQNAgent:
     def __init__(self, model, discount_factor, memory, batch_size, device):
@@ -75,12 +59,13 @@ class DQNAgent:
 
         return loss.item()
 
-class CartpoleTask(object):
-    def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False):
+class MountainCarTask(object):
+    def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False, rl=False):
         self.batch_size = batch_size
         self.device = device
         self.lamarckism = lamarckism
-        self.envs = [gym.make('CartPole-v0') for _ in range(self.batch_size)]
+        self.rl = rl
+        self.envs = [gym.make('MountainCar-v0') for _ in range(self.batch_size)]
         self.discount_factor = discount_factor
         self.memory = memory
 
@@ -95,21 +80,22 @@ class CartpoleTask(object):
         state = torch.tensor([self.envs[i].reset() for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
         total_done = torch.zeros([self.batch_size, 1], device=self.device)
 
-        for i in range(max_tries):
-            action = agent.select_actions(state, 0.01)
+        if self.rl:
+            for i in range(max_tries):
+                action = agent.select_actions(state, 0.01)
 
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
-            done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
-            next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
-            reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
+                next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
+                done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
+                next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
+                reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
 
-            total_done += done
+                total_done += done
 
-            agent.memory.push(state, action, next_state, reward, done)
+                agent.memory.push(state, action, next_state, reward, done)
 
-            agent.train()
+                agent.train()
 
-            state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
+                state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
         if self.lamarckism:
             genome.weights_to_genotype(network)
@@ -120,8 +106,9 @@ class CartpoleTask(object):
 
         max_tries = 200
         tries = 0
+        dones = 0
 
-        for _ in range(10):
+        for _ in range(100):
             network.reset()
             state = torch.tensor([self.envs[0].reset()], device=self.device, dtype=torch.float32)
             for _ in range(max_tries):
@@ -134,9 +121,10 @@ class CartpoleTask(object):
                 tries += 1
 
                 if done:
+                    dones += 1
                     break
 
-        fitness = (tries/10)/max_tries
+        fitness = dones/100
 
         return {'fitness': fitness, 'info': 0}
 

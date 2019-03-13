@@ -1,11 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 from feedforwardnetwork import NeuralNetwork
-import numpy as np
-
-from memory import ReplayMemory
 
 import gym
 

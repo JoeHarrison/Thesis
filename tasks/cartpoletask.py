@@ -1,11 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 from feedforwardnetwork import NeuralNetwork
-import numpy as np
-
-from memory import ReplayMemory
 
 import gym
 
@@ -64,10 +60,11 @@ class DQNAgent:
         return loss.item()
 
 class CartpoleTask(object):
-    def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False):
+    def __init__(self, batch_size, device, discount_factor, memory, lamarckism=False, rl=False):
         self.batch_size = batch_size
         self.device = device
         self.lamarckism = lamarckism
+        self.rl = rl
         self.envs = [gym.make('CartPole-v0') for _ in range(self.batch_size)]
         self.discount_factor = discount_factor
         self.memory = memory
@@ -83,21 +80,22 @@ class CartpoleTask(object):
         state = torch.tensor([self.envs[i].reset() for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
         total_done = torch.zeros([self.batch_size, 1], device=self.device)
 
-        for i in range(max_tries):
-            action = agent.select_actions(state, 0.01)
+        if self.rl:
+            for i in range(max_tries):
+                action = agent.select_actions(state, 0.01)
 
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
-            done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
-            next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
-            reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
+                next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
+                done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
+                next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
+                reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
 
-            total_done += done
+                total_done += done
 
-            agent.memory.push(state, action, next_state, reward, done)
+                agent.memory.push(state, action, next_state, reward, done)
 
-            agent.train()
+                agent.train()
 
-            state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
+                state = torch.tensor([env.reset() if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
         if self.lamarckism:
             genome.weights_to_genotype(network)

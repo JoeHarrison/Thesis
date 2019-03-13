@@ -12,10 +12,12 @@
 
 
 import numpy as np
+from PIL import Image
 import copy
 import gym
 from gym import spaces
 from gym.utils import seeding
+import matplotlib.pyplot as plt
 
 class RubiksEnv(gym.Env):
     """
@@ -376,7 +378,42 @@ class RubiksEnv(gym.Env):
     
     def render(self):
         """"""
-        raise NotImplementedError('Render not implemented')
+        colordict = {0: [255, 0, 0],
+                     1: [0, 0, 255],
+                     2: [255, 255, 255],
+                     3: [0, 255, 0],
+                     4: [255, 255, 0],
+                     5: [255, 127, 0]}
+
+        factor = 60
+        square = int(factor/self.size)
+        width = factor*4
+        height = factor*3
+
+        image = np.ones((height, width, 3), dtype='uint8')*127
+        for i in range(self.size):
+            for j in range(self.size):
+                # UP
+                image[i*square:(i+1)*square, factor + j*square:factor + (j+1)*square] = colordict[self.U[i, j]]
+
+                # RIGHT
+                image[factor + i*square: factor + (i+1)*square, j*square:(j+1)*square] = colordict[self.L[i, j]]
+
+                # FRONT
+                image[factor + i*square: factor + (i+1)*square, factor + j*square: factor + (j+1)*square] = colordict[self.F[i, j]]
+
+                # Right
+                image[factor + i*square: factor + (i+1)*square, 2*factor + j*square: 2*factor + (j+1)*square] = colordict[self.R[i, j]]
+
+                # Back
+                image[factor + i*square: factor + (i+1)*square, 3*factor + j*square: 3*factor + (j+1)*square] = colordict[self.B[i, j]]
+
+                # DOWN
+                image[2*factor + i*square: 2*factor + (i+1)*square, factor + j*square: factor + (j+1)*square] = colordict[self.D[i, j]]
+        plt.imshow(image)
+        plt.show()
+        # img = Image.fromarray(image, 'RGB')
+        # img.show()
     
     def close(self):
         """"""
@@ -492,5 +529,10 @@ ACTION_MEANING_HALF_METRIC_POMDP = {
     22 : "Antipode"
 }
 
-
+if __name__ == "__main__":
+    env = RubiksEnv(size=2, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0, seed=None)
+    for i in range(12):
+        env.step(i)
+        print(ACTION_MEANING_QUARTER_METRIC[i])
+        env.render()
 
