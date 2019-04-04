@@ -77,6 +77,87 @@ class RubiksEnv(gym.Env):
         self.unsolved_reward = unsolved_reward
         
         self.seed(seed)
+
+        self.ACTION_MEANING_QUARTER_METRIC = {
+            0 : "U",
+            1 : "L",
+            2 : "F",
+            3 : "R",
+            4 : "B",
+            5 : "D",
+            6 : "U'",
+            7 : "L'",
+            8 : "F'",
+            9 : "R'",
+            10 : "B'",
+            11 : "D'"
+        }
+
+        self.ACTION_MEANING_QUARTER_METRIC_POMDP = {
+            0 : "U",
+            1 : "L",
+            2 : "F",
+            3 : "R",
+            4 : "B",
+            5 : "D",
+            6 : "U'",
+            7 : "L'",
+            8 : "F'",
+            9 : "R'",
+            10 : "B'",
+            11 : "D'",
+            12 : "North",
+            13 : "West",
+            14 : "South",
+            15 : "East"
+        }
+
+        self.ACTION_MEANING_HALF_METRIC = {
+            0 : "U",
+            1 : "L",
+            2 : "F",
+            3 : "R",
+            4 : "B",
+            5 : "D",
+            6 : "U'",
+            7 : "L'",
+            8 : "F'",
+            9 : "R'",
+            10 : "B'",
+            11 : "D'",
+            12 : "U2",
+            13 : "L2",
+            14 : "F2",
+            15 : "R2",
+            16 : "B2",
+            17 : "D2"
+        }
+
+        self.ACTION_MEANING_HALF_METRIC_POMDP = {
+            0 : "U",
+            1 : "L",
+            2 : "F",
+            3 : "R",
+            4 : "B",
+            5 : "D",
+            6 : "U'",
+            7 : "L'",
+            8 : "F'",
+            9 : "R'",
+            10 : "B'",
+            11 : "D'",
+            12 : "U2",
+            13 : "L2",
+            14 : "F2",
+            15 : "R2",
+            16 : "B2",
+            17 : "D2",
+            18 : "North",
+            19 : "West",
+            20 : "South",
+            21 : "East",
+            22 : "Antipode"
+        }
         
     def seed(self, seed=None):
         """"""
@@ -85,12 +166,12 @@ class RubiksEnv(gym.Env):
     
     def reset(self, steps = 20, orientation = False):
         """"""
-        self.U = (0*np.ones((self.size,self.size))).astype(int)
-        self.L = (1*np.ones((self.size,self.size))).astype(int)
-        self.F = (2*np.ones((self.size,self.size))).astype(int)
-        self.R = (3*np.ones((self.size,self.size))).astype(int)
-        self.B = (4*np.ones((self.size,self.size))).astype(int)
-        self.D = (5*np.ones((self.size,self.size))).astype(int)
+        self.U = (0*np.ones((self.size, self.size))).astype(int)
+        self.L = (1*np.ones((self.size, self.size))).astype(int)
+        self.F = (2*np.ones((self.size, self.size))).astype(int)
+        self.R = (3*np.ones((self.size, self.size))).astype(int)
+        self.B = (4*np.ones((self.size, self.size))).astype(int)
+        self.D = (5*np.ones((self.size, self.size))).astype(int)
         
         for step in range(steps):
             action = self.np_random.choice(self._action_set)
@@ -99,12 +180,50 @@ class RubiksEnv(gym.Env):
             self.reset(steps, orientation)
         observation = self.get_observation()
         return observation
+
+    def reset_to_action(self, actions, orientation = False):
+        """"""
+        self.U = (0*np.ones((self.size, self.size))).astype(int)
+        self.L = (1*np.ones((self.size, self.size))).astype(int)
+        self.F = (2*np.ones((self.size, self.size))).astype(int)
+        self.R = (3*np.ones((self.size, self.size))).astype(int)
+        self.B = (4*np.ones((self.size, self.size))).astype(int)
+        self.D = (5*np.ones((self.size, self.size))).astype(int)
+
+        for action in actions:
+            self.step(int(action))
+
+        observation = self.get_observation()
+        return observation
+
+    def curriculum_reset(self, level=12*20 - 1, orientation = False):
+        """"""
+        self.U = (0*np.ones((self.size, self.size))).astype(int)
+        self.L = (1*np.ones((self.size, self.size))).astype(int)
+        self.F = (2*np.ones((self.size, self.size))).astype(int)
+        self.R = (3*np.ones((self.size, self.size))).astype(int)
+        self.B = (4*np.ones((self.size, self.size))).astype(int)
+        self.D = (5*np.ones((self.size, self.size))).astype(int)
+
+        for step in range((level // self._n_actions)):
+            action = self.np_random.choice(self._action_set)
+            self.step(int(action))
+
+        action = self.np_random.choice(self._action_set[:(level % self._n_actions) + 1])
+        self.step(int(action))
+
+        if self.solved():
+            self.curriculum_reset(level, orientation)
+
+        observation = self.get_observation()
+
+        return observation
         
     def move(self, side, sign, times, orientation):
         """"""
         if orientation is None:
             if side is 0:
-                self.U = np.rot90(self.U,times*-sign)
+                self.U = np.rot90(self.U, times*-sign)
                 if times < 2:
                     if sign > 0:
                         Ftmp = copy.copy(self.F[0,:])
@@ -338,7 +457,7 @@ class RubiksEnv(gym.Env):
     def step(self, action):
         assert self.action_space.contains(action), "Invalid action"
         side, sign, times, orientation = self.translate_action(action)
-        self.move(side,sign,times, orientation)
+        self.move(side, sign, times, orientation)
         
         observation = self.get_observation()
         done = self.solved()
@@ -412,8 +531,6 @@ class RubiksEnv(gym.Env):
                 image[2*factor + i*square: 2*factor + (i+1)*square, factor + j*square: factor + (j+1)*square] = colordict[self.D[i, j]]
         plt.imshow(image)
         plt.show()
-        # img = Image.fromarray(image, 'RGB')
-        # img.show()
     
     def close(self):
         """"""
@@ -423,14 +540,14 @@ class RubiksEnv(gym.Env):
         """"""
         if self.metric is 'quarter':
             if self.pomdp:
-                return [ACTION_MEANING_QUARTER_METRIC_POMDP[i] for i in self._action_set]
+                return [self.ACTION_MEANING_QUARTER_METRIC_POMDP[i] for i in self._action_set]
             else:
-                return [ACTION_MEANING_QUARTER_METRIC[i] for i in self._action_set]
+                return [self.ACTION_MEANING_QUARTER_METRIC[i] for i in self._action_set]
         else:
             if self.pomdp:
-                return [ACTION_MEANING_HALF_METRIC_POMDP[i] for i in self._action_set]
+                return [self.ACTION_MEANING_HALF_METRIC_POMDP[i] for i in self._action_set]
             else:
-                return [ACTION_MEANING_HALF_METRIC[i] for i in self._action_set]
+                return [self.ACTION_MEANING_HALF_METRIC[i] for i in self._action_set]
                 
         
     def get_observation(self):
@@ -448,91 +565,12 @@ class RubiksEnv(gym.Env):
         
     
     
-ACTION_MEANING_QUARTER_METRIC = {
-    0 : "U",
-    1 : "L",
-    2 : "F",
-    3 : "R",
-    4 : "B",
-    5 : "D",
-    6 : "U'",
-    7 : "L'",
-    8 : "F'",
-    9 : "R'",
-    10 : "B'",
-    11 : "D'"
-}
 
-ACTION_MEANING_QUARTER_METRIC_POMDP = {
-    0 : "U",
-    1 : "L",
-    2 : "F",
-    3 : "R",
-    4 : "B",
-    5 : "D",
-    6 : "U'",
-    7 : "L'",
-    8 : "F'",
-    9 : "R'",
-    10 : "B'",
-    11 : "D'",
-    12 : "North",
-    13 : "West",
-    14 : "South",
-    15 : "East"
-}
-
-ACTION_MEANING_HALF_METRIC = {
-    0 : "U",
-    1 : "L",
-    2 : "F",
-    3 : "R",
-    4 : "B",
-    5 : "D",
-    6 : "U'",
-    7 : "L'",
-    8 : "F'",
-    9 : "R'",
-    10 : "B'",
-    11 : "D'",
-    12 : "U2",
-    13 : "L2",
-    14 : "F2",
-    15 : "R2",
-    16 : "B2",
-    17 : "D2"
-}
-
-ACTION_MEANING_HALF_METRIC_POMDP = {
-    0 : "U",
-    1 : "L",
-    2 : "F",
-    3 : "R",
-    4 : "B",
-    5 : "D",
-    6 : "U'",
-    7 : "L'",
-    8 : "F'",
-    9 : "R'",
-    10 : "B'",
-    11 : "D'",
-    12 : "U2",
-    13 : "L2",
-    14 : "F2",
-    15 : "R2",
-    16 : "B2",
-    17 : "D2",
-    18 : "North",
-    19 : "West",
-    20 : "South",
-    21 : "East",
-    22 : "Antipode"
-}
 
 if __name__ == "__main__":
-    env = RubiksEnv(size=2, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0, seed=None)
-    for i in range(12):
-        env.step(i)
-        print(ACTION_MEANING_QUARTER_METRIC[i])
+    env = RubiksEnv(size=3, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=0.0, seed=None)
+    for x in range(12):
+        env.curriculum_reset(level=0)
+
         env.render()
 

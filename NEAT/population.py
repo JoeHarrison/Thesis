@@ -154,7 +154,8 @@ class Population(object):
         # Recombination
         
         for specie in self.species:
-            specie.max_fitness_previous = specie.max_fitness
+            if specie.max_fitness > specie.max_fitness_previous:
+                specie.max_fitness_previous = specie.max_fitness
             specie.average_fitness = np.mean([individual.stats['fitness'] for individual in specie.members])
             specie.max_fitness = np.max([individual.stats['fitness'] for individual in specie.members])
             if specie.max_fitness <= specie.max_fitness_previous:
@@ -178,7 +179,10 @@ class Population(object):
         # Compute offspring size
         total_fitness = sum(specie.average_fitness for specie in self.species)
         for specie in self.species:
-            specie.offspring = int(round(self.population_size * specie.average_fitness / total_fitness))
+            if total_fitness == 0.0:
+                specie.offspring = int(round(self.population_size/len(self.species)))
+            else:
+                specie.offspring = int(round(self.population_size * specie.average_fitness / total_fitness))
             
         
         

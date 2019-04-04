@@ -66,7 +66,7 @@ class RubiksTask(object):
         self.rl = rl
         self.discount_factor = discount_factor
         self.memory = memory
-        self.difficulty = 1
+        self.difficulty = 0
 
         # TODO set cube size from parameter
         self.envs = [rubiks.RubiksEnv(2) for _ in range(self.batch_size)]
@@ -82,30 +82,31 @@ class RubiksTask(object):
         # Should always be a genome
         if not isinstance(genome, NeuralNetwork):
             network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
-        network.reset()
+
 
         agent = DQNAgent(network, self.discount_factor, self.memory, self.batch_size, self.device)
 
-        max_tries = self.difficulty + 10
-
-        state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
+        max_tries = self.difficulty // 12 + 1
 
         if self.rl:
-            for i in range(max_tries):
-                action = agent.select_actions(state, 0.1)
+            for e in range(10):
+                network.reset()
+                state = torch.tensor([self.envs[i].curriculum_reset(level=self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
+                for i in range(max_tries):
+                    action = agent.select_actions(state, 0.1)
 
-                next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
-                done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
-                next_state = torch.tensor(next_state, device=self.device)
-                reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
+                    next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
+                    done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
+                    next_state = torch.tensor(next_state, device=self.device)
+                    reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
 
-                agent.memory.push(state, action, next_state, reward, done)
+                    agent.memory.push(state, action, next_state, reward, done)
 
-                agent.train()
+                    agent.train()
 
-                # Reset each state that is done
+                    # Reset each state that is done
 
-                state = torch.tensor([env.reset(self.difficulty) if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
+                    state = torch.tensor([env.curriculum_reset(level=self.difficulty) if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
 
         # Moves trained weights to genes
         if self.lamarckism:
@@ -117,21 +118,31 @@ class RubiksTask(object):
 
         #substitute for total done for vector form
 
-        total_done = torch.zeros([100,1], device=self.device)
+
 
         network.reset()
-        state = state = torch.tensor([self.envs[i].reset(self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
-        for _ in range(self.difficulty + 2):
+        if self.difficulty < 12:
+            total_done = torch.zeros([self.difficulty + 1, 1], device=self.device)
+            state = torch.tensor([self.envs[i].reset_to_action([i]) for i in range(self.difficulty + 1)], device=self.device, dtype=torch.float32)
+        else:
+            total_done = torch.zeros([100, 1], device=self.device)
+            state = torch.tensor([self.envs[i].curriculum_reset(level=self.difficulty) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
+        if self.difficulty>1:
+            pass
+        for _ in range(max_tries):
             action = agent.select_actions(state, 0.0)
+            # print(self.envs[0].ACTION_MEANING_QUARTER_METRIC[int(action[0])])
+            # self.envs[0].render()
 
             next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
+
             done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
             next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
             state = next_state
 
             total_done += done
 
-        fitness = ((total_done>1).sum().item())/float(self.batch_size)
+        fitness = ((total_done >= 1).sum().item())/float(len(state))
 
         # TODO: set threshold in init
         if fitness > 0.95:
