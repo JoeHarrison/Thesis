@@ -6,11 +6,11 @@ import time
 import numpy as np
 
 def evaluate_individual(item):
-    (individual, evaluator) = item
+    (individual, evaluator, generation) = item
     if callable(evaluator):
-        individual.stats = evaluator(individual)
+        individual.stats = evaluator(individual, generation)
     elif hasattr(evaluator, 'evaluate'):
-        individual.stats = evaluator.evaluate(individual)
+        individual.stats = evaluator.evaluate(individual, generation)
     else:
         raise Exception("Evaluator must be a callable or object" \
                     "with a callable attribute 'evaluate'.")
@@ -70,7 +70,7 @@ class Population(object):
         self.survival = survival
         
     def _evaluate_all(self, population, evaluator):
-        to_eval = [(individual, evaluator) for individual in population]
+        to_eval = [(individual, evaluator, self.generation) for individual in population]
         if self.pool is not None:
             population = list(self.pool.map(evaluate_individual, to_eval))
         else:
@@ -90,6 +90,7 @@ class Population(object):
         
     def _find_best(self, population, solution = None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
+        self.champions[-1].rl_training = True
         
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -163,11 +164,9 @@ class Population(object):
             else:
                 specie.stagnation = 0
             specie.has_best = self.champions[-1] in specie.members
-        
+
         # Keep species that have the best or within stagnation age range
         self.species = list(filter(lambda s: s.stagnation < self.stagnation_age or s.has_best, self.species))
-        
-        
         
         # Adjust fitness based on age
         for specie in self.species:
@@ -201,8 +200,8 @@ class Population(object):
                 
             while len(specie.members) < specie.offspring:
                 k = min(len(pool), self.tournament_selection_k)
-                p1 = max(random.sample(pool,k), key=lambda individual: individual.stats['fitness'])
-                p2 = max(random.sample(pool,k), key=lambda individual: individual.stats['fitness'])
+                p1 = max(random.sample(pool, k), key=lambda individual: individual.stats['fitness'])
+                p2 = max(random.sample(pool, k), key=lambda individual: individual.stats['fitness'])
                 
                 child = p1.recombinate(p2)
                 child.mutate(innovations=self.innovations, global_innovation_number = self.global_innovation_number)

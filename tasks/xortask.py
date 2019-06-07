@@ -11,8 +11,14 @@ class XORTask(object):
         self.criterion = torch.nn.MSELoss()
         self.batch_size = batch_size
         self.device = device
+        self.generation = 0
 
-    def evaluate(self, genome):
+    def evaluate(self, genome, generation):
+
+        if generation > self.generation:
+            self.difficulty_set = False
+            self.generation = generation
+
         if not isinstance(genome, NeuralNetwork):
             network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
         network.reset()
@@ -24,4 +30,4 @@ class XORTask(object):
         return {'fitness': loss.item(), 'info': 0}
 
     def solve(self, network):
-        return int(self.evaluate(network)['fitness'] > 0.9)
+        return int(self.evaluate(network, self.generation)['fitness'] > 0.9)

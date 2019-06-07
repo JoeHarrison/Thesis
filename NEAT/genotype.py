@@ -86,6 +86,8 @@ class Genotype(object):
         self._initialise_hyperparameters()
         self._initialise_topology(topology, self.initialisation_type)
 
+        self.rl_training = False
+
     def _initialise_hyperparameters(self):
         self.hyperparameter_genes = {}
         self.hyperparameter_genes['p_add_neuron'] = [self.p_add_neuron, self.initial_sigma, True]

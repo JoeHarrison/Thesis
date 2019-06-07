@@ -3,6 +3,7 @@ from NEAT.genotype import Genotype
 from naming.namegenerator import NameGenerator
 from NEAT.population import Population
 from tasks.xortask import XORTask
+from tasks.xortaskcurriculum import XORTaskCurriculum
 from tasks.rubikstask import RubiksTask
 from tasks.cartpoletask import CartpoleTask, DQNAgent
 from tasks.acrobottask import AcrobotTask
@@ -10,7 +11,122 @@ from reinforcement_learning.vanillarl import VanillaRL
 from reinforcement_learning.memory import ReplayMemory
 from feedforwardnetwork import NeuralNetwork
 import gym
+import numpy as np
+import random
 
+def required_for_output(inputs, outputs, connections):
+    """
+    Collect the nodes whose state is required to compute the final network output(s)..
+    """
+    required = set(outputs)
+    s = set(outputs)
+    while 1:
+        # Find nodes not in S whose output is consumed by a node in s.
+        t = set(a for (a, b) in connections if b in s and a not in s)
+
+        if not t:
+            break
+
+        layer_nodes = set(x for x in t if x not in inputs)
+        if not layer_nodes:
+            break
+
+        required = required.union(layer_nodes)
+        s = s.union(t)
+
+    return list(required)
+
+def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
+    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
+    new_individual_name = first_name_generator.generate_name()
+    surname_generator = NameGenerator('naming/surnames.csv', 3, 12)
+    new_specie_name = surname_generator.generate_name()
+
+    inputs = 3
+    outputs = 1
+    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
+    topology = None
+    feedforward = True
+    max_depth = None
+    max_nodes = float('inf')
+    response_default = 1.0
+    bias_as_node = False
+    initial_weight_stdev = 2.0
+    p_add_neuron = 0.03
+    p_add_connection = 0.3
+    p_mutate_weight = 0.8
+    p_reset_weight = 0.1
+    p_reenable_connection = 0.01
+    p_disable_connection = 0.01
+    p_reenable_parent = 0.25
+    p_mutate_bias = 0.2
+    p_mutate_response = 0.0
+    p_mutate_type = 0.01
+    stdev_mutate_weight = 1.0
+    stdev_mutate_bias = 0.5
+    stdev_mutate_response = 0.5
+    weight_range = (-3., 3.)
+
+    distance_excess_weight = 1.0
+    distance_disjoint_weight = 1.0
+    distance_weight = 0.4
+
+    initialisation_type = 'partially_connected'
+    initial_sigma = 0.0
+
+    genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
+                                  max_depth, max_nodes, response_default, initial_weight_stdev,
+                                  bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
+                                  p_reset_weight, p_reenable_connection, p_disable_connection,
+                                  p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
+                                  stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
+                                  weight_range, distance_excess_weight, distance_disjoint_weight,
+                                  distance_weight,initialisation_type, initial_sigma)
+
+    population_size = 150
+    elitism = True
+    stop_when_solved = True
+    tournament_selection_k = 3
+    # verbose = False
+    max_cores = 1
+    compatibility_threshold = 3.0
+    compatibility_threshold_delta = 0.4
+    target_species = 12
+    minimum_elitism_size = 5
+    young_age = 10
+    young_multiplier = 1.2
+    old_age = 30
+    old_multiplier = 0.2
+    stagnation_age = 15
+    reset_innovations = False
+    survival = 0.2
+
+    population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
+    task = XORTaskCurriculum(batch_size, device, baldwin, lamarckism)
+    result = population.epoch(evaluator=task, generations=1000, solution=task)
+
+    if result['stats']['solved'][-1]:
+        individual = result['champions'][-1]
+    else:
+        individual = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'],result['stats']['info_max']))]
+    net = NeuralNetwork(result['champions'][-1], device=device)
+    net.reset()
+
+    criterion = torch.nn.MSELoss()
+
+    TARGETSOR = torch.tensor([[0.0], [1.0], [1.0], [1.0]], device=device)
+
+    output = net(torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]))
+    OR_loss = 1.0/(1.0+criterion(output, TARGETSOR))
+
+    net.reset()
+
+    TARGETSXOR = torch.tensor([[0.0], [1.0], [1.0], [0.0]], device=device)
+
+    output = net(torch.tensor([[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]]))
+    XOR_loss = 1.0/(1.0+criterion(output, TARGETSXOR))
+
+    return OR_loss, XOR_loss, result['champions'][-1], population.generation
 
 def xortask(device, batch_size):
     first_name_generator = NameGenerator('naming/names.csv', 3, 12)
@@ -460,7 +576,7 @@ def rubikstask(device, batch_size):
     # Population parameters
     population_size = 128
     elitism = True
-    stop_when_solved = True
+    stop_when_solved = False
     tournament_selection_k = 3
     verbose = True
     max_cores = 1
@@ -493,7 +609,10 @@ def rubikstask(device, batch_size):
     lamarckism = True
     rl = True
 
-    task = RubiksTask(batch_size, device, 0.99, memory, lamarckism, rl)
+    # Curriculum settings
+    curriculum = 'naive'
+
+    task = RubiksTask(batch_size, device, 0.99, memory, curriculum, lamarckism, rl)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
 
 
@@ -514,7 +633,7 @@ if __name__ == "__main__":
         print(torch.cuda.get_device_name(0))
 
     # Batch size of training and testing
-    batch_size = 128
+    batch_size = 100
 
     # Variety of Problems. Uncomment to test
     # For testing Reinforcement Learning
@@ -523,6 +642,38 @@ if __name__ == "__main__":
     # For testing NEAT
     # Batch_size for the xortask is set to 4, because the batch size also determines the batch_size for evaluation.
 
-    # xortask(device, 4)
+    OR_losses = []
+    XOR_losses = []
+    individuals = []
+    generations = []
+    n_neurons = []
+    n_connections = []
 
-    rubikstask(device, batch_size)
+    for i in range(100):
+        random.seed(i)
+        np.random.seed(i)
+        torch.manual_seed(i)
+
+        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, True, True, False)
+        OR_losses.append(OR_loss.item())
+        XOR_losses.append(XOR_loss.item())
+        individuals.append(individual)
+        generations.append(generation)
+        n_neurons.append(len(required_for_output(individual.input_keys, individual.output_keys, individual.connection_genes)) + len(individual.input_keys) + len(individual.output_keys))
+        n_connections.append(np.sum([1 for conn in individual.connection_genes.values() if conn[4]]))
+        print(i, OR_loss, XOR_loss, generation)
+
+    print(np.average(OR_losses))
+    print(np.average(XOR_losses))
+    print(np.average(generations))
+    print(np.average(n_neurons))
+    print(np.average(n_connections))
+    best_individual = individuals[np.argmax(XOR_losses)]
+    print(best_individual.neuron_genes)
+    print(best_individual.connection_genes)
+    number_neurons = len(required_for_output(best_individual.input_keys, best_individual.output_keys, best_individual.connection_genes)) + len(best_individual.input_keys) + len(best_individual.output_keys)
+    number_enabled_connections = np.sum([1 for conn in best_individual.connection_genes.values() if conn[4]])
+    print(number_neurons)
+    print(number_enabled_connections)
+
+    # rubikstask(device, batch_size)

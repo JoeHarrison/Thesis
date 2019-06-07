@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import time
 
 # Activation functions
 def identity(x):
@@ -79,12 +79,13 @@ class WeightLinear(nn.Module):
 
 
 class NeuralNetwork(nn.Module):
-    def __init__(self, genome, batch_size=1, device=torch.device('cpu'), dtype=torch.float32):
+    def __init__(self, genome, batch_size=1, device=torch.device('cpu'), dtype=torch.float32, use_single_activation_function = False):
         super(NeuralNetwork, self).__init__()
 
         self.batch_size = batch_size
         self.dtype = dtype
         self.device = device
+        self.use_single_activation_function = use_single_activation_function
 
         # Build list of neurons that are required for output excluding input neurons
         required = required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)
@@ -192,8 +193,10 @@ class NeuralNetwork(nn.Module):
                                   self.hidden_to_hidden(self.activations) + \
                                   self.output_to_hidden(self.outputs) + \
                                   self.hidden_biases
-
-                self.activations = torch.cat(([self.hidden_activations[i](hidden_inputs[:,i]).view(-1,1) for i in range(self.n_hidden)]), dim=1)
+                if self.use_single_activation_function:
+                    self.activations = F.relu(hidden_inputs)
+                else:
+                    self.activations = torch.cat(([self.hidden_activations[i](hidden_inputs[:, i]).view(-1, 1) for i in range(self.n_hidden)]), dim=1)
 
             activations_for_output = self.activations
 
@@ -203,8 +206,10 @@ class NeuralNetwork(nn.Module):
             output_inputs += self.hidden_to_output(activations_for_output)
 
         output_inputs += self.output_biases
-
-        self.outputs = torch.cat(([self.output_activations[i](output_inputs[:,i]).view(-1,1) for i in range(self.n_outputs)]), dim=1)
+        if self.use_single_activation_function:
+            self.outputs = F.relu(output_inputs)
+        else:
+            self.outputs = torch.cat(([self.output_activations[i](output_inputs[:, i]).view(-1, 1) for i in range(self.n_outputs)]), dim=1)
 
         return self.outputs
 
@@ -217,10 +222,21 @@ if __name__ == "__main__":
 
     gen = Genotype(new_individual_name, 2, 1)
 
-    gen.neuron_genes = [[0, 'tanh', 0.0, 0, 0.0, 1.0], [1, 'tanh', 0.0, 0, 1024.0, 1.0], [2,  'tanh', 0.0, 2048, 2048.0, 1.0], [3,  'tanh', 0.0, 1, 1024.0, 1.0], [4,  'tanh', 0.0, 2, 1536.0, 1.0], [5, 'tanh', 0.18701591191571043, 1, 512.0, 1.0], [6, 'tanh', 0.0, 1, 512.0, 1.0], [7, 'tanh', 0.0, 2, 768.0, 1.0]]
+    gen.neuron_genes = [[0, 'relu', 0.0, 0, 0.0, 1.0], [1, 'relu', 0.0, 0, 1024.0, 1.0], [2,  'relu', 0.0, 2048, 2048.0, 1.0], [3,  'relu', 0.0, 1, 1024.0, 1.0], [4,  'relu', 0.0, 2, 1536.0, 1.0], [5, 'relu', 0.18701591191571043, 1, 512.0, 1.0], [6, 'relu', 0.0, 1, 512.0, 1.0], [7, 'relu', 0.0, 2, 768.0, 1.0]]
 
     gen.connection_genes = {(0, 2): [0, 0, 2, 3.0, False], (1, 2): [1, 1, 2, 3.0, True], (0, 3): [2, 0, 3, 1.3543900040487509, True], (3, 2): [3, 3, 2, -1.7074518345019327, True], (0, 4): [4, 0, 4, 1.6063807318468386, True], (4, 2): [5, 4, 2, 2.7212401858775306, True], (0, 5): [6, 0, 5, 1.2006299281998838, True], (5, 3): [7, 5, 3, -3.0, False], (5, 2): [8, 5, 2, -1.374675084173348, True], (5, 4): [9, 5, 4, 1.1369768644513045, True], (5, 7): [12, 5, 7, -0.18695628785579665, True], (7, 3): [13, 7, 3, 0.5542666714061728, True], (7, 4): [16, 7, 4, -3.0, True], (6, 2): [8, 6, 2, -1.4279939502396626, True]}
 
-    net = NeuralNetwork(gen)
-    output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
-    print(output)
+
+
+
+    net = NeuralNetwork(gen, use_single_activation_function=False)
+    t = time.time()
+    for i in range(100000):
+        output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
+    print(time.time()-t)
+
+    net = NeuralNetwork(gen, use_single_activation_function=True)
+    t = time.time()
+    for i in range(100000):
+        output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
+    print(time.time()-t)
