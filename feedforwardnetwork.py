@@ -12,6 +12,9 @@ def identity(x):
 def leaky_relu(x):
     return F.leaky_relu(x)
 
+def elu(x):
+    return F.elu(x)
+
 def tanh(x):
     return torch.tanh(x)
 
@@ -27,7 +30,8 @@ string_to_activation = {
     'leaky_relu': leaky_relu,
     'relu': relu,
     'sigmoid': sigmoid,
-    'tanh': tanh
+    'tanh': tanh,
+    'elu' : elu
 
 }
 
@@ -187,8 +191,8 @@ class NeuralNetwork(nn.Module):
         activations_for_output = self.activations
         if self.n_hidden > 0:
             #self.n_hidden needs to be n_hidden_layers
-            for i in range(1):
-            # for i in range(self.n_layers):
+            # for i in range(1):
+            for i in range(self.n_layers):
                 hidden_inputs = self.input_to_hidden(inputs) + \
                                   self.hidden_to_hidden(self.activations) + \
                                   self.output_to_hidden(self.outputs) + \

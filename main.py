@@ -44,7 +44,8 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
 
     inputs = 3
     outputs = 1
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
+    # ['tanh', 'relu', 'sigmoid', 'identity']
+    nonlinearities = ['elu']
     topology = None
     feedforward = True
     max_depth = None
@@ -71,7 +72,7 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type = 'partially_connected'
+    initialisation_type = 'fully_connected'
     initial_sigma = 0.0
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
@@ -100,16 +101,24 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
     stagnation_age = 15
     reset_innovations = False
     survival = 0.2
+    # Setting this to true will limit the network to using relu only
+    use_single_activation_function = False
 
     population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-    task = XORTaskCurriculum(batch_size, device, baldwin, lamarckism)
+    task = XORTaskCurriculum(batch_size, device, baldwin, lamarckism, use_single_activation_function)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
 
     if result['stats']['solved'][-1]:
         individual = result['champions'][-1]
     else:
         individual = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'],result['stats']['info_max']))]
-    net = NeuralNetwork(result['champions'][-1], device=device)
+
+    if(baldwin and not lamarckism):
+        task.lamarckism = True
+        individual = task.backprop(individual)
+
+    net = NeuralNetwork(individual, device=device, use_single_activation_function=use_single_activation_function)
+
     net.reset()
 
     criterion = torch.nn.MSELoss()
@@ -635,6 +644,35 @@ if __name__ == "__main__":
     # Batch size of training and testing
     batch_size = 100
 
+    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
+    new_individual_name = first_name_generator.generate_name()
+    genome = Genotype(new_individual_name, inputs = 3, outputs = 1)
+    genome.neuron_genes = []
+    genome.connection_genes = []
+
+    # # NEAT
+    # genome.neuron_genes = [[0,'identity',0,0,0,1.0], [1,'identity',0,0,2048,1.0],[2, 'identity', 0 ,0, 2049, 1.0],[3,'relu',0.0,1024,4096,1.0],[4,'relu',-1,1,3072,1.0], [5,'relu',0.0,2,3071,1.0]]
+    # genome.connection_genes = {(0,3): [0,0,3,1.0,1] , (0,4): [1,0,4,1.0,1], (1,3):[2,1,3,1.0,1], (1,4):[3,1,4,1.0,1],(4,3):[4,4,3,-2.0,1],(2,5):[5,2,5,-1.0,1],(4,5):[6,4,5,1.0,1],(5,3):[7,5,3,1.0,1]}
+    # network = NeuralNetwork(genome, batch_size=4, device=device)
+    # network.reset()
+    # output = network(torch.tensor([[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]]))
+    # print(output)
+    # network.reset()
+    # output = network(torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]))
+    # print(output)
+    #
+    # # Backprop
+    # genome.neuron_genes = [[0,'identity',0,0,0,1.0],[1,'identity',0,0,1024,1.0],[2,'identity',0,0,2048,1.0],[3, 'relu',0,1024,4096,1.0],[4,'relu',0,1,3000,1.0],[5,'relu',-1.0,1,3001,1.0],[6,'relu',-1.0,2,3002,1.0]]
+    # genome.connection_genes = {(0,4):[0,0,4,1.0,1],(0,5):[1,0,5,1.0,1],(1,4):[2,1,4,1.0,1],(1,5):[3,1,5,1.0,1],(2,6):[4,2,6,-2,1],(4,6):[5,4,6,0.5,1],(4,3):[6,4,3,1.0,1],(5,6):[7,5,6,1.0,1],(5,3):[8,5,3,-2.0,1],(6,3):[9,6,3,1.0,1]}
+    #
+    # network = NeuralNetwork(genome, batch_size=4, device=device)
+    # network.reset()
+    # output = network(torch.tensor([[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]]))
+    # print(output)
+    # network.reset()
+    # output = network(torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]))
+    # print(output)
+
     # Variety of Problems. Uncomment to test
     # For testing Reinforcement Learning
     # cartpoletask(device, batch_size)
@@ -646,7 +684,9 @@ if __name__ == "__main__":
     XOR_losses = []
     individuals = []
     generations = []
+    from collections import defaultdict
     n_neurons = []
+    total_neurons = []
     n_connections = []
 
     for i in range(100):
@@ -654,26 +694,54 @@ if __name__ == "__main__":
         np.random.seed(i)
         torch.manual_seed(i)
 
-        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, True, True, False)
+        #Device and batch wrong way round?
+        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, False, False, False)
         OR_losses.append(OR_loss.item())
         XOR_losses.append(XOR_loss.item())
         individuals.append(individual)
         generations.append(generation)
-        n_neurons.append(len(required_for_output(individual.input_keys, individual.output_keys, individual.connection_genes)) + len(individual.input_keys) + len(individual.output_keys))
+
+        tmp_neurons = defaultdict(int)
+        req = required_for_output(individual.input_keys, individual.output_keys, individual.connection_genes)
+        for neuron in individual.neuron_genes:
+            if neuron[0] in req and neuron[0] not in individual.output_keys:
+                layer = neuron[3]
+                tmp_neurons[layer] += 1
+
+        n_neurons.append(tmp_neurons)
+
+        total_neurons.append(len(required_for_output(individual.input_keys, individual.output_keys, individual.connection_genes)) + len(individual.input_keys) + len(individual.output_keys))
         n_connections.append(np.sum([1 for conn in individual.connection_genes.values() if conn[4]]))
         print(i, OR_loss, XOR_loss, generation)
 
-    print(np.average(OR_losses))
-    print(np.average(XOR_losses))
-    print(np.average(generations))
-    print(np.average(n_neurons))
-    print(np.average(n_connections))
-    best_individual = individuals[np.argmax(XOR_losses)]
+    print('Average OR Loss:', np.average(OR_losses))
+    print('Average XOR Loss:', np.average(XOR_losses))
+    print('Average number of Generations:', np.average(generations))
+    print('Average total number of required Neurons:', np.average(total_neurons))
+
+    avg_per_layer = defaultdict(int)
+    for n_neuron in n_neurons:
+        for key in list(n_neuron.keys()):
+            avg_per_layer[key] += n_neuron[key]
+    print('Average number of neurons per layer')
+    for key in sorted(list(avg_per_layer.keys())):
+        print('Layer: ', key, 'average number of neurons: ', np.sum(avg_per_layer[key])/len(n_neurons))
+
+    print('Average Number of connections: ', np.average(n_connections))
+
+    print('---Genes and stats of individual with Lowest loss averaged over XOR and OR task---')
+    combined_losses = (np.array(OR_losses) + np.array(XOR_losses))/2.0
+    best_individual = individuals[np.argmax(combined_losses)]
+    print(OR_losses[np.argmax(combined_losses)])
+    print(XOR_losses[np.argmax(combined_losses)])
     print(best_individual.neuron_genes)
     print(best_individual.connection_genes)
-    number_neurons = len(required_for_output(best_individual.input_keys, best_individual.output_keys, best_individual.connection_genes)) + len(best_individual.input_keys) + len(best_individual.output_keys)
+
+    for key in sorted(list(n_neurons[np.argmax(combined_losses)].keys())):
+        print('Layer: ', key, 'number of neurons: ', n_neurons[np.argmax(combined_losses)][key])
+
     number_enabled_connections = np.sum([1 for conn in best_individual.connection_genes.values() if conn[4]])
-    print(number_neurons)
-    print(number_enabled_connections)
+    print('Total number of Enabled connections: ', number_enabled_connections)
+    print('Number of Generations', generations[np.argmax(combined_losses)])
 
     # rubikstask(device, batch_size)

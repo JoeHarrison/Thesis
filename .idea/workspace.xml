@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/feedforwardnetwork.py" line="241" mnemonic="0" />
+    <bookmark url="file://$PROJECT_DIR$/feedforwardnetwork.py" line="245" mnemonic="0" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0af60f52-46d3-4cf9-9813-60777f80b172" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Experiments/Baseline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/Baseline.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/neat.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/neat.py" afterDir="false" />
@@ -16,14 +17,10 @@
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NEAT/genotype.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NEAT/population.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/population.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feedforwardnetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/feedforwardnetwork.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/noio" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/NEAT.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/Reinforcement Learning.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/Rubik's environment.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tasks/rubikstask.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstask.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tasks/xortask.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/xortask.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tasks/xortaskcurriculum.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/xortaskcurriculum.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,14 +29,14 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.5">
+    <splitter split-orientation="horizontal" split-proportion="0.5129753">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/main.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="383">
-                  <caret line="656" column="93" selection-start-line="656" selection-start-column="93" selection-end-line="656" selection-end-column="93" />
+                <state relative-caret-position="10530">
+                  <caret line="702" lean-forward="true" selection-start-line="702" selection-end-line="702" />
                   <folding>
                     <element signature="e#0#12#0" expanded="true" />
                   </folding>
@@ -48,21 +45,12 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/NEAT/genotype.py">
+            <entry file="file://$PROJECT_DIR$/rubiks.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-30">
-                  <caret line="55" column="40" selection-start-line="55" selection-start-column="40" selection-end-line="55" selection-end-column="40" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/tasks/xortask.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="210">
-                  <caret line="14" selection-start-line="14" selection-end-line="14" />
+                <state relative-caret-position="420">
+                  <caret line="28" column="16" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
                   <folding>
-                    <element signature="e#0#18#0" expanded="true" />
+                    <element signature="e#181#199#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -71,8 +59,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/tasks/xortaskcurriculum.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="585">
-                  <caret line="53" column="49" selection-start-line="53" selection-start-column="49" selection-end-line="53" selection-end-column="49" />
+                <state relative-caret-position="-3037">
+                  <caret line="7" column="54" selection-start-line="7" selection-start-column="54" selection-end-line="7" selection-end-column="54" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                   </folding>
@@ -83,12 +71,21 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/NEAT/population.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="390">
+                  <caret line="52" column="70" selection-start-line="52" selection-start-column="70" selection-end-line="52" selection-end-column="70" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/feedforwardnetwork.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="180">
-                  <caret line="39" column="12" lean-forward="true" selection-start-line="39" selection-start-column="12" selection-end-line="39" selection-end-column="12" />
+                <state relative-caret-position="510">
+                  <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                   </folding>
@@ -109,13 +106,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>evaluate</find>
-      <find>self.gener</find>
-      <find>self.gene</find>
-      <find>population.ep</find>
-      <find>-1</find>
-      <find>find_best</find>
-      <find>self.champions</find>
       <find>_reset</find>
       <find>generation</find>
       <find>reset</find>
@@ -139,6 +129,13 @@
       <find>'info'</find>
       <find>stats</find>
       <find>required_for</find>
+      <find>network</find>
+      <find>xortaskcurricul</find>
+      <find>print</find>
+      <find>multiproc</find>
+      <find>multiproces</find>
+      <find>multi</find>
+      <find>evaluate_in</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -178,15 +175,15 @@
         <option value="$PROJECT_DIR$/notebooks/rubiks.py" />
         <option value="$PROJECT_DIR$/notebooks/Reinforcement Learning.ipynb" />
         <option value="$PROJECT_DIR$/rubiks.py" />
-        <option value="$PROJECT_DIR$/feedforwardnetwork.py" />
-        <option value="$PROJECT_DIR$/NEAT/genotype.py" />
         <option value="$PROJECT_DIR$/dqnagent.py" />
         <option value="$PROJECT_DIR$/tasks/rubikstask2.py" />
         <option value="$PROJECT_DIR$/tasks/rubikstask.py" />
         <option value="$PROJECT_DIR$/tasks/xortask.py" />
-        <option value="$PROJECT_DIR$/NEAT/population.py" />
         <option value="$PROJECT_DIR$/tasks/xortasknoob.py" />
         <option value="$PROJECT_DIR$/tasks/xortaskcurriculum.py" />
+        <option value="$PROJECT_DIR$/feedforwardnetwork.py" />
+        <option value="$PROJECT_DIR$/NEAT/genotype.py" />
+        <option value="$PROJECT_DIR$/NEAT/population.py" />
         <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
@@ -194,8 +191,8 @@
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="67" />
     <option name="y" value="25" />
-    <option name="width" value="1157" />
-    <option name="height" value="1055" />
+    <option name="width" value="927" />
+    <option name="height" value="1053" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -415,7 +412,7 @@
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32914045" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3092243" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49945354" visible="true" weight="0.3092243" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3259958" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -424,7 +421,7 @@
       <window_info anchor="bottom" id="Educational.CheckDetails" order="8" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32704404" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32914045" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50054646" side_tool="true" weight="0.3092243" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -447,6 +444,11 @@
           <url>file://$PROJECT_DIR$/noio/peas/tasks/xor.py</url>
           <line>186</line>
           <option name="timeStamp" value="73" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tasks/xortaskcurriculum.py</url>
+          <line>255</line>
+          <option name="timeStamp" value="85" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -580,16 +582,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/rubiks.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1860">
-          <caret line="130" column="22" selection-start-line="130" selection-start-column="22" selection-end-line="130" selection-end-column="22" />
-          <folding>
-            <element signature="e#181#199#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tasks/rubikstask.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="500">
@@ -610,34 +602,44 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/NEAT/population.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3105">
-          <caret line="212" column="26" selection-start-line="212" selection-start-column="21" selection-end-line="212" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NEAT/genotype.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-30">
-          <caret line="55" column="40" selection-start-line="55" selection-start-column="40" selection-end-line="55" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/tasks/xortask.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
+        <state relative-caret-position="330">
+          <caret line="22" column="22" selection-start-line="22" selection-start-column="22" selection-end-line="22" selection-end-column="91" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/NEAT/genotype.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="10" column="71" selection-start-line="10" selection-start-column="71" selection-end-line="10" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/rubiks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="28" column="16" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
+          <folding>
+            <element signature="e#181#199#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NEAT/population.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="52" column="70" selection-start-line="52" selection-start-column="70" selection-end-line="52" selection-end-column="70" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/feedforwardnetwork.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="39" column="12" lean-forward="true" selection-start-line="39" selection-start-column="12" selection-end-line="39" selection-end-column="12" />
+        <state relative-caret-position="510">
+          <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -646,8 +648,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tasks/xortaskcurriculum.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
-          <caret line="53" column="49" selection-start-line="53" selection-start-column="49" selection-end-line="53" selection-end-column="49" />
+        <state relative-caret-position="-3037">
+          <caret line="7" column="54" selection-start-line="7" selection-start-column="54" selection-end-line="7" selection-end-column="54" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
@@ -656,8 +658,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="383">
-          <caret line="656" column="93" selection-start-line="656" selection-start-column="93" selection-end-line="656" selection-end-column="93" />
+        <state relative-caret-position="10530">
+          <caret line="702" lean-forward="true" selection-start-line="702" selection-end-line="702" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>

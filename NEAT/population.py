@@ -1,4 +1,4 @@
-import multiprocessing
+import torch.multiprocessing
 from collections import defaultdict
 from NEAT.species import Species
 import random
@@ -46,10 +46,11 @@ class Population(object):
         self.verbose = verbose
         self.max_cores = max_cores
         
-        cpus = multiprocessing.cpu_count()
+        cpus = torch.multiprocessing.cpu_count()
         use_cores = min(self.max_cores, cpus-1)
         if use_cores > 1:
-            self.pool = multiprocessing.Pool(processes=use_cores, maxtasksperchild=5)
+            torch.multiprocessing.set_start_method('spawn')
+            self.pool = torch.multiprocessing.Pool(processes=use_cores)
         else:
             self.pool = None
         

@@ -8,7 +8,7 @@ class Genotype(object):
                  new_individual_name,
                  inputs=144,
                  outputs=12,
-                 nonlinearities=['relu', 'sigmoid', 'tanh'],
+                 nonlinearities=['tanh', 'relu', 'sigmoid', 'identity'],
                  topology = None,
                  feedforward = True,
                  max_depth = None,

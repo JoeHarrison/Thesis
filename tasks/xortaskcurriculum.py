@@ -3,6 +3,7 @@ import random
 import torch
 from torch import optim
 from feedforwardnetwork import NeuralNetwork
+from collections import defaultdict
 
 def required_for_output(inputs, outputs, connections):
     """
@@ -84,7 +85,7 @@ def generate_xor_XY(num_data_points):
     return Xs, Ys
 
 class XORTaskCurriculum(object):
-    def __init__(self, batch_size, device, baldwin, lamarckism):
+    def __init__(self, batch_size, device, baldwin, lamarckism, use_single_activation_function):
         self.INPUTSOR = torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]], device=device)
         self.TARGETSOR = torch.tensor([[0.0], [1.0], [1.0], [1.0]], device=device)
 
@@ -101,9 +102,11 @@ class XORTaskCurriculum(object):
         self.baldwin = baldwin
         self.lamarckism = lamarckism
 
+        self.use_single_activation_function = use_single_activation_function
+
     def backprop(self, genome):
         if not isinstance(genome, NeuralNetwork):
-            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
+            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device, use_single_activation_function=self.use_single_activation_function)
 
         optimiser = torch.optim.Adam(network.parameters(), amsgrad=True)
         criterion = torch.nn.MSELoss()
@@ -173,10 +176,10 @@ class XORTaskCurriculum(object):
             if genome.rl_training and self.baldwin:
                 network = self.backprop(genome)
                 if not isinstance(network, NeuralNetwork):
-                    network = NeuralNetwork(genome, batch_size=4, device=self.device)
+                    network = NeuralNetwork(genome, batch_size=4, device=self.device, use_single_activation_function=self.use_single_activation_function)
                 network.batch_size = 4
             else:
-                network = NeuralNetwork(genome, batch_size=4, device=self.device)
+                network = NeuralNetwork(genome, batch_size=4, device=self.device, use_single_activation_function=self.use_single_activation_function)
         network.reset()
 
         # Evaluation
@@ -193,18 +196,55 @@ class XORTaskCurriculum(object):
 
             if loss >= 0.95:
                 print('----------------------')
-                print('Number neurons', len(required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)) + len(genome.input_keys) + len(genome.output_keys))
+
+                tmp_neurons = defaultdict(int)
+                req = required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)
+                for neuron in genome.neuron_genes:
+                    if neuron[0] in req and neuron[0] not in genome.output_keys:
+                        layer = neuron[3]
+                        tmp_neurons[layer] += 1
+
+                for key in sorted(list(tmp_neurons.keys())):
+                    print('Layer: ', key, 'number of neurons: ', tmp_neurons[key])
+
+                if len(list(tmp_neurons.keys()))==0:
+                    print('No hidden layers')
+
                 print('Number enabled connections', np.sum([1 for conn in genome.connection_genes.values() if conn[4]]))
                 print('Generation', generation)
+                print(loss)
+
+                network.reset()
+
+                print(1.0/(1.0+torch.sqrt(self.criterion(self.TARGETSXOR, network(self.INPUTSXOR)))))
                 self.difficulty += 1
                 self.difficulty_set = True
 
             if generation >= 500 and not self.difficulty_set:
                 print('----------------------')
                 print('0.95 not reached')
-                print('Number neurons', len(required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)) + len(genome.input_keys) + len(genome.output_keys))
+
+                tmp_neurons = defaultdict(int)
+                req = required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)
+                for neuron in genome.neuron_genes:
+                    if neuron[0] in req and neuron[0] not in genome.output_keys:
+                        layer = neuron[3]
+                        tmp_neurons[layer] += 1
+
+                for key in sorted(list(tmp_neurons.keys())):
+                    print('Layer: ', key, 'number of neurons: ', tmp_neurons[key])
+
+                if len(list(tmp_neurons.keys()))==0:
+                    print('No hidden layers')
+
                 print('Number enabled connections', np.sum([1 for conn in genome.connection_genes.values() if conn[4]]))
                 print('Generation', generation)
+
+                print(loss)
+
+                network.reset()
+
+                print(1.0/(1.0+torch.sqrt(self.criterion(self.TARGETSXOR, network(self.INPUTSXOR)))))
                 self.difficulty += 1
                 self.difficulty_set = True
         else:
