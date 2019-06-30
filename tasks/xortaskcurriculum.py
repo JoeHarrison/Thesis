@@ -115,7 +115,7 @@ class XORTaskCurriculum(object):
             network.reset()
             optimiser.zero_grad()
             if self.difficulty == 0:
-                Xs, Ys =generate_both(int(self.batch_size/4), 0.1)
+                Xs, Ys = generate_both(int(self.batch_size/4), 0.1)
                 Xs = torch.tensor(Xs, device=self.device)
                 Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
                 # if np.random.rand() < 0.1:

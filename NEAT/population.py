@@ -92,6 +92,8 @@ class Population(object):
     def _find_best(self, population, solution = None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
         self.champions[-1].rl_training = True
+
+
         
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -249,11 +251,11 @@ class Population(object):
             number_enabled_connections = np.sum([1 for conn in self.champions[-1].connection_genes.values() if conn[4]])
             print("Population's average fitness: %.5f stdev: %.5f" % (np.average(fitness_list), np.std(fitness_list)))
             print("Best individual: %s %s" % (self.champions[-1].name, self.champions[-1].specie))
-            print("Best fitness: %.2f - #neurons: %i - #enabled connections: %i" % (self.champions[-1].stats['fitness'],number_neurons,number_enabled_connections))
+            print("Best fitness: %.5f - #neurons: %i - #enabled connections: %i" % (self.champions[-1].stats['fitness'],number_neurons,number_enabled_connections))
             print("Population of %i members in %i species:" % (len(list(self.population)), len(self.species)))
             print("Species         age    size    fitness    stag")
             print("============    ===    ====    =======    ====")
             for specie in self.species:
                 print("{: >12}    {: >3}    {: >4}    {:.5f}    {: >4}".format(specie.name,specie.age,len(specie.members),specie.max_fitness,specie.stagnation))
-            print("Generation time: %d seconds" % (time.time()-self.time))
+            print("Generation time: %.5f seconds" % (time.time()-self.time))
             print("Solved in generation: %s" % (self.solved_at))

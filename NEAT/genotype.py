@@ -35,7 +35,7 @@ class Genotype(object):
                  distance_weight = 0.4,
                  initialisation_type='partially_connected',
                  initial_sigma = 0.01):
-        
+
         self.name = next(new_individual_name)
         self.specie = None
         
@@ -218,6 +218,8 @@ class Genotype(object):
             sigma = (self.hyperparameter_genes[hk][1] + other.hyperparameter_genes[hk][1])/2
             child.hyperparameter_genes[hk] = [parameter_value, sigma, True]
 
+        child.rl_training = False
+        child.name = self.name[:3] + other.name[3:]
         return child
     
     def add_neuron(self, maximum_innovation_number, innovations):
@@ -394,11 +396,11 @@ class Genotype(object):
                     self.connection_genes[cg][3] = network.input_to_output.linear.weight.data[output_node, input_node].item()
                 elif layer_input == 0:
                     self.connection_genes[cg][3] = network.input_to_hidden.linear.weight.data[output_node, input_node].item()
-                elif layer_input is not self.max_layer and layer_output is not self.max_layer:
+                elif layer_input != self.max_layer and layer_output != self.max_layer:
                     self.connection_genes[cg][3] = network.hidden_to_hidden.linear.weight.data[output_node, input_node].item()
-                elif layer_input == self.max_layer and layer_output is not self.max_layer:
+                elif layer_input == self.max_layer and layer_output != self.max_layer:
                     self.connection_genes[cg][3] = network.output_to_hidden.linear.weight.data[output_node, input_node].item()
-                elif layer_input is not self.max_layer and layer_output == self.max_layer:
+                elif layer_input != self.max_layer and layer_output == self.max_layer:
                     self.connection_genes[cg][3] = network.hidden_to_output.linear.weight.data[output_node, input_node].item()
                 elif layer_input == self.max_layer and layer_output == self.max_layer:
                     self.connection_genes[cg][3] = network.output_to_output.linear.weight.data[output_node, input_node].item()

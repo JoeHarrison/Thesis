@@ -1,4 +1,8 @@
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import copy
+import time
 from NEAT.genotype import Genotype
 from naming.namegenerator import NameGenerator
 from NEAT.population import Population
@@ -45,7 +49,7 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
     inputs = 3
     outputs = 1
     # ['tanh', 'relu', 'sigmoid', 'identity']
-    nonlinearities = ['elu']
+    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
     topology = None
     feedforward = True
     max_depth = None
@@ -571,7 +575,7 @@ def rubikstask(device, batch_size):
     distance_weight = 0.4
 
     initialisation_type = 'partially_connected'
-    initial_sigma = 0.01
+    initial_sigma = 0.001
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
                                   max_depth, max_nodes, response_default, initial_weight_stdev,
@@ -624,13 +628,189 @@ def rubikstask(device, batch_size):
     task = RubiksTask(batch_size, device, 0.99, memory, curriculum, lamarckism, rl)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
 
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        # 1 input image channel, 6 output channels, 3x3 square convolution
+        # kernel
+        self.lin0 = nn.Linear(3, 2)
+        self.lin1 = nn.Linear(2, 1)
+
+
+    def forward(self, x):
+        x = self.lin0(x)
+        x = F.elu(x)
+        x = self.lin1(x)
+        x = F.elu(x)
+        return x
+
+def generate_zero():
+    return random.uniform(0, 49) / 100
+
+
+def generate_one():
+    return random.uniform(50, 100) / 100
+
+def generate_both(num_data_points, p):
+    Xs, Ys = [], []
+    for _ in range(num_data_points):
+        if random.random() < p:
+            Xs.append([generate_zero(), generate_zero(), 0]); Ys.append([0])
+            # or(1, 0) -> 1
+            Xs.append([generate_one(), generate_zero(), 0]); Ys.append([1])
+            # or(0, 1) -> 1
+            Xs.append([generate_zero(), generate_one(), 0]); Ys.append([1])
+            # or(1, 1) -> 1
+            Xs.append([generate_one(), generate_one(), 0]); Ys.append([1])
+        else:
+            # xor(0, 0) -> 0
+            Xs.append([generate_zero(), generate_zero(), 1]); Ys.append([0])
+            # xor(1, 0) -> 1
+            Xs.append([generate_one(), generate_zero(), 1]); Ys.append([1])
+            # xor(0, 1) -> 1
+            Xs.append([generate_zero(), generate_one(), 1]); Ys.append([1])
+            # xor(1, 1) -> 0
+            Xs.append([generate_one(), generate_one(), 1]); Ys.append([0])
+    return Xs, Ys
+
+def test_times_backprop(device):
+
+
+    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
+    new_individual_name = first_name_generator.generate_name()
+
+    backprop_net = Net()
+
+    wl0 = backprop_net.lin0.weight.flatten()
+    wl1 = backprop_net.lin1.weight.flatten()
+    b0 = backprop_net.lin0.bias
+    b1 = backprop_net.lin1.bias
+
+    g = Genotype(new_individual_name, 3, 1, ['elu'], feedforward=True)
+
+    weights = copy.deepcopy(torch.cat((wl0, wl1),0).flatten().detach().numpy())
+
+    bias_pad = torch.tensor([0.0, 0.0, 0.0],dtype=torch.float)
+    biases = copy.deepcopy(torch.cat((bias_pad, b0, b1), 0).flatten().detach().numpy())
+
+    seed = 5
+
+    # Backprop
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    random.seed(seed)
+
+    backprop_net.to(device)
+
+    optimiser = torch.optim.Adam(backprop_net.parameters(), amsgrad=True)
+    criterion = torch.nn.MSELoss()
+
+    t = time.time()
+    for i in range(10000):
+        optimiser.zero_grad()
+        Xs, Ys = generate_both(int(25), 0.5)
+        Xs = torch.tensor(Xs, device=device)
+        Ys = torch.tensor(Ys, dtype=torch.float, device=device)
+        outputs = backprop_net(Xs)
+
+        loss = criterion(outputs, Ys)
+
+        loss.backward()
+
+        optimiser.step()
+
+    print(time.time()-t)
+    print(loss)
+
+    Xs = backprop_net(torch.tensor([[0.0, 0.0, 0.0],
+                             [0.0, 1.0, 0.0],
+                             [1.0, 0.0, 0.0],
+                             [1.0, 1.0, 0.0],
+                             [0.0, 0.0, 1.0],
+                             [0.0, 1.0, 1.0],
+                             [1.0, 0.0, 1.0],
+                             [1.0, 1.0, 1.0]], device=device))
+    print(Xs)
+    Ys = torch.tensor([[0.0],[1.0],[1.0],[1.0],[0.0],[1.0],[1.0],[0.0]],dtype=torch.float, device=device)
+    print(criterion(Xs, Ys))
+
+    # NEAT
+    g.neuron_genes = [[0, 'elu', biases[0], 0, 0, 1.0],
+                           [1, 'elu', biases[1], 0, 2048,1.0],
+                           [2, 'elu', biases[2], 0, 2049,1.0],
+                           [3, 'elu', biases[5], 1024, 4096,1.0],
+                           [4, 'elu', biases[3], 1, 2050,1.0],
+                           [5, 'elu', biases[4], 1, 2051,1.0]]
+
+    g.connection_genes = {(0,4):[0,0,4,weights[0],1],
+                               (0,5):[1,0,5,weights[3],1],
+
+                               (1,4):[2,1,4,weights[1],1],
+                               (1,5):[3,1,5,weights[4],1],
+
+                               (2,4):[4,2,4,weights[2],1],
+                               (2,5):[5,2,5,weights[5],1],
+
+                               (4,3):[6,4,3,weights[6],1],
+                               (5,3):[7,5,3,weights[7],1],
+                               }
+
+    NEAT_net = NeuralNetwork(g, batch_size=100, device=device, use_single_activation_function=False)
+
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    random.seed(seed)
+
+    NEAT_net.to(device)
+
+    optimiser = torch.optim.Adam(NEAT_net.parameters(), amsgrad=True)
+    criterion = torch.nn.MSELoss()
+
+    t = time.time()
+    for i in range(10000):
+        NEAT_net.reset()
+        optimiser.zero_grad()
+        Xs, Ys = generate_both(int(25), 0.5)
+        Xs = torch.tensor(Xs, device=device)
+        Ys = torch.tensor(Ys, dtype=torch.float, device=device)
+        outputs = NEAT_net(Xs)
+
+        loss = criterion(outputs, Ys)
+
+        loss.backward()
+
+        optimiser.step()
+
+    print(time.time()-t)
+    print(loss)
+
+    g.weights_to_genotype(NEAT_net)
+
+    NEAT_net = NeuralNetwork(g, batch_size=8, device=device, use_single_activation_function=False)
+
+    NEAT_net.reset()
+
+    Xs = NEAT_net(torch.tensor([[0.0, 0.0, 0.0],
+                                 [0.0, 1.0, 0.0],
+                                 [1.0, 0.0, 0.0],
+                                 [1.0, 1.0, 0.0],
+                                 [0.0, 0.0, 1.0],
+                                 [0.0, 1.0, 1.0],
+                                 [1.0, 0.0, 1.0],
+                                 [1.0, 1.0, 1.0]], device=device))
+    print(Xs)
+    Ys = torch.tensor([[0.0],[1.0],[1.0],[1.0],[0.0],[1.0],[1.0],[0.0]],dtype=torch.float, device=device)
+    print(criterion(Xs,Ys))
 
 if __name__ == "__main__":
-    # Set seeds to get reproducible outcomes by uncommenting the following
 
+    #Set seeds to get reproducible outcomes by uncommenting the following
+    #
     # np.random.seed(3)
     # torch.manual_seed(3)
     # random.seed(3)
+
+
 
     # Checks whether CUDA is available. If it is the program will run on the GPU, otherwise on the CPU.
     device = torch.device('cpu')
@@ -641,14 +821,15 @@ if __name__ == "__main__":
     if device.type == 'cuda':
         print(torch.cuda.get_device_name(0))
 
+    # test_times_backprop(device)
+
     # Batch size of training and testing
     batch_size = 100
 
     first_name_generator = NameGenerator('naming/names.csv', 3, 12)
     new_individual_name = first_name_generator.generate_name()
     genome = Genotype(new_individual_name, inputs = 3, outputs = 1)
-    genome.neuron_genes = []
-    genome.connection_genes = []
+
 
     # # NEAT
     # genome.neuron_genes = [[0,'identity',0,0,0,1.0], [1,'identity',0,0,2048,1.0],[2, 'identity', 0 ,0, 2049, 1.0],[3,'relu',0.0,1024,4096,1.0],[4,'relu',-1,1,3072,1.0], [5,'relu',0.0,2,3071,1.0]]
@@ -695,7 +876,7 @@ if __name__ == "__main__":
         torch.manual_seed(i)
 
         #Device and batch wrong way round?
-        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, False, False, False)
+        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, True, True, True)
         OR_losses.append(OR_loss.item())
         XOR_losses.append(XOR_loss.item())
         individuals.append(individual)
