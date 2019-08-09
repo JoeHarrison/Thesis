@@ -119,6 +119,26 @@ class DuelingDQN(nn.Module):
         
         return v + a - a.mean()
     
+    def policy(self, x):
+        for i in range(len(self.sharedLayers)):
+
+            x = self.non_linearity(self.sharedLayers[i](x))
+
+        a = self.non_linearity(self.adv1(x))
+        a = self.adv2(a)
+
+        return a
+        
+    def  value(self, x):
+        for i in range(len(self.sharedLayers)):
+
+            x = self.non_linearity(self.sharedLayers[i](x))
+         
+        v = self.non_linearity(self.v1(x))
+        v = self.v2(v)
+        
+        return v
+    
     def increase_capacity(self, increment):
         for i in range(len(self.hidden)):
             self.hidden[i] += increment[i]
@@ -208,6 +228,8 @@ class DuelingDQN(nn.Module):
         else:
             action =  np.random.randint(self.num_actions)
         return action
+    
+    
     
 class DuelingDQNHER(nn.Module):
     def __init__(self, num_inputs, hidden, num_actions, non_linearity):
