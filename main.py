@@ -1,22 +1,19 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import copy
-import time
+from collections import defaultdict
 from NEAT.genotype import Genotype
 from naming.namegenerator import NameGenerator
 from NEAT.population import Population
 from tasks.xortask import XORTask
 from tasks.xortaskcurriculum import XORTaskCurriculum
 from tasks.rubikstask import RubiksTask
-from tasks.cartpoletask import CartpoleTask, DQNAgent
-from tasks.acrobottask import AcrobotTask
 from reinforcement_learning.vanillarl import VanillaRL
 from reinforcement_learning.memory import ReplayMemory
 from feedforwardnetwork import NeuralNetwork
-import gym
 import numpy as np
 import random
+from tqdm import tqdm
 
 def required_for_output(inputs, outputs, connections):
     """
@@ -48,8 +45,8 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
 
     inputs = 3
     outputs = 1
-    # ['tanh', 'relu', 'sigmoid', 'identity']
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
+
+    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity', 'elu']
     topology = None
     feedforward = True
     max_depth = None
@@ -70,14 +67,14 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
     stdev_mutate_weight = 1.0
     stdev_mutate_bias = 0.5
     stdev_mutate_response = 0.5
-    weight_range = (-3., 3.)
+    weight_range = (-3.0, 3.0)
 
     distance_excess_weight = 1.0
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
     initialisation_type = 'fully_connected'
-    initial_sigma = 0.0
+    initial_sigma = 0.01
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
                                   max_depth, max_nodes, response_default, initial_weight_stdev,
@@ -92,7 +89,7 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
-    # verbose = False
+
     max_cores = 1
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
@@ -115,7 +112,7 @@ def xortaskcurriculum(device, batch_size, baldwin, lamarckism, verbose):
     if result['stats']['solved'][-1]:
         individual = result['champions'][-1]
     else:
-        individual = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'],result['stats']['info_max']))]
+        individual = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
 
     if(baldwin and not lamarckism):
         task.lamarckism = True
@@ -226,317 +223,6 @@ def xortask(device, batch_size):
     # output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
     # print(output)
 
-
-def cartpoletask(device, batch_size):
-    # Name Generators
-    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-    surname_generator = NameGenerator('naming/surnames.csv', 3, 12)
-    new_specie_name = surname_generator.generate_name()
-
-    # Genotype Parameters
-    inputs = 4
-    outputs = 2
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
-    topology = None
-    feedforward = True
-    max_depth = None
-    max_nodes = float('inf')
-    response_default = 1.0
-    bias_as_node = False
-    initial_weight_stdev = 1.0
-    p_add_neuron = 0.1
-    p_add_connection = 0.25
-    p_mutate_weight = 0.75
-    p_reset_weight = 0.1
-    p_reenable_connection = 0.01
-    p_disable_connection = 0.01
-    p_reenable_parent = 0.25
-    p_mutate_bias = 0.25
-    p_mutate_response = 0.0
-    p_mutate_type = 0.05
-    stdev_mutate_weight = 1.0
-    stdev_mutate_bias = 1.0
-    stdev_mutate_response = 0.5
-    weight_range = (-5., 5.)
-
-    distance_excess_weight = 1.0
-    distance_disjoint_weight = 1.0
-    distance_weight = 0.4
-
-    initialisation_type= 'partially_connected'
-    initial_sigma = 0.0
-
-    genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
-                                  max_depth, max_nodes, response_default, initial_weight_stdev,
-                                  bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
-                                  p_reset_weight, p_reenable_connection, p_disable_connection,
-                                  p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
-                                  stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
-                                  weight_range, distance_excess_weight, distance_disjoint_weight,
-                                  distance_weight, initialisation_type, initial_sigma)
-
-    # Population parameters
-    population_size = 32
-    elitism = True
-    stop_when_solved = True
-    tournament_selection_k = 3
-    verbose = True
-    max_cores = 1
-    compatibility_threshold = 3.0
-    compatibility_threshold_delta = 0.4
-    target_species = 8
-    minimum_elitism_size = 5
-    young_age = 10
-    young_multiplier = 1.2
-    old_age = 30
-    old_multiplier = 0.2
-    stagnation_age = 15
-    reset_innovations = False
-    survival = 0.2
-
-    population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-
-    # RL parameters
-    memory = ReplayMemory(100000)
-    # memory = None
-    discount_factor = 0.99
-
-    # Task parameters
-    lamarckism = False
-
-    task = CartpoleTask(batch_size, device, 0.99, memory, lamarckism)
-    # task = CartpoleTask(batch_size, device, rl_method, lamarckism)
-    result = population.epoch(evaluator=task, generations=1000, solution=task)
-    while True:
-        done = False
-        envs = [gym.make('CartPole-v0')]
-        state = torch.tensor([envs[0].reset()], device=device, dtype=torch.float32)
-        steps = 0
-        network = NeuralNetwork(result['champions'][-1], device=device)
-        network.reset()
-        agent = DQNAgent(network, discount_factor, memory, 1, device)
-        while not done:
-            action = agent.select_actions(state, 0.0)
-
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
-            done = done[0]
-            next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
-
-            state = next_state
-            steps += 1
-            envs[0].render()
-        print(steps)
-        envs[0].close()
-
-def cartpoletask(device, batch_size):
-    # Name Generators
-    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-    surname_generator = NameGenerator('naming/surnames.csv', 3, 12)
-    new_specie_name = surname_generator.generate_name()
-
-    # Genotype Parameters
-    inputs = 4
-    outputs = 2
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
-    topology = None
-    feedforward = True
-    max_depth = None
-    max_nodes = float('inf')
-    response_default = 1.0
-    bias_as_node = False
-    initial_weight_stdev = 1.0
-    p_add_neuron = 0.1
-    p_add_connection = 0.25
-    p_mutate_weight = 0.75
-    p_reset_weight = 0.1
-    p_reenable_connection = 0.01
-    p_disable_connection = 0.01
-    p_reenable_parent = 0.25
-    p_mutate_bias = 0.25
-    p_mutate_response = 0.0
-    p_mutate_type = 0.05
-    stdev_mutate_weight = 1.0
-    stdev_mutate_bias = 1.0
-    stdev_mutate_response = 0.5
-    weight_range = (-5., 5.)
-
-    distance_excess_weight = 1.0
-    distance_disjoint_weight = 1.0
-    distance_weight = 0.4
-
-    initialisation_type= 'partially_connected'
-    initial_sigma = 0.0
-
-    genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
-                                  max_depth, max_nodes, response_default, initial_weight_stdev,
-                                  bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
-                                  p_reset_weight, p_reenable_connection, p_disable_connection,
-                                  p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
-                                  stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
-                                  weight_range, distance_excess_weight, distance_disjoint_weight,
-                                  distance_weight, initialisation_type, initial_sigma)
-
-    # Population parameters
-    population_size = 32
-    elitism = True
-    stop_when_solved = True
-    tournament_selection_k = 3
-    verbose = True
-    max_cores = 1
-    compatibility_threshold = 3.0
-    compatibility_threshold_delta = 0.4
-    target_species = 8
-    minimum_elitism_size = 5
-    young_age = 10
-    young_multiplier = 1.2
-    old_age = 30
-    old_multiplier = 0.2
-    stagnation_age = 15
-    reset_innovations = False
-    survival = 0.2
-
-    population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-
-    # RL parameters
-    memory = ReplayMemory(100000)
-    # memory = None
-    discount_factor = 0.99
-
-    rl_method = VanillaRL(memory, discount_factor, device, batch_size)
-
-    # Task parameters
-    lamarckism = True
-    rl= True
-
-    task = CartpoleTask(batch_size, device, 0.99, memory, lamarckism)
-    result = population.epoch(evaluator=task, generations=10, solution=task)
-    while True:
-        done = False
-        envs = [gym.make('CartPole-v0')]
-        state = torch.tensor([envs[0].reset()], device=device, dtype=torch.float32)
-        steps = 0
-        network = NeuralNetwork(result['champions'][-1], device=device)
-        network.reset()
-        agent = DQNAgent(network, discount_factor, memory, 1, device)
-        while not done:
-            action = agent.select_actions(state, 0.0)
-
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
-            done = done[0]
-            next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
-
-            state = next_state
-            steps += 1
-            envs[0].render()
-        print(steps)
-        envs[0].close()
-
-def acrobottask(device, batch_size):
-    # Name Generators
-    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-    surname_generator = NameGenerator('naming/surnames.csv', 3, 12)
-    new_specie_name = surname_generator.generate_name()
-
-    # Genotype Parameters
-    inputs = 6
-    outputs = 3
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity']
-    topology = None
-    feedforward = True
-    max_depth = None
-    max_nodes = float('inf')
-    response_default = 1.0
-    bias_as_node = False
-    initial_weight_stdev = 1.0
-    p_add_neuron = 0.1
-    p_add_connection = 0.25
-    p_mutate_weight = 0.75
-    p_reset_weight = 0.1
-    p_reenable_connection = 0.01
-    p_disable_connection = 0.01
-    p_reenable_parent = 0.25
-    p_mutate_bias = 0.25
-    p_mutate_response = 0.0
-    p_mutate_type = 0.05
-    stdev_mutate_weight = 1.0
-    stdev_mutate_bias = 1.0
-    stdev_mutate_response = 0.5
-    weight_range = (-5., 5.)
-
-    distance_excess_weight = 1.0
-    distance_disjoint_weight = 1.0
-    distance_weight = 0.4
-
-    initialisation_type = 'partially_connected'
-    initial_sigma = 0.0
-
-    genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
-                                  max_depth, max_nodes, response_default, initial_weight_stdev,
-                                  bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
-                                  p_reset_weight, p_reenable_connection, p_disable_connection,
-                                  p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
-                                  stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
-                                  weight_range, distance_excess_weight, distance_disjoint_weight,
-                                  distance_weight, initialisation_type, initial_sigma)
-
-    # Population parameters
-    population_size = 32
-    elitism = True
-    stop_when_solved = True
-    tournament_selection_k = 3
-    verbose = True
-    max_cores = 1
-    compatibility_threshold = 3.0
-    compatibility_threshold_delta = 0.4
-    target_species = 8
-    minimum_elitism_size = 5
-    young_age = 10
-    young_multiplier = 1.2
-    old_age = 30
-    old_multiplier = 0.2
-    stagnation_age = 15
-    reset_innovations = False
-    survival = 0.2
-
-    population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved, tournament_selection_k, verbose, max_cores, compatibility_threshold, compatibility_threshold_delta, target_species, minimum_elitism_size, young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations, survival)
-
-    # RL parameters
-    memory = ReplayMemory(100000)
-    # memory = None
-    discount_factor = 0.99
-
-    rl_method = VanillaRL(memory, discount_factor, device, batch_size)
-
-    # Task parameters
-    lamarckism = False
-
-    task = AcrobotTask(batch_size, device, 0.99, memory, lamarckism)
-    # task = CartpoleTask(batch_size, device, rl_method, lamarckism)
-    result = population.epoch(evaluator=task, generations=1000, solution=task)
-    while True:
-        done = False
-        envs = [gym.make('Acrobot-v1')]
-        state = torch.tensor([envs[0].reset()], device=device, dtype=torch.float32)
-        steps = 0
-        network = NeuralNetwork(result['champions'][-1], device=device)
-        network.reset()
-        agent = DQNAgent(network, discount_factor, memory, 1, device)
-        while not done:
-            action = agent.select_actions(state, 0.0)
-
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(envs, action)])
-            done = done[0]
-            next_state = torch.tensor(next_state, dtype=torch.float32, device=device)
-
-            state = next_state
-            steps += 1
-            envs[0].render()
-        print(steps)
-        envs[0].close()
-
 def rubikstask(device, batch_size):
     # Initialise name generators for individuals in NEAT population
     first_name_generator = NameGenerator('naming/names.csv', 3, 12)
@@ -628,189 +314,12 @@ def rubikstask(device, batch_size):
     task = RubiksTask(batch_size, device, 0.99, memory, curriculum, lamarckism, rl)
     result = population.epoch(evaluator=task, generations=1000, solution=task)
 
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        # 1 input image channel, 6 output channels, 3x3 square convolution
-        # kernel
-        self.lin0 = nn.Linear(3, 2)
-        self.lin1 = nn.Linear(2, 1)
-
-
-    def forward(self, x):
-        x = self.lin0(x)
-        x = F.elu(x)
-        x = self.lin1(x)
-        x = F.elu(x)
-        return x
-
-def generate_zero():
-    return random.uniform(0, 49) / 100
-
-
-def generate_one():
-    return random.uniform(50, 100) / 100
-
-def generate_both(num_data_points, p):
-    Xs, Ys = [], []
-    for _ in range(num_data_points):
-        if random.random() < p:
-            Xs.append([generate_zero(), generate_zero(), 0]); Ys.append([0])
-            # or(1, 0) -> 1
-            Xs.append([generate_one(), generate_zero(), 0]); Ys.append([1])
-            # or(0, 1) -> 1
-            Xs.append([generate_zero(), generate_one(), 0]); Ys.append([1])
-            # or(1, 1) -> 1
-            Xs.append([generate_one(), generate_one(), 0]); Ys.append([1])
-        else:
-            # xor(0, 0) -> 0
-            Xs.append([generate_zero(), generate_zero(), 1]); Ys.append([0])
-            # xor(1, 0) -> 1
-            Xs.append([generate_one(), generate_zero(), 1]); Ys.append([1])
-            # xor(0, 1) -> 1
-            Xs.append([generate_zero(), generate_one(), 1]); Ys.append([1])
-            # xor(1, 1) -> 0
-            Xs.append([generate_one(), generate_one(), 1]); Ys.append([0])
-    return Xs, Ys
-
-def test_times_backprop(device):
-
-
-    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-
-    backprop_net = Net()
-
-    wl0 = backprop_net.lin0.weight.flatten()
-    wl1 = backprop_net.lin1.weight.flatten()
-    b0 = backprop_net.lin0.bias
-    b1 = backprop_net.lin1.bias
-
-    g = Genotype(new_individual_name, 3, 1, ['elu'], feedforward=True)
-
-    weights = copy.deepcopy(torch.cat((wl0, wl1),0).flatten().detach().numpy())
-
-    bias_pad = torch.tensor([0.0, 0.0, 0.0],dtype=torch.float)
-    biases = copy.deepcopy(torch.cat((bias_pad, b0, b1), 0).flatten().detach().numpy())
-
-    seed = 5
-
-    # Backprop
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    random.seed(seed)
-
-    backprop_net.to(device)
-
-    optimiser = torch.optim.Adam(backprop_net.parameters(), amsgrad=True)
-    criterion = torch.nn.MSELoss()
-
-    t = time.time()
-    for i in range(10000):
-        optimiser.zero_grad()
-        Xs, Ys = generate_both(int(25), 0.5)
-        Xs = torch.tensor(Xs, device=device)
-        Ys = torch.tensor(Ys, dtype=torch.float, device=device)
-        outputs = backprop_net(Xs)
-
-        loss = criterion(outputs, Ys)
-
-        loss.backward()
-
-        optimiser.step()
-
-    print(time.time()-t)
-    print(loss)
-
-    Xs = backprop_net(torch.tensor([[0.0, 0.0, 0.0],
-                             [0.0, 1.0, 0.0],
-                             [1.0, 0.0, 0.0],
-                             [1.0, 1.0, 0.0],
-                             [0.0, 0.0, 1.0],
-                             [0.0, 1.0, 1.0],
-                             [1.0, 0.0, 1.0],
-                             [1.0, 1.0, 1.0]], device=device))
-    print(Xs)
-    Ys = torch.tensor([[0.0],[1.0],[1.0],[1.0],[0.0],[1.0],[1.0],[0.0]],dtype=torch.float, device=device)
-    print(criterion(Xs, Ys))
-
-    # NEAT
-    g.neuron_genes = [[0, 'elu', biases[0], 0, 0, 1.0],
-                           [1, 'elu', biases[1], 0, 2048,1.0],
-                           [2, 'elu', biases[2], 0, 2049,1.0],
-                           [3, 'elu', biases[5], 1024, 4096,1.0],
-                           [4, 'elu', biases[3], 1, 2050,1.0],
-                           [5, 'elu', biases[4], 1, 2051,1.0]]
-
-    g.connection_genes = {(0,4):[0,0,4,weights[0],1],
-                               (0,5):[1,0,5,weights[3],1],
-
-                               (1,4):[2,1,4,weights[1],1],
-                               (1,5):[3,1,5,weights[4],1],
-
-                               (2,4):[4,2,4,weights[2],1],
-                               (2,5):[5,2,5,weights[5],1],
-
-                               (4,3):[6,4,3,weights[6],1],
-                               (5,3):[7,5,3,weights[7],1],
-                               }
-
-    NEAT_net = NeuralNetwork(g, batch_size=100, device=device, use_single_activation_function=False)
-
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    random.seed(seed)
-
-    NEAT_net.to(device)
-
-    optimiser = torch.optim.Adam(NEAT_net.parameters(), amsgrad=True)
-    criterion = torch.nn.MSELoss()
-
-    t = time.time()
-    for i in range(10000):
-        NEAT_net.reset()
-        optimiser.zero_grad()
-        Xs, Ys = generate_both(int(25), 0.5)
-        Xs = torch.tensor(Xs, device=device)
-        Ys = torch.tensor(Ys, dtype=torch.float, device=device)
-        outputs = NEAT_net(Xs)
-
-        loss = criterion(outputs, Ys)
-
-        loss.backward()
-
-        optimiser.step()
-
-    print(time.time()-t)
-    print(loss)
-
-    g.weights_to_genotype(NEAT_net)
-
-    NEAT_net = NeuralNetwork(g, batch_size=8, device=device, use_single_activation_function=False)
-
-    NEAT_net.reset()
-
-    Xs = NEAT_net(torch.tensor([[0.0, 0.0, 0.0],
-                                 [0.0, 1.0, 0.0],
-                                 [1.0, 0.0, 0.0],
-                                 [1.0, 1.0, 0.0],
-                                 [0.0, 0.0, 1.0],
-                                 [0.0, 1.0, 1.0],
-                                 [1.0, 0.0, 1.0],
-                                 [1.0, 1.0, 1.0]], device=device))
-    print(Xs)
-    Ys = torch.tensor([[0.0],[1.0],[1.0],[1.0],[0.0],[1.0],[1.0],[0.0]],dtype=torch.float, device=device)
-    print(criterion(Xs,Ys))
 
 if __name__ == "__main__":
-
-    #Set seeds to get reproducible outcomes by uncommenting the following
-    #
+    # Set seeds to get reproducible outcomes by uncommenting the following
     # np.random.seed(3)
     # torch.manual_seed(3)
     # random.seed(3)
-
-
 
     # Checks whether CUDA is available. If it is the program will run on the GPU, otherwise on the CPU.
     device = torch.device('cpu')
@@ -821,8 +330,6 @@ if __name__ == "__main__":
     if device.type == 'cuda':
         print(torch.cuda.get_device_name(0))
 
-    # test_times_backprop(device)
-
     # Batch size of training and testing
     batch_size = 100
 
@@ -830,53 +337,21 @@ if __name__ == "__main__":
     new_individual_name = first_name_generator.generate_name()
     genome = Genotype(new_individual_name, inputs = 3, outputs = 1)
 
-
-    # # NEAT
-    # genome.neuron_genes = [[0,'identity',0,0,0,1.0], [1,'identity',0,0,2048,1.0],[2, 'identity', 0 ,0, 2049, 1.0],[3,'relu',0.0,1024,4096,1.0],[4,'relu',-1,1,3072,1.0], [5,'relu',0.0,2,3071,1.0]]
-    # genome.connection_genes = {(0,3): [0,0,3,1.0,1] , (0,4): [1,0,4,1.0,1], (1,3):[2,1,3,1.0,1], (1,4):[3,1,4,1.0,1],(4,3):[4,4,3,-2.0,1],(2,5):[5,2,5,-1.0,1],(4,5):[6,4,5,1.0,1],(5,3):[7,5,3,1.0,1]}
-    # network = NeuralNetwork(genome, batch_size=4, device=device)
-    # network.reset()
-    # output = network(torch.tensor([[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]]))
-    # print(output)
-    # network.reset()
-    # output = network(torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]))
-    # print(output)
-    #
-    # # Backprop
-    # genome.neuron_genes = [[0,'identity',0,0,0,1.0],[1,'identity',0,0,1024,1.0],[2,'identity',0,0,2048,1.0],[3, 'relu',0,1024,4096,1.0],[4,'relu',0,1,3000,1.0],[5,'relu',-1.0,1,3001,1.0],[6,'relu',-1.0,2,3002,1.0]]
-    # genome.connection_genes = {(0,4):[0,0,4,1.0,1],(0,5):[1,0,5,1.0,1],(1,4):[2,1,4,1.0,1],(1,5):[3,1,5,1.0,1],(2,6):[4,2,6,-2,1],(4,6):[5,4,6,0.5,1],(4,3):[6,4,3,1.0,1],(5,6):[7,5,6,1.0,1],(5,3):[8,5,3,-2.0,1],(6,3):[9,6,3,1.0,1]}
-    #
-    # network = NeuralNetwork(genome, batch_size=4, device=device)
-    # network.reset()
-    # output = network(torch.tensor([[0.0, 0.0, 1.0], [0.0, 1.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 1.0]]))
-    # print(output)
-    # network.reset()
-    # output = network(torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]))
-    # print(output)
-
-    # Variety of Problems. Uncomment to test
-    # For testing Reinforcement Learning
-    # cartpoletask(device, batch_size)
-    # acrobottask(device, batch_size)
-    # For testing NEAT
-    # Batch_size for the xortask is set to 4, because the batch size also determines the batch_size for evaluation.
-
     OR_losses = []
     XOR_losses = []
     individuals = []
     generations = []
-    from collections import defaultdict
+
     n_neurons = []
     total_neurons = []
     n_connections = []
 
-    for i in range(100):
+    for i in tqdm(range(100)):
         random.seed(i)
         np.random.seed(i)
         torch.manual_seed(i)
 
-        #Device and batch wrong way round?
-        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, True, True, True)
+        OR_loss, XOR_loss, individual, generation = xortaskcurriculum(device, 100, True, True, False)
         OR_losses.append(OR_loss.item())
         XOR_losses.append(XOR_loss.item())
         individuals.append(individual)
@@ -897,6 +372,9 @@ if __name__ == "__main__":
 
     print('Average OR Loss:', np.average(OR_losses))
     print('Average XOR Loss:', np.average(XOR_losses))
+    print('Average Loss: ', np.average([np.average(OR_losses), np.average(XOR_losses)]))
+    print('Std Loss: ', np.std([np.average(OR_losses), np.average(XOR_losses)]))
+    print('Score: ', np.average([np.average(OR_losses), np.average(XOR_losses)]) - np.std([np.average(OR_losses), np.average(XOR_losses)]))
     print('Average number of Generations:', np.average(generations))
     print('Average total number of required Neurons:', np.average(total_neurons))
 

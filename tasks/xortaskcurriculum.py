@@ -28,62 +28,6 @@ def required_for_output(inputs, outputs, connections):
     return list(required)
 
 
-def generate_zero():
-    return random.uniform(0, 49) / 100
-
-
-def generate_one():
-    return random.uniform(50, 100) / 100
-
-def generate_both(num_data_points, p):
-    Xs, Ys = [], []
-    for _ in range(num_data_points):
-        if random.random() < p:
-            Xs.append([generate_zero(), generate_zero(), 0]); Ys.append([0])
-            # or(1, 0) -> 1
-            Xs.append([generate_one(), generate_zero(), 0]); Ys.append([1])
-            # or(0, 1) -> 1
-            Xs.append([generate_zero(), generate_one(), 0]); Ys.append([1])
-            # or(1, 1) -> 1
-            Xs.append([generate_one(), generate_one(), 0]); Ys.append([1])
-        else:
-            # xor(0, 0) -> 0
-            Xs.append([generate_zero(), generate_zero(), 1]); Ys.append([0])
-            # xor(1, 0) -> 1
-            Xs.append([generate_one(), generate_zero(), 1]); Ys.append([1])
-            # xor(0, 1) -> 1
-            Xs.append([generate_zero(), generate_one(), 1]); Ys.append([1])
-            # xor(1, 1) -> 0
-            Xs.append([generate_one(), generate_one(), 1]); Ys.append([0])
-    return Xs, Ys
-
-
-def generate_or_XY(num_data_points):
-    Xs, Ys = [], []
-    for _ in range(num_data_points):
-        # or(0, 0) -> 0
-        Xs.append([generate_zero(), generate_zero(), 0]); Ys.append([0])
-        # or(1, 0) -> 1
-        Xs.append([generate_one(), generate_zero(), 0]); Ys.append([1])
-        # or(0, 1) -> 1
-        Xs.append([generate_zero(), generate_one(), 0]); Ys.append([1])
-        # or(1, 1) -> 1
-        Xs.append([generate_one(), generate_one(), 0]); Ys.append([1])
-    return Xs, Ys
-
-def generate_xor_XY(num_data_points):
-    Xs, Ys = [], []
-    for _ in range(num_data_points):
-        # xor(0, 0) -> 0
-        Xs.append([generate_zero(), generate_zero(), 1]); Ys.append([0])
-        # xor(1, 0) -> 1
-        Xs.append([generate_one(), generate_zero(), 1]); Ys.append([1])
-        # xor(0, 1) -> 1
-        Xs.append([generate_zero(), generate_one(), 1]); Ys.append([1])
-        # xor(1, 1) -> 0
-        Xs.append([generate_one(), generate_one(), 1]); Ys.append([0])
-    return Xs, Ys
-
 class XORTaskCurriculum(object):
     def __init__(self, batch_size, device, baldwin, lamarckism, use_single_activation_function):
         self.INPUTSOR = torch.tensor([[0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]], device=device)
@@ -104,28 +48,25 @@ class XORTaskCurriculum(object):
 
         self.use_single_activation_function = use_single_activation_function
 
+    def generate_both(self, p):
+        r_idx = np.random.randint(0,4)
+        if random.random() < p:
+            return self.INPUTSXOR[r_idx], self.TARGETSXOR[r_idx]
+        else:
+            return self.INPUTSOR[r_idx], self.TARGETSOR[r_idx]
+
     def backprop(self, genome):
         if not isinstance(genome, NeuralNetwork):
-            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device, use_single_activation_function=self.use_single_activation_function)
+            network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
 
-        optimiser = torch.optim.Adam(network.parameters(), amsgrad=True)
+        optimiser = torch.optim.Adam(network.parameters())
         criterion = torch.nn.MSELoss()
 
         for epoch in range(1000):
             network.reset()
             optimiser.zero_grad()
             if self.difficulty == 0:
-                Xs, Ys = generate_both(int(self.batch_size/4), 0.1)
-                Xs = torch.tensor(Xs, device=self.device)
-                Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
-                # if np.random.rand() < 0.1:
-                #     Xs, Ys = generate_xor_XY(int(self.batch_size/4))
-                #     Xs = torch.tensor(Xs, device=self.device)
-                #     Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
-                # else:
-                #     Xs, Ys = generate_or_XY(int(self.batch_size/4))
-                #     Xs = torch.tensor(Xs, device=self.device)
-                #     Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
+                Xs, Ys = self.generate_both(0.0)
 
                 outputs = network(Xs)
 
@@ -135,17 +76,7 @@ class XORTaskCurriculum(object):
 
                 optimiser.step()
             else:
-                Xs, Ys =generate_both(int(self.batch_size/4), 0.9)
-                Xs = torch.tensor(Xs, device=self.device)
-                Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
-                # if np.random.rand() < 0.1:
-                #     Xs, Ys = generate_or_XY(int(self.batch_size/4))
-                #     Xs = torch.tensor(Xs, device=self.device)
-                #     Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
-                # else:
-                #     Xs, Ys = generate_xor_XY(int(self.batch_size/4))
-                #     Xs = torch.tensor(Xs, device=self.device)
-                #     Ys = torch.tensor(Ys, dtype=torch.float, device=self.device)
+                Xs, Ys = self.generate_both(1.0)
 
                 outputs = network(Xs)
 
@@ -163,10 +94,7 @@ class XORTaskCurriculum(object):
         else:
             return network
 
-
-
     def evaluate(self, genome, generation):
-
 
         if generation > self.generation:
             self.difficulty_set = False
@@ -192,9 +120,7 @@ class XORTaskCurriculum(object):
 
             loss = 1.0/(1.0+torch.sqrt(self.criterion(outputs, Ys)))
 
-
-
-            if loss >= 0.95:
+            if loss >= 0.99:
                 print('----------------------')
 
                 tmp_neurons = defaultdict(int)
@@ -222,7 +148,7 @@ class XORTaskCurriculum(object):
 
             if generation >= 500 and not self.difficulty_set:
                 print('----------------------')
-                print('0.95 not reached')
+                print('0.99 not reached')
 
                 tmp_neurons = defaultdict(int)
                 req = required_for_output(genome.input_keys, genome.output_keys, genome.connection_genes)
@@ -262,6 +188,6 @@ class XORTaskCurriculum(object):
 
     def solve(self, network):
         if self.difficulty > 0:
-            return int(self.evaluate(network, self.generation)['fitness'] > 0.95)
+            return int(self.evaluate(network, self.generation)['fitness'] > 0.99)
         else:
             return 0

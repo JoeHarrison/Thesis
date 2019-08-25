@@ -24,7 +24,7 @@ class ReplayMemory(object):
     
 # Even more laziness. Stole this code from https://github.com/higgsfield/
 class PrioritizedReplayMemory(object):
-    def __init__(self, size, alpha=0.7, beta_start=0.5 , beta_frames=10000):
+    def __init__(self, size, alpha=0.5, beta_start=0.4 , beta_frames=10000):
         """Create Prioritized Replay buffer.
         Parameters
         ----------
