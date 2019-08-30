@@ -1,127 +1,195 @@
-import rubiks
+import random
+import torch
 from feedforwardnetwork import NeuralNetwork
 from dqnagent import DQNAgent
-import torch
-import random
-
+import rubiks2
+import time
 
 class RubiksTask(object):
-    def __init__(self, batch_size, device, discount_factor, memory, curriculum, lamarckism=False, rl=False):
+    def __init__(self, batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum, use_single_activation_function=False):
+        self.criterion = torch.nn.MSELoss()
         self.batch_size = batch_size
         self.device = device
-        self.lamarckism = lamarckism
-        self.rl = rl
-        self.discount_factor = discount_factor
-        self.memory = memory
-        self.difficulty = 0
+
         self.generation = 0
+        self.difficulty = 0
+
+        self.generations_in_difficulty = 0
+        self.generations_in_difficulty_updated = self.generation
+
         self.difficulty_set = False
+        self.memory = memory
+        self.discount_factor = discount_factor
 
-        if curriculum is 'naive':
+        self.baldwin = baldwin
+        self.lamarckism = lamarckism
+
+        self.use_single_activation_function = use_single_activation_function
+
+        epsilon_start = 1.0
+        epsilon_final = 0.01
+        epsilon_decay = 100
+        self.epsilon_by_linear_step = lambda step_idx: epsilon_final + (epsilon_start-epsilon_final)*((epsilon_decay-step_idx)/epsilon_decay) if step_idx < epsilon_decay else epsilon_final
+
+        # Select curriculum
+        if curriculum is 'Naive':
             self.curriculum = self._naive
-        elif curriculum is 'mixed':
-            self.curriculum = self._mixed
+        elif curriculum is 'Uniform':
+            self.curriculum = self._uniform
+        elif curriculum is 'LBF':
+            self.curriculum = self._lbf
         else:
-            self.curriculum = self._combination
+            self.curriculum = self._no_curriculum
 
-        # TODO set cube size from parameter
-        self.envs = [rubiks.RubiksEnv(2) for _ in range(self.batch_size)]
-
-    def _increase_difficulty(self):
-        self.difficulty += 1
-
-    def _combination(self, p=0.2, max_difficulty=12*20):
-        random_number = random.random()
-        if random_number > p:
-            return self.difficulty
-        else:
-            return random.randint(0, 12*(self.difficulty//12 + 1))
-
-    def _mixed(self, max_difficulty=12*20):
-        return random.randint(0, max_difficulty)
+        self.env = rubiks2.RubiksEnv2()
+        self.envs = [rubiks2.RubiksEnv2() for _ in range(self.batch_size)]
 
     def _naive(self):
         return self.difficulty
 
-    def rl_training(self, genome):
-        if not isinstance(genome, NeuralNetwork):
-            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
+    def _lbf(self):
+        random_number = random.random()
+        if random_number > 0.2:
+            return self.difficulty
+        else:
+            return random.randint(0, 14)
 
-        agent = DQNAgent(network, self.discount_factor, self.memory, self.batch_size, self.device)
+    def _uniform(self):
+        return random.randint(0, 14)
 
-        max_tries = 20
+    def _no_curriculum(self):
+        return 14
 
-        for epoch in range(100):
-            import time
-            t = time.time()
-            # TODO: network reset problem
+    def backprop(self, genome):
+        t = time.time()
+        network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
+
+        agent = DQNAgent(network, self.discount_factor, self.memory, 1, self.device)
+
+        batch_network = NeuralNetwork(genome, batch_size=100, device=self.device, use_single_activation_function=self.use_single_activation_function)
+
+        batch_agent = DQNAgent(batch_network, self.discount_factor, self.memory, 100, self.device)
+
+        for epoch in range(1000):
             network.reset()
-            state = torch.tensor([self.envs[i].curriculum_reset(level=self.curriculum()) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
-            for i in range(max_tries):
-                # TODO: not enough exploration with 0.1
-                action = agent.select_actions(state, 0.5)
+            batch_network.reset()
 
-                next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
-                done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
-                next_state = torch.tensor(next_state, device=self.device)
-                reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
+            state = self.env.reset(self.curriculum() + 1)
 
-                agent.memory.push(state, action, next_state, reward, done)
+            for _ in range(self.difficulty + 14):
+                action = agent.act(state, self.epsilon_by_linear_step(self.generations_in_difficulty), [0.0]*6, self.device)
+                next_state, reward, done, info = self.env.step(int(action))
 
-                agent.train()
+                self.memory.push((state, action, reward, next_state, done))
 
-                # Reset each state that is done
-                state = torch.tensor([env.curriculum_reset(level=self.curriculum()) if d else s.tolist() for env, s, d in zip(self.envs, next_state, done)], dtype=torch.float32, device=self.device)
+                state = next_state
 
-        # Moves trained weights to back to genes
-        if self.lamarckism:
-            genome.weights_to_genotype(network)
+            # agent.train(self.epsilon_by_linear_step(self.generations_in_difficulty))
+            batch_agent.train()
 
         genome.rl_training = False
+        print('RL-time: ', time.time()-t, 'len mem:', len(self.memory))
+        if self.lamarckism:
+            genome.weights_to_genotype(batch_network)
+            return genome
+        else:
+            return batch_network
 
     def evaluate(self, genome, generation):
-        if genome.rl_training:
-            print('rl training')
-            self.rl_training(genome)
-
         if generation > self.generation:
             self.difficulty_set = False
             self.generation = generation
 
-        # Should always be a genome
-        if not isinstance(genome, NeuralNetwork):
-            network = NeuralNetwork(genome, batch_size=self.batch_size, device=self.device)
+        if genome.rl_training and self.baldwin:
 
-        # TODO: Move agent class code to separate class
-        agent = DQNAgent(network, self.discount_factor, self.memory, self.batch_size, self.device)
+            network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
 
-        network = NeuralNetwork(genome, batch_size=1, device=self.device)
+            agent = DQNAgent(network, self.discount_factor, self.memory, 1, self.device)
+
+            total_done = 0.0
+
+            for i in range(100):
+                network.reset()
+                done = 0.0
+                tries = 0
+                max_tries = self.difficulty + 1
+                state = self.env.reset(self.difficulty + 1)
+
+                while tries < max_tries and not done:
+                    action = agent.act(state, 0.0, [0.0]*6, self.device)
+                    next_state, reward, done, info = self.env.step(int(action))
+
+                    state = next_state
+                    tries += 1
+                total_done += done
+
+            print('before:', total_done/100.0)
+            w_before = network.input_to_output.linear.weight.data
+
+            network = self.backprop(genome)
+            if not isinstance(network, NeuralNetwork):
+                network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
+            network.batch_size = 1
+            print((w_before - network.input_to_output.linear.weight.data).sum())
+            agent = DQNAgent(network, self.discount_factor, self.memory, 1, self.device)
+
+            total_done = 0.0
+
+            for i in range(100):
+                network.reset()
+                done = 0.0
+                tries = 0
+                max_tries = self.difficulty + 1
+                state = self.env.reset(self.difficulty + 1)
+
+                while tries < max_tries and not done:
+                    action = agent.act(state, 0.0, [0.0]*6, self.device)
+                    next_state, reward, done, info = self.env.step(int(action))
+
+                    state = next_state
+                    tries += 1
+                total_done += done
+
+            print('after:', total_done/100.0)
+        else:
+            network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
 
         agent = DQNAgent(network, self.discount_factor, self.memory, 1, self.device)
 
-        network.reset()
+        total_done = 0.0
 
-        total_done = torch.zeros([self.batch_size, 1], device=self.device)
-        state = torch.tensor([self.envs[i].curriculum_reset(level=self.curriculum()) for i in range(self.batch_size)], device=self.device, dtype=torch.float32)
-        max_tries = 20
-        for _ in range(max_tries):
-            action = agent.select_actions(state, 0.0)
-            next_state, reward, done, info = zip(*[env.step(int(a)) for env, a in zip(self.envs, action)])
+        for i in range(100):
+            network.reset()
+            done = 0.0
+            tries = 0
+            max_tries = self.difficulty + 1
+            state = self.env.reset(self.difficulty + 1)
 
-            done = torch.tensor(done, dtype=torch.float32, device=self.device).view(-1, 1)
-            next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
-            state = next_state
+            while tries < max_tries and not done:
+                action = agent.act(state, 0.0, [0.0]*6, self.device)
+                next_state, reward, done, info = self.env.step(int(action))
 
+                state = next_state
+                tries += 1
             total_done += done
 
-        fitness = ((total_done >= 1).sum().item())/float(len(state))
+        percentage_solved = total_done/100.0
 
-        # TODO: set threshold in init
-        if not self.difficulty_set and fitness > self.difficulty / (self.difficulty + 1) + 0.5 * 1/(self.difficulty + 1):
-            self._increase_difficulty()
+        if self.generations_in_difficulty_updated != self.generation:
+            self.generations_in_difficulty_updated = self.generation
+            self.generations_in_difficulty += 1
+
+        if not self.difficulty_set and percentage_solved > 0.95:
+            self.difficulty += 1
             self.difficulty_set = True
 
-        return {'fitness': fitness, 'info': self.difficulty}
+        if self.difficulty_set:
+            return {'fitness': percentage_solved, 'info': self.difficulty - 1, 'generation': generation}
+        else:
+            return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation}
 
     def solve(self, network):
-        return int(self.evaluate(network, self.generation)['fitness'] > 0.99)
+        if self.difficulty == 14:
+            return int(self.evaluate(network, self.generation)['fitness'] > 0.95)
+        else:
+            return 0

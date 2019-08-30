@@ -4,6 +4,7 @@ from NEAT.species import Species
 import random
 import time
 import numpy as np
+from tqdm import tqdm
 
 def evaluate_individual(item):
     (individual, evaluator, generation) = item
@@ -88,12 +89,15 @@ class Population(object):
         self.global_innovation_number = 0
         self.innovations = {}
         self.current_compatibility_threshold = self.compatibility_threshold
+
+    def _reset_stagnation(self):
+        print('resetting species')
+        for specie in self.species:
+            specie.reset_stagnation()
         
     def _find_best(self, population, solution = None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
         self.champions[-1].rl_training = True
-
-
         
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -130,7 +134,10 @@ class Population(object):
             specie.age += 1
             
         # Add each individual to a species
+        reset_specie_flag = False
         for individual in population:
+            if individual.stats['reset_species']:
+                reset_specie_flag = True
             found = False
             for specie in self.species:
                 if individual.distance(specie.representative) <= self.current_compatibility_threshold:
@@ -142,6 +149,9 @@ class Population(object):
                 s = Species(self.new_specie_name, individual)
                 individual.change_specie(s.name)
                 self.species.append(s)
+
+        if reset_specie_flag:
+            self._reset_stagnation()
         
         # Remove empty species
         self.species = list(filter(lambda s: len(s.members) > 0, self.species))
@@ -156,7 +166,6 @@ class Population(object):
         self._find_best(population, solution)
         
         # Recombination
-        
         for specie in self.species:
             if specie.max_fitness > specie.max_fitness_previous:
                 specie.max_fitness_previous = specie.max_fitness
@@ -240,7 +249,7 @@ class Population(object):
             self.stats[key+'_avg'].append(np.mean([individual.stats[key] for individual in population]))
             self.stats[key+'_max'].append(np.max([individual.stats[key] for individual in population]))
             self.stats[key+'_min'].append(np.min([individual.stats[key] for individual in population]))
-        self.stats['solved'].append(self.solved_at is not None )
+        self.stats['solved'].append(self.solved_at is not None)
     
     def _status_report(self):
         if self.verbose:
@@ -256,6 +265,6 @@ class Population(object):
             print("Species         age    size    fitness    stag")
             print("============    ===    ====    =======    ====")
             for specie in self.species:
-                print("{: >12}    {: >3}    {: >4}    {:.5f}    {: >4}".format(specie.name,specie.age,len(specie.members),specie.max_fitness,specie.stagnation))
+                print("{: >12}    {: >3}    {: >4}    {:.5f}    {: >4}".format(specie.name, specie.age, len(specie.members), specie.max_fitness, specie.stagnation))
             print("Generation time: %.5f seconds" % (time.time()-self.time))
             print("Solved in generation: %s" % (self.solved_at))

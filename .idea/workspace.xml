@@ -2,47 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0af60f52-46d3-4cf9-9813-60777f80b172" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/EC/.idea/EC.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/.idea/dictionaries/joe.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/NEAT/genotype.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/NEAT/population.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/NEAT/species.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/EC/tasks/rubikstask.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/networks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reinforcement_learning/data_structures.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reinforcement_learning/replay_memories.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rubiks2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tasks/rubikstask2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/NEAT-checkpoint.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/Pytorch-NEAT-checkpoint.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/Reinforcement Learning-checkpoint.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/Baseline.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/MCTS.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/MCTS.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/OR-XOR.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/OR_XOR_experiments.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/OR_XOR_experiments.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing/difficulty" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing/epsilon_decay" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing/global_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing/local_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing/max_tries" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing/model.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_all/difficulty" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_all/epsilon_decay" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_all/global_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_all/local_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_all/max_tries" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_all/model.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_bottom/difficulty" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_bottom/epsilon_decay" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_bottom/global_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_bottom/local_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_bottom/max_tries" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Increasing_bottom/model.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Leaky_relu3/difficulty" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Leaky_relu3/epsilon_decay" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Leaky_relu3/global_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Leaky_relu3/local_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Leaky_relu3/max_tries" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Leaky_relu3/model.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Same/difficulty" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Same/epsilon_decay" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Same/global_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Same/local_steps" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Same/max_tries" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/models/Same/model.pt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/replay_memories.py" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/replay_memories.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/xor.mp4" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" afterDir="false" />
@@ -50,8 +28,20 @@
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/genotype.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/population.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/population.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/species.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/species.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dqnagent.py" beforeDir="false" afterPath="$PROJECT_DIR$/dqnagent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reinforcement_learning/memory.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reinforcement_learning/prioritisedreplaymemory.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reinforcement_learning/vanillarl.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rl.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/rl.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tasks/rubikstask.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstask.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tasks/xortask.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/tasks/xortaskcurriculum.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/xortaskcurriculum.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/visualize.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/visualize.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -69,12 +59,6 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="67" />
-    <option name="y" value="25" />
-    <option name="width" value="927" />
-    <option name="height" value="1055" />
-  </component>
   <component name="ProjectId" id="1PdTa0ZXG1Aut77wm8ERDj2iJVb" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
@@ -86,11 +70,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Misc" />
       <recent name="$PROJECT_DIR$/NEAT" />
       <recent name="$PROJECT_DIR$/reinforcement_learning" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/peas/peas/examples" />
-      <recent name="$PROJECT_DIR$/notebooks" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/tasks" />
@@ -128,7 +112,7 @@
       <option name="ipnbPort" value="8888" />
       <method v="2" />
     </configuration>
-    <configuration name="feedforwardnetwork" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="dqnagent" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -140,7 +124,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/feedforwardnetwork.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dqnagent.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -170,7 +154,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rubiks (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="replay_memories" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -178,11 +162,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/notebooks" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/reinforcement_learning" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/notebooks/rubiks.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/reinforcement_learning/replay_memories.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -191,7 +175,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="rubiks" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="rubiks2" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -203,7 +187,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rubiks.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/rubiks2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -234,19 +218,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.feedforwardnetwork" />
       <item itemvalue="Python.main" />
-      <item itemvalue="Python.rubiks" />
-      <item itemvalue="Python.rubiks (1)" />
       <item itemvalue="Python.rubikstask" />
+      <item itemvalue="Python.replay_memories" />
+      <item itemvalue="Python.rubiks2" />
+      <item itemvalue="Python.dqnagent" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.rubiks2" />
+        <item itemvalue="Python.dqnagent" />
+        <item itemvalue="Python.replay_memories" />
         <item itemvalue="Python.rubikstask" />
-        <item itemvalue="Python.feedforwardnetwork" />
-        <item itemvalue="Python.rubiks" />
-        <item itemvalue="Python.rubiks (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -288,6 +272,16 @@
           <url>file://$PROJECT_DIR$/tasks/xortaskcurriculum.py</url>
           <line>61</line>
           <option name="timeStamp" value="98" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dqnagent.py</url>
+          <line>102</line>
+          <option name="timeStamp" value="99" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dqnagent.py</url>
+          <line>61</line>
+          <option name="timeStamp" value="102" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

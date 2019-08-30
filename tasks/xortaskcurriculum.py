@@ -120,7 +120,7 @@ class XORTaskCurriculum(object):
 
             loss = 1.0/(1.0+torch.sqrt(self.criterion(outputs, Ys)))
 
-            if loss >= 0.99:
+            if loss >= 0.999:
                 print('----------------------')
 
                 tmp_neurons = defaultdict(int)
@@ -188,6 +188,6 @@ class XORTaskCurriculum(object):
 
     def solve(self, network):
         if self.difficulty > 0:
-            return int(self.evaluate(network, self.generation)['fitness'] > 0.99)
+            return int(self.evaluate(network, self.generation)['fitness'] > 0.999)
         else:
             return 0

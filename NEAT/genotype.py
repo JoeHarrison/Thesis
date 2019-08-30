@@ -125,19 +125,16 @@ class Genotype(object):
         self.specie = specie
         
     def _initialise_topology(self, topology, initialisation_type):
-        #         if self.bias_as_node:
-        #             self.inputs += 1
-        
         self.max_layer = 2**10 if (self.max_depth is None) else (self.max_depth - 1)
         
         if topology is None:
             # Initialise inputs
             for i in range(self.inputs):
-                self.neuron_genes.append([i, random.choice(self.nonlinearities), 1.0, 0, i * 2048, self.response_default])
+                self.neuron_genes.append([i, random.choice(self.nonlinearities), np.random.randn(), 0, i * 2048, self.response_default])
                 self.input_keys.append(i)
             # Initialise outputs
             for i in range(self.outputs):
-                self.neuron_genes.append([(self.inputs + i), random.choice(self.nonlinearities), 1.0, self.max_layer, (self.inputs + i) * 2048, self.response_default])
+                self.neuron_genes.append([(self.inputs + i), random.choice(self.nonlinearities), np.random.randn(), self.max_layer, (self.inputs + i) * 2048, self.response_default])
                 self.output_keys.append((self.inputs + i))
 
             # All inputs connected with all outputs
@@ -146,8 +143,6 @@ class Genotype(object):
                 for i in range(self.inputs):
                     for j in range(self.inputs,self.inputs + self.outputs):
                         weight = self._initialise_weight(self.inputs,self.outputs)
-                        self.connection_genes[(i,j)] = [innovation_number, i, j, weight ,True]
-                        innovation_number += 1
 
             # All outputs connected to one random input
             if initialisation_type is 'partially_connected':
