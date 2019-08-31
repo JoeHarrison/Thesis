@@ -194,6 +194,7 @@ def rubikstask(device, batch_size):
     tournament_selection_k = 3
     verbose = True
     max_cores = 1
+
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.4
     target_species = 16
