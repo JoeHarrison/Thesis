@@ -79,7 +79,7 @@ class RubiksTask(object):
 
         total_done = 0.0
 
-        for i in range(100):
+        for i in range(90):
             network.reset()
             done = 0.0
             tries = 0
@@ -115,14 +115,63 @@ class RubiksTask(object):
 
                 state = next_state
                 tries += 1
+
             if genome.rl_training and self.baldwin:
                 total_done += done.item()
             else:
                 total_done += done
 
+        for i in range(10):
+            network.reset()
+            done = 0.0
+            tries = 0
+            max_tries = self.difficulty//6 + 1
+            state = torch.tensor([self.env.force_last_action_reset(self.difficulty)], dtype=torch.float32, device=self.device)
+
+            while tries < max_tries and not done:
+                q_values = network(state)
+                action = q_values.max(1)[1].view(1, 1).item()
+                next_state, reward, done, info = self.env.step(int(action))
+                next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
+
+                if genome.rl_training and self.baldwin:
+                    w_before = copy.copy(network.input_to_output.linear.weight.data)
+                    optimiser.zero_grad()
+                    # state = torch.tensor(state, dtype=torch.float32, device=self.device)
+                    action = torch.tensor([action], dtype=torch.long, device=self.device)
+                    # next_state = torch.tensor(next_state, dtype=torch.float32, device=self.device)
+                    reward = torch.tensor([reward], dtype=torch.float32, device=self.device)
+                    done = torch.tensor([done], dtype=torch.float32, device=self.device)
+
+                    q_val = self.compute_q_val(network, state, action)
+
+                    with torch.no_grad():
+                        target = self.compute_target(network, reward, next_state, done)
+                    criterion = nn.MSELoss()
+
+                    loss = criterion(q_val, target)
+
+                    loss.backward()
+
+                    optimiser.step()
+
+                state = next_state
+                tries += 1
+
+
+            if genome.rl_training and self.baldwin:
+                total_done += done.item()
+            else:
+                total_done += done
+
+        if self.lamarckism and genome.rl_training:
+            print('rl')
+            genome.weights_to_genotype(network)
+            genome.rl_training = False
+
         percentage_solved = total_done/100.0
 
-        if percentage_solved > 0.95:
+        if percentage_solved >= 0.9:
             self.set_difficulty_next_gen = True
 
         return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': self.set_difficulty_next_gen}

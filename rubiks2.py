@@ -440,6 +440,6 @@ class RubiksEnv2(gym.Env):
 
 if __name__ == "__main__":
     env = RubiksEnv2(size=2, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=-1.0, seed=None)
-    env.curriculum_reset(1)
+    env.force_last_action_reset(7)
     env.render()
 

@@ -9,7 +9,7 @@ class ReplayMemory(object):
         self.memory = deque(maxlen=capacity)
 
     def push(self, batch):
-        self.memory.append((batch))
+        self.memory.append(batch)
 
     def sample(self, batch_size, _, device):
         # Lazy programming. Returns 1, 1 so that I don't have write additional code that discerns between replay memory and prioritized replay memory

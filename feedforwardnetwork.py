@@ -215,6 +215,16 @@ class NeuralNetwork(nn.Module):
 
         return self.outputs
 
+    def act(self, state, epsilon, mask, device):
+        if np.random.rand() > epsilon:
+            state = torch.tensor([state], dtype=torch.float32, device=device)
+            mask = torch.tensor([mask], dtype=torch.float32, device=device)
+            q_values = self.forward(state) + mask
+            action = q_values.max(1)[1].view(1, 1).item()
+        else:
+            action = np.random.randint(self.num_actions)
+        return action
+
 if __name__ == "__main__":
     from naming.namegenerator import NameGenerator
     from NEAT.genotype import Genotype
@@ -228,17 +238,14 @@ if __name__ == "__main__":
 
     gen.connection_genes = {(0, 2): [0, 0, 2, 3.0, False], (1, 2): [1, 1, 2, 3.0, True], (0, 3): [2, 0, 3, 1.3543900040487509, True], (3, 2): [3, 3, 2, -1.7074518345019327, True], (0, 4): [4, 0, 4, 1.6063807318468386, True], (4, 2): [5, 4, 2, 2.7212401858775306, True], (0, 5): [6, 0, 5, 1.2006299281998838, True], (5, 3): [7, 5, 3, -3.0, False], (5, 2): [8, 5, 2, -1.374675084173348, True], (5, 4): [9, 5, 4, 1.1369768644513045, True], (5, 7): [12, 5, 7, -0.18695628785579665, True], (7, 3): [13, 7, 3, 0.5542666714061728, True], (7, 4): [16, 7, 4, -3.0, True], (6, 2): [8, 6, 2, -1.4279939502396626, True]}
 
-
-
-
     net = NeuralNetwork(gen, use_single_activation_function=False)
     t = time.time()
-    for i in range(100000):
+    for i in range(10000):
         output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
     print(time.time()-t)
 
     net = NeuralNetwork(gen, use_single_activation_function=True)
     t = time.time()
-    for i in range(100000):
+    for i in range(10000):
         output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
     print(time.time()-t)

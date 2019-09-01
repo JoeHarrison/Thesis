@@ -98,6 +98,7 @@ class Population(object):
     def _find_best(self, population, solution = None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
         self.champions[-1].rl_training = True
+
         
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -121,7 +122,10 @@ class Population(object):
         
         while len(population) < self.population_size:
             individual = self.genome_factory()
-            population.append(individual)        
+            population.append(individual)
+
+        rando = random.choice(population)
+        rando.rl_training = True
             
         population = self._evaluate_all(population, evaluator)
         
