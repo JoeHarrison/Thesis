@@ -126,8 +126,10 @@ class Population(object):
 
         rando = random.choice(population)
         rando.rl_training = True
-            
+
         population = self._evaluate_all(population, evaluator)
+
+        self._gather_stats(population)
         
         # Speciation
         for specie in self.species:
@@ -158,7 +160,7 @@ class Population(object):
             self._reset_stagnation()
         
         # Remove empty species
-        self.species = list(filter(lambda s: len(s.members) > 0, self.species))
+        self.species = list(filter(lambda sp: len(sp.members) > 0, self.species))
         
         # Adjust compatibility threshold
         if len(self.species) < self.target_species:
@@ -198,14 +200,12 @@ class Population(object):
                 specie.offspring = int(round(self.population_size/len(self.species)))
             else:
                 specie.offspring = int(round(self.population_size * specie.average_fitness / total_fitness))
-            
-        
         
         # Remove species without offspring
-        self.species = list(filter(lambda s: s.offspring > 0, self.species))
+        self.species = list(filter(lambda sp: sp.offspring > 0, self.species))
 
         for specie in self.species:
-            specie.members.sort(key=lambda individual: individual.stats['fitness'], reverse = True)
+            specie.members.sort(key=lambda ind: ind.stats['fitness'], reverse=True)
             keep = max(1, int(round(len(specie.members)*self.survival)))
             pool = specie.members[:keep]
             
@@ -216,18 +216,16 @@ class Population(object):
                 
             while len(specie.members) < specie.offspring:
                 k = min(len(pool), self.tournament_selection_k)
-                p1 = max(random.sample(pool, k), key=lambda individual: individual.stats['fitness'])
-                p2 = max(random.sample(pool, k), key=lambda individual: individual.stats['fitness'])
+                p1 = max(random.sample(pool, k), key=lambda ind: ind.stats['fitness'])
+                p2 = max(random.sample(pool, k), key=lambda ind: ind.stats['fitness'])
                 
                 child = p1.recombinate(p2)
-                child.mutate(innovations=self.innovations, global_innovation_number = self.global_innovation_number)
+                child.mutate(innovations=self.innovations, global_innovation_number=self.global_innovation_number)
                 specie.members.append(child)
                 
         if self.innovations:
             self.global_innovation_number = max(self.innovations.values())
-            
-        self._gather_stats(population)
-            
+
     def epoch(self, evaluator, generations, solution=None, reset=True, callback= None):
         if reset:
             self._reset()
@@ -272,3 +270,4 @@ class Population(object):
                 print("{: >12}    {: >3}    {: >4}    {:.5f}    {: >4}".format(specie.name, specie.age, len(specie.members), specie.max_fitness, specie.stagnation))
             print("Generation time: %.5f seconds" % (time.time()-self.time))
             print("Solved in generation: %s" % (self.solved_at))
+            print(self.current_compatibility_threshold)

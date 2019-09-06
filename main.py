@@ -280,8 +280,8 @@ def rubikstask(device, batch_size):
     max_nodes = float('inf')
     bias_as_node = False
     initial_weight_stdev = 2.0
-    p_add_neuron = 0.1
-    p_add_connection = 0.3
+    p_add_neuron = 0.03
+    p_add_connection = 0.25
     p_mutate_weight = 0.8
     p_reset_weight = 0.1
     p_reenable_connection = 0.01
@@ -289,8 +289,8 @@ def rubikstask(device, batch_size):
     p_reenable_parent = 0.25
     p_mutate_bias = 0.2
     p_mutate_type = 0.01
-    stdev_mutate_weight = 1.0
-    stdev_mutate_bias = 0.5
+    stdev_mutate_weight = 0.1
+    stdev_mutate_bias = 0.1
     weight_range = (-3.0, 3.0)
 
     distance_excess_weight = 1.0
@@ -310,7 +310,7 @@ def rubikstask(device, batch_size):
                                   distance_weight, initialisation_type, initial_sigma)
 
     # Population parameters
-    population_size = 250
+    population_size = 20
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -318,9 +318,9 @@ def rubikstask(device, batch_size):
     max_cores = 1
 
     compatibility_threshold = 3.0
-    compatibility_threshold_delta = 0.4
-    target_species = 16
-    minimum_elitism_size = 5
+    compatibility_threshold_delta = 0.1
+    target_species = 32
+    minimum_elitism_size = 1
     young_age = 10
     young_multiplier = 1.2
     old_age = 30
@@ -345,10 +345,10 @@ def rubikstask(device, batch_size):
     baldwin = True
 
     # Curriculum settings
-    curriculum = 'Naive'
+    curriculum = 'LBF'
 
     task = RubiksTask(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-    result = population.epoch(evaluator=task, generations=14*6*100, solution=task)
+    result = population.epoch(evaluator=task, generations=14*6*100)
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
     network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
     test_result = test_rubiks(network, max_tries=1000)

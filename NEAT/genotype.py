@@ -247,33 +247,33 @@ class Genotype(object):
             self.add_neuron(maximum_innovation_number, innovations)
 
         # Noio/Stanley use elif here
-        if np.random.rand() < self.p_add_connection:
+        elif np.random.rand() < self.p_add_connection:
             self.add_connection(global_innovation_number, innovations)
             
         # else:
-        for cg in self.connection_genes.values():
-            if np.random.rand() < self.p_mutate_weight:
-                cg[3] += np.random.normal(0.0, self.stdev_mutate_weight)
-                # cg[3] = np.clip(cg[3], self.weight_range[0], self.weight_range[1])
-                # clipping?
-            if np.random.rand() < self.p_reset_weight:
-                cg[3] = np.random.normal(0.0, self.stdev_mutate_weight)
-
-            # bigger chance to disable in this way
-            if np.random.rand() < self.p_reenable_connection:
-                cg[4] = True
-
-            if np.random.rand() < self.p_disable_connection:
-                cg[4] = False
-
-        for neuron_gene in self.neuron_genes[self.inputs:]:
-            if np.random.rand() < self.p_mutate_bias:
-                neuron_gene[2] += np.random.normal(0.0, 1)
-
-                # neuron_gene[2] = np.clip(neuron_gene[2], self.weight_range[0], self.weight_range[1])
-
-            if np.random.rand() < self.p_mutate_type:
-                neuron_gene[1] = random.choice(self.nonlinearities)
+        #     for cg in self.connection_genes.values():
+        #         if np.random.rand() < self.p_mutate_weight:
+        #             cg[3] += np.random.normal(0.0, self.stdev_mutate_weight)
+        #             # cg[3] = np.clip(cg[3], self.weight_range[0], self.weight_range[1])
+        #             # clipping?
+        #         if np.random.rand() < self.p_reset_weight:
+        #             cg[3] = np.random.normal(0.0, self.stdev_mutate_weight)
+        #
+        #         # bigger chance to disable in this way
+        #         if np.random.rand() < self.p_reenable_connection:
+        #             cg[4] = True
+        #
+        #         if np.random.rand() < self.p_disable_connection:
+        #             cg[4] = False
+        #
+        #     for neuron_gene in self.neuron_genes[self.inputs:]:
+        #         if np.random.rand() < self.p_mutate_bias:
+        #             neuron_gene[2] += np.random.normal(0.0, 1)
+        #
+        #             # neuron_gene[2] = np.clip(neuron_gene[2], self.weight_range[0], self.weight_range[1])
+        #
+        #         if np.random.rand() < self.p_mutate_type:
+        #             neuron_gene[1] = random.choice(self.nonlinearities)
 
         return self
         

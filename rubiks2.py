@@ -325,7 +325,7 @@ class RubiksEnv2(gym.Env):
         return side, sign, times, orientation
 
     def step(self, action):
-        action =  int(action)
+        action = int(action)
         assert self.action_space.contains(action), "Invalid action"
         side, sign, times, orientation = self.translate_action(action)
         self.move(side, sign, times, orientation)
@@ -355,9 +355,9 @@ class RubiksEnv2(gym.Env):
         """"""
         emptysymbol = np.chararray((self.size, self.size), unicode=True)
         emptysymbol[:] = '-'
-        matrix = np.vstack((np.hstack((emptysymbol,self.U.astype(int),emptysymbol,emptysymbol)),
-        np.hstack((self.L.astype(int),self.F.astype(int),self.R.astype(int),self.B.astype(int))),
-        np.hstack((emptysymbol,self.D.astype(int),emptysymbol,emptysymbol))))
+        matrix = np.vstack((np.hstack((emptysymbol, self.U.astype(int), emptysymbol, emptysymbol)),
+        np.hstack((self.L.astype(int), self.F.astype(int), self.R.astype(int), self.B.astype(int))),
+        np.hstack((emptysymbol, self.D.astype(int), emptysymbol, emptysymbol))))
 
         print(matrix)
 
