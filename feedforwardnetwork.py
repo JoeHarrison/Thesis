@@ -74,16 +74,28 @@ class WeightLinear(nn.Module):
     def __init__(self, in_features, out_features, weights):
         super(WeightLinear, self).__init__()
         self.linear = nn.Linear(in_features, out_features, bias=False)
+        self.mask = weights != 0
+        self.mask_inverse = weights == 0
+        self.mask_float = self.mask.float()
+
 
         if weights is not None:
             self.linear.weight.data = weights
+            self.linear.weight.register_hook(self.backward_hook)
 
     def forward(self, x):
         return self.linear(x)
 
+    def backward_hook(self, grad):
+
+        grad_out = grad.clone()
+        grad_out[self.mask_inverse] = 0.0
+
+        return grad_out
+
 
 class NeuralNetwork(nn.Module):
-    def __init__(self, genome, batch_size=1, device=torch.device('cpu'), dtype=torch.float32, use_single_activation_function = False):
+    def __init__(self, genome, batch_size=1, device=torch.device('cpu'), dtype=torch.float32, use_single_activation_function=False):
         super(NeuralNetwork, self).__init__()
 
         self.batch_size = batch_size
@@ -105,10 +117,10 @@ class NeuralNetwork(nn.Module):
 
         if self.n_hidden > 0:
             self.n_layers = max([k[3] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys])
-            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad = True)
+            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad=True)
             self.hidden_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.hidden_keys]
 
-        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device, requires_grad = True)
+        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device, requires_grad=True)
         self.output_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.output_keys]
 
         self.input_key_to_idx = {k: i for i, k in enumerate(self.input_keys)}
@@ -183,7 +195,6 @@ class NeuralNetwork(nn.Module):
         self.outputs = torch.zeros(self.batch_size, self.n_outputs, dtype=self.dtype, device=self.device)
 
     def forward(self, x):
-        # inputs = torch.tensor(x, dtype=self.dtype)
         inputs = x.type(self.dtype).to(self.device)
 
         activations_for_output = self.activations
@@ -211,7 +222,7 @@ class NeuralNetwork(nn.Module):
         if self.use_single_activation_function:
             self.outputs = F.relu(output_inputs)
         else:
-            self.outputs = torch.cat(([self.output_activations[i](output_inputs[:, i]).view(-1, 1) for i in range(self.n_outputs)]), dim=1)
+            self.outputs = torch.tanh(torch.cat(([self.output_activations[i](output_inputs[:, i]).view(-1, 1) for i in range(self.n_outputs)]), dim=1))
 
         return self.outputs
 
@@ -226,26 +237,64 @@ class NeuralNetwork(nn.Module):
         return action
 
 if __name__ == "__main__":
-    from naming.namegenerator import NameGenerator
-    from NEAT.genotype import Genotype
+    class Net(nn.Module):
 
-    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
+        def __init__(self):
+            super(Net, self).__init__()
+            self.fc1 = nn.Linear(2,2)
+            self.s1 = nn.Sigmoid()
+            self.fc2 = nn.Linear(2,2)
+            self.s2 = nn.Sigmoid()
+            self.fc1.weight = torch.nn.Parameter(torch.Tensor([[0.0, 0.2],[0.250,0.30]]))
+            self.fc1.bias = torch.nn.Parameter(torch.Tensor([0.35]))
+            self.fc2.weight = torch.nn.Parameter(torch.Tensor([[0.4,0.45],[0.5,0.55]]))
+            self.fc2.bias = torch.nn.Parameter(torch.Tensor([0.6]))
+            self.hook = self.register_backward_hook(self.hook_fn)
 
-    gen = Genotype(new_individual_name, 2, 1)
+        def forward(self, x):
+            x = self.fc1(x)
+            x = self.s1(x)
+            x = self.fc2(x)
+            x = self.s2(x)
+            return x
 
-    gen.neuron_genes = [[0, 'relu', 0.0, 0, 0.0, 1.0], [1, 'relu', 0.0, 0, 1024.0, 1.0], [2,  'relu', 0.0, 2048, 2048.0, 1.0], [3,  'relu', 0.0, 1, 1024.0, 1.0], [4,  'relu', 0.0, 2, 1536.0, 1.0], [5, 'relu', 0.18701591191571043, 1, 512.0, 1.0], [6, 'relu', 0.0, 1, 512.0, 1.0], [7, 'relu', 0.0, 2, 768.0, 1.0]]
+        def hook_fn(self, module, input, output):
+            print(input)
+            self.input = input
+            self.output = output
 
-    gen.connection_genes = {(0, 2): [0, 0, 2, 3.0, False], (1, 2): [1, 1, 2, 3.0, True], (0, 3): [2, 0, 3, 1.3543900040487509, True], (3, 2): [3, 3, 2, -1.7074518345019327, True], (0, 4): [4, 0, 4, 1.6063807318468386, True], (4, 2): [5, 4, 2, 2.7212401858775306, True], (0, 5): [6, 0, 5, 1.2006299281998838, True], (5, 3): [7, 5, 3, -3.0, False], (5, 2): [8, 5, 2, -1.374675084173348, True], (5, 4): [9, 5, 4, 1.1369768644513045, True], (5, 7): [12, 5, 7, -0.18695628785579665, True], (7, 3): [13, 7, 3, 0.5542666714061728, True], (7, 4): [16, 7, 4, -3.0, True], (6, 2): [8, 6, 2, -1.4279939502396626, True]}
+    net = Net()
 
-    net = NeuralNetwork(gen, use_single_activation_function=False)
-    t = time.time()
-    for i in range(10000):
-        output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
-    print(time.time()-t)
+    data = torch.Tensor([0.05, 0.1])
 
-    net = NeuralNetwork(gen, use_single_activation_function=True)
-    t = time.time()
-    for i in range(10000):
-        output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
-    print(time.time()-t)
+    # output of last layer
+    out = net(data)
+    target = torch.Tensor([0.01, 0.99])  # a dummy target, for example
+    criterion = nn.MSELoss()
+    loss = criterion(out, target)
+    loss.backward()
+
+
+    # from naming.namegenerator import NameGenerator
+    # from NEAT.genotype import Genotype
+    #
+    # first_name_generator = NameGenerator('naming/names.csv', 3, 12)
+    # new_individual_name = first_name_generator.generate_name()
+    #
+    # gen = Genotype(new_individual_name, 2, 1)
+    #
+    # gen.neuron_genes = [[0, 'relu', 0.0, 0, 0.0, 1.0], [1, 'relu', 0.0, 0, 1024.0, 1.0], [2,  'relu', 0.0, 2048, 2048.0, 1.0], [3,  'relu', 0.0, 1, 1024.0, 1.0], [4,  'relu', 0.0, 2, 1536.0, 1.0], [5, 'relu', 0.18701591191571043, 1, 512.0, 1.0], [6, 'relu', 0.0, 1, 512.0, 1.0], [7, 'relu', 0.0, 2, 768.0, 1.0]]
+    #
+    # gen.connection_genes = {(0, 2): [0, 0, 2, 3.0, False], (1, 2): [1, 1, 2, 3.0, True], (0, 3): [2, 0, 3, 1.3543900040487509, True], (3, 2): [3, 3, 2, -1.7074518345019327, True], (0, 4): [4, 0, 4, 1.6063807318468386, True], (4, 2): [5, 4, 2, 2.7212401858775306, True], (0, 5): [6, 0, 5, 1.2006299281998838, True], (5, 3): [7, 5, 3, -3.0, False], (5, 2): [8, 5, 2, -1.374675084173348, True], (5, 4): [9, 5, 4, 1.1369768644513045, True], (5, 7): [12, 5, 7, -0.18695628785579665, True], (7, 3): [13, 7, 3, 0.5542666714061728, True], (7, 4): [16, 7, 4, -3.0, True], (6, 2): [8, 6, 2, -1.4279939502396626, True]}
+    #
+    # net = NeuralNetwork(gen, use_single_activation_function=False)
+    # t = time.time()
+    # for i in range(10000):
+    #     output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
+    # print(time.time()-t)
+    #
+    # net = NeuralNetwork(gen, use_single_activation_function=True)
+    # t = time.time()
+    # for i in range(10000):
+    #     output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
+    # print(time.time()-t)

@@ -124,8 +124,8 @@ class Population(object):
             individual = self.genome_factory()
             population.append(individual)
 
-        rando = random.choice(population)
-        rando.rl_training = True
+        # rando = random.choice(population)
+        # rando.rl_training = True
 
         population = self._evaluate_all(population, evaluator)
 
@@ -261,7 +261,7 @@ class Population(object):
             number_neurons = len(self.champions[-1].neuron_genes)
             number_enabled_connections = np.sum([1 for conn in self.champions[-1].connection_genes.values() if conn[4]])
             print("Population's average fitness: %.5f stdev: %.5f" % (np.average(fitness_list), np.std(fitness_list)))
-            print("Best individual: %s %s" % (self.champions[-1].name, self.champions[-1].specie))
+            print("Best individual: %s %s %s" % (self.champions[-1].name, self.champions[-1].specie, id(self.champions[-1])))
             print("Best fitness: %.5f - #neurons: %i - #enabled connections: %i" % (self.champions[-1].stats['fitness'],number_neurons,number_enabled_connections))
             print("Population of %i members in %i species:" % (len(list(self.population)), len(self.species)))
             print("Species         age    size    fitness    stag")
@@ -270,4 +270,3 @@ class Population(object):
                 print("{: >12}    {: >3}    {: >4}    {:.5f}    {: >4}".format(specie.name, specie.age, len(specie.members), specie.max_fitness, specie.stagnation))
             print("Generation time: %.5f seconds" % (time.time()-self.time))
             print("Solved in generation: %s" % (self.solved_at))
-            print(self.current_compatibility_threshold)

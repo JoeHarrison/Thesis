@@ -403,6 +403,49 @@ class RubiksEnv2(gym.Env):
         plt.imshow(image)
         plt.show()
 
+    def render_state(self, state):
+        """"""
+        colordict = {0: [255, 255, 255],
+                     1: [255, 127, 0],
+                     2: [0, 255, 0],
+                     3: [255, 0, 0],
+                     4: [0, 0, 255],
+                     5: [255, 255, 0]}
+
+        factor = 60
+        square = int(factor/self.size)
+        width = factor*4
+        height = factor*3
+
+        raveled_list = []
+        for i in range(0, len(state), 6):
+            raveled_list.append(np.argmax(state[i:i+6]))
+        [state_U, state_L, state_F, state_R, state_B, state_D] = np.array(raveled_list).reshape(6, 2, 2)
+
+
+        image = np.ones((height, width, 3), dtype='uint8')*127
+        for i in range(self.size):
+            for j in range(self.size):
+                # UP
+                image[i*square:(i+1)*square, factor + j*square:factor + (j+1)*square] = colordict[state_U[i, j]]
+
+                # RIGHT
+                image[factor + i*square: factor + (i+1)*square, j*square:(j+1)*square] = colordict[state_L[i, j]]
+
+                # FRONT
+                image[factor + i*square: factor + (i+1)*square, factor + j*square: factor + (j+1)*square] = colordict[state_F[i, j]]
+
+                # Right
+                image[factor + i*square: factor + (i+1)*square, 2*factor + j*square: 2*factor + (j+1)*square] = colordict[state_R[i, j]]
+
+                # Back
+                image[factor + i*square: factor + (i+1)*square, 3*factor + j*square: 3*factor + (j+1)*square] = colordict[state_B[i, j]]
+
+                # DOWN
+                image[2*factor + i*square: 2*factor + (i+1)*square, factor + j*square: factor + (j+1)*square] = colordict[state_D[i, j]]
+        plt.imshow(image)
+        plt.show()
+
     def close(self):
         """"""
         raise NotImplementedError('close not implemented')
@@ -425,7 +468,7 @@ class RubiksEnv2(gym.Env):
         """"""
         sides = [self.U, self.L, self.F, self.R, self.B, self.D]
         if self.pomdp:
-            raveled_cube = np.array([sides[self.orientation[0]],sides[self.orientation[1]],sides[self.orientation[2]]]).ravel()
+            raveled_cube = np.array([sides[self.orientation[0]], sides[self.orientation[1]], sides[self.orientation[2]]]).ravel()
             one_hot = np.eye(6)[raveled_cube]
             return one_hot.reshape(-1)
         else:
@@ -434,12 +477,10 @@ class RubiksEnv2(gym.Env):
 
             return one_hot.reshape(-1)
 
-
-
-
-
 if __name__ == "__main__":
     env = RubiksEnv2(size=2, metric='quarter', pomdp=False, solved_reward=1.0, unsolved_reward=-1.0, seed=None)
     env.force_last_action_reset(7)
+    state = env.get_observation()
     env.render()
+    env.render_state(state)
 

@@ -280,7 +280,7 @@ def rubikstask(device, batch_size):
     max_nodes = float('inf')
     bias_as_node = False
     initial_weight_stdev = 2.0
-    p_add_neuron = 0.03
+    p_add_neuron = 0.1
     p_add_connection = 0.25
     p_mutate_weight = 0.8
     p_reset_weight = 0.1
@@ -297,7 +297,7 @@ def rubikstask(device, batch_size):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type = 'partially_connected'
+    initialisation_type = 'fully_connected'
     initial_sigma = 0.0
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
@@ -310,7 +310,7 @@ def rubikstask(device, batch_size):
                                   distance_weight, initialisation_type, initial_sigma)
 
     # Population parameters
-    population_size = 20
+    population_size = 100
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -345,7 +345,7 @@ def rubikstask(device, batch_size):
     baldwin = True
 
     # Curriculum settings
-    curriculum = 'LBF'
+    curriculum = 'Naive'
 
     task = RubiksTask(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
     result = population.epoch(evaluator=task, generations=14*6*100)
