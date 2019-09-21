@@ -98,7 +98,6 @@ class Population(object):
     def _find_best(self, population, solution = None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
         self.champions[-1].rl_training = True
-
         
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -256,7 +255,7 @@ class Population(object):
     def _status_report(self):
         if self.verbose:
             print("\n****** Running Generation %d ******" % self.generation)
-            print("****** Difficulty %d ******" % self.champions[-1].stats['info'])
+            print("****** Difficulty %s ******" % self.champions[-1].stats['info'])
             fitness_list = np.array([i.stats['fitness'] for i in self.population])
             number_neurons = len(self.champions[-1].neuron_genes)
             number_enabled_connections = np.sum([1 for conn in self.champions[-1].connection_genes.values() if conn[4]])

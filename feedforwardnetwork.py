@@ -18,7 +18,6 @@ def elu(x):
 def tanh(x):
     return torch.tanh(x)
 
-
 def relu(x):
     return F.relu(x)
 
@@ -32,7 +31,6 @@ string_to_activation = {
     'sigmoid': sigmoid,
     'tanh': tanh,
     'elu' : elu
-
 }
 
 def required_for_output(inputs, outputs, connections):
@@ -77,7 +75,6 @@ class WeightLinear(nn.Module):
         self.mask = weights != 0
         self.mask_inverse = weights == 0
         self.mask_float = self.mask.float()
-
 
         if weights is not None:
             self.linear.weight.data = weights
@@ -222,7 +219,7 @@ class NeuralNetwork(nn.Module):
         if self.use_single_activation_function:
             self.outputs = F.relu(output_inputs)
         else:
-            self.outputs = torch.tanh(torch.cat(([self.output_activations[i](output_inputs[:, i]).view(-1, 1) for i in range(self.n_outputs)]), dim=1))
+            self.outputs = torch.cat(([self.output_activations[i](output_inputs[:, i]).view(-1, 1) for i in range(self.n_outputs)]), dim=1)
 
         return self.outputs
 

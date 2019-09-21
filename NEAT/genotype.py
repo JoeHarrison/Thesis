@@ -91,12 +91,12 @@ class Genotype(object):
         if topology is None:
             # Initialise inputs
             for i in range(self.inputs):
-                self.neuron_genes.append([i, random.choice(self.nonlinearities), np.random.randn(), 0, i * 2048])
+                self.neuron_genes.append([i, random.choice(self.nonlinearities), self._initialise_weight(self.inputs), 0, i * 2048])
                 self.input_keys.append(i)
 
             # Initialise outputs
             for i in range(self.outputs):
-                self.neuron_genes.append([len(self.neuron_genes), random.choice(self.nonlinearities), np.random.randn(), self.max_layer, len(self.neuron_genes) * 2048])
+                self.neuron_genes.append([len(self.neuron_genes), random.choice(self.nonlinearities), self._initialise_weight(self.inputs), self.max_layer, len(self.neuron_genes) * 2048])
                 self.output_keys.append(len(self.neuron_genes) - 1)
 
             # All inputs connected with all outputs
@@ -104,23 +104,75 @@ class Genotype(object):
                 innovation_number = 0
                 for i in range(self.inputs):
                     for j in range(self.inputs, self.inputs + self.outputs):
-                        weight = self._initialise_weight()
+                        weight = self._initialise_weight(self.inputs)
                         self.connection_genes[(i, j)] = [innovation_number, i, j, weight, True]
                         innovation_number += 1
+
 
             # All outputs connected to one random input
             if initialisation_type is 'partially_connected':
                 innovation_number = 0
                 for i in range(self.inputs, self.inputs + self.outputs):
                     random_input_neuron = np.random.randint(0, self.inputs)
-                    weight = self._initialise_weight()
+                    weight = self._initialise_weight(self.inputs)
                     self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight, True]
                     innovation_number += 1
+
+            # # Initialise inputs
+            # for i in range(self.inputs):
+            #     self.neuron_genes.append([i, random.choice(self.nonlinearities), self._initialise_weight(self.inputs), 0, i * 2048])
+            #     self.input_keys.append(i)
+            #
+            # for i in range(4096):
+            #     self.neuron_genes.append([len(self.neuron_genes), random.choice(self.nonlinearities), self._initialise_weight(self.inputs), 1, len(self.neuron_genes) * 2048])
+            #
+            # for i in range(2048):
+            #     self.neuron_genes.append([len(self.neuron_genes), random.choice(self.nonlinearities), self._initialise_weight(self.inputs), 2, len(self.neuron_genes) * 2048])
+            #
+            # for i in range(512):
+            #     self.neuron_genes.append([len(self.neuron_genes), random.choice(self.nonlinearities), self._initialise_weight(self.inputs), 3, len(self.neuron_genes) * 2048])
+            #
+            # # Initialise outputs
+            # for i in range(self.outputs):
+            #     self.neuron_genes.append([len(self.neuron_genes), random.choice(self.nonlinearities), self._initialise_weight(self.inputs), self.max_layer, len(self.neuron_genes) * 2048])
+            #     self.output_keys.append(len(self.neuron_genes) - 1)
+            #
+            # # All inputs connected with all outputs
+            # if initialisation_type is 'fully_connected':
+            #     innovation_number = 0
+            #     for i in range(self.inputs):
+            #         for j in range(self.inputs, self.inputs + 4096):
+            #             weight = self._initialise_weight(self.inputs)
+            #             self.connection_genes[(i, j)] = [innovation_number, i, j, weight, True]
+            #             innovation_number += 1
+            #
+            #     for i in range(self.inputs, self.inputs + 4096):
+            #         for j in range(self.inputs + 4096, self.inputs + 4096 + 2048):
+            #             weight = self._initialise_weight(self.inputs)
+            #             self.connection_genes[(i, j)] = [innovation_number, i, j, weight, True]
+            #             innovation_number += 1
+            #
+            #     for i in range(self.inputs + 4096, self.inputs + 4096 + 2048):
+            #         for j in range(self.inputs + 4096 + 2048, self.inputs + 4096 + 2048 + 512):
+            #             weight = self._initialise_weight(self.inputs)
+            #             self.connection_genes[(i, j)] = [innovation_number, i, j, weight, True]
+            #             innovation_number += 1
+            #
+            #     for i in range(self.inputs + 4096 + 2048, self.inputs + 4096 + 2048 + 512):
+            #         for j in range(self.inputs + 4096 + 2048 + 512, self.inputs + 4096 + 2048 + 512 + self.outputs):
+            #             weight = self._initialise_weight(self.inputs)
+            #             self.connection_genes[(i, j)] = [innovation_number, i, j, weight, True]
+            #             innovation_number += 1
+
+
+
+
         else:
             raise NotImplementedError
 
-    def _initialise_weight(self):
-        return np.random.normal(0.0, self.initial_weight_stdev)
+    def _initialise_weight(self, n=144):
+        u = 1/np.sqrt(n)
+        return np.random.uniform(-u, u)
         
     def recombinate(self, other):
         child = deepcopy(self)
@@ -173,6 +225,8 @@ class Genotype(object):
         child.rl_training = False
         child.name = self.name[:3] + other.name[3:]
         return child
+
+
     
     def add_neuron(self, maximum_innovation_number, innovations):
         possible_to_split = self.connection_genes.keys()
@@ -254,7 +308,7 @@ class Genotype(object):
             for cg in self.connection_genes.values():
                 if np.random.rand() < self.p_mutate_weight:
                     cg[3] += np.random.normal(0.0, self.stdev_mutate_weight)
-                    # cg[3] = np.clip(cg[3], self.weight_range[0], self.weight_range[1])
+                    cg[3] = np.clip(cg[3], self.weight_range[0], self.weight_range[1])
                     # clipping?
                 if np.random.rand() < self.p_reset_weight:
                     cg[3] = np.random.normal(0.0, self.stdev_mutate_weight)
@@ -270,7 +324,7 @@ class Genotype(object):
                 if np.random.rand() < self.p_mutate_bias:
                     neuron_gene[2] += np.random.normal(0.0, 1)
 
-                    # neuron_gene[2] = np.clip(neuron_gene[2], self.weight_range[0], self.weight_range[1])
+                    neuron_gene[2] = np.clip(neuron_gene[2], self.weight_range[0], self.weight_range[1])
 
                 if np.random.rand() < self.p_mutate_type:
                     neuron_gene[1] = random.choice(self.nonlinearities)

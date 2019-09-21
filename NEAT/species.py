@@ -13,5 +13,6 @@ class Species(object):
 
     def reset_stagnation(self):
         self.stagnation = 0
+        self.age = 0
         self.max_fitness_previous = 0.0
         self.max_fitness = 0.0

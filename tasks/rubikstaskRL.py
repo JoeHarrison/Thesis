@@ -10,12 +10,12 @@ import numpy as np
 
 class RubiksTask(object):
     def __init__(self, batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum, use_single_activation_function=False):
-        self.criterion = torch.nn.MSELoss()
+        self.criterion = torch.nn.SmoothL1Loss()
         self.batch_size = batch_size
         self.device = device
 
         self.generation = 0
-        self.difficulty = 2
+        self.difficulty = 1
 
         self.set_difficulty_next_gen = False
         self.memory = memory
@@ -23,7 +23,7 @@ class RubiksTask(object):
 
         self.baldwin = baldwin
         self.lamarckism = lamarckism
-        self.memory = ReplayMemory(14*250)
+        self.memory = ReplayMemory(14*10000)
 
         self.use_single_activation_function = use_single_activation_function
 
@@ -65,7 +65,6 @@ class RubiksTask(object):
     def compute_target(self, model, reward, next_state, done):
         return reward + self.discount_factor * model(next_state).max(1)[0] * (1-done)
 
-
     def compute_target_ddqn(self, model, target_model, reward, next_state, done):
         return reward.view(-1, 1) + self.discount_factor * torch.gather(target_model(next_state), 1, model(next_state).max(1)[1].view(-1, 1)) * (1-done).view(-1, 1)
 
@@ -73,9 +72,7 @@ class RubiksTask(object):
         if len(self.memory) < 128:
             return
 
-
-
-        batch, _, _ = self.memory.sample(128, 1, self.device)
+        batch, _, _ = self.memory.sample(32, 1, self.device)
         state, action, next_state, reward, done = zip(*batch)
 
         state = torch.tensor(state, dtype=torch.float32, device=self.device)
@@ -91,23 +88,18 @@ class RubiksTask(object):
         with torch.no_grad():
             target = self.compute_target_ddqn(network, self.target_network, reward, next_state, done).view(-1, 1)
 
-        criterion = nn.MSELoss()
-
-        error = q_val - target
-        error = error.clamp(-1, 1)
-        error = error.pow(2)
-        loss = error.mean()
+        loss = self.criterion(q_val, target)
 
         optimiser.zero_grad()
         loss.backward()
+
         optimiser.step()
-
-
 
         return loss
 
     def backprop(self, network):
-        optimiser = torch.optim.Adam(network.parameters())
+        # optimiser = torch.optim.Adam(network.parameters())
+        optimiser = torch.optim.RMSprop(params=network.parameters(), momentum=0.95, lr=0.0001)
 
         if not self.target_network:
             self.target_network = copy.deepcopy(network)
@@ -119,31 +111,38 @@ class RubiksTask(object):
         epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * np.exp(-1. * frame_idx / epsilon_decay)
 
         for i in range(10000):
-            done = 0
-            tries = 0
-            local_diff = self.curriculum()
-            max_tries = local_diff
-            state = self.env.reset(local_diff)
+            # done = 0
+            # tries = 0
+            # local_diff = self.curriculum()
+            # max_tries = local_diff
+            # state = self.env.reset(local_diff)
+            #
+            # while tries < max_tries and not done:
+            #     network.reset()
+            #     q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
+            #
+            #     if random.random() > epsilon_by_frame(i):
+            #         action = q_values.max(1)[1].view(1, 1).item()
+            #     else:
+            #         action = random.randint(0, 5)
+            #
+            #     next_state, reward, done, info = self.env.step(int(action))
+            #     self.memory.push((state, action, next_state, reward, done))
+            #
+            #     loss = self.b(network, optimiser)
+            #
+            #     state = next_state
+            #     tries += 1
 
-            while tries < max_tries and not done:
-                network.reset()
-                q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
+            loss = self.b(network, optimiser)
 
-                if random.random() > epsilon_by_frame(i):
-                    action = q_values.max(1)[1].view(1, 1).item()
-                else:
-                    action = random.randint(0, 5)
 
-                next_state, reward, done, info = self.env.step(int(action))
-                self.memory.push((state, action, next_state, reward, done))
-                loss = self.b(network, optimiser)
-
-                state = next_state
-                tries += 1
-
-            if i % 100 == 0:
+            if i % 100 == 0 and i > 0:
                 network.reset()
                 self.target_network = copy.deepcopy(network)
+
+
+
 
         return network
 
@@ -158,6 +157,7 @@ class RubiksTask(object):
             t = time.time()
             with torch.no_grad():
                 network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
+                nwa = copy.deepcopy(network)
                 total_done = 0.0
                 for i in range(100):
                     done = 0.0
@@ -184,7 +184,6 @@ class RubiksTask(object):
                 genome.weights_to_genotype(network)
             genome.rl_training = False
 
-
             with torch.no_grad():
                 network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
 
@@ -207,7 +206,7 @@ class RubiksTask(object):
                         tries += 1
 
                     total_done += done
-                print('After: ', total_done)
+                print('After: ', total_done, 'Diff: ', (nwa.input_to_output.linear.weight.data - network.input_to_output.linear.weight.data).abs().sum(), nwa.input_to_output.linear.weight.data.abs().mean(), nwa.input_to_output.linear.weight.data.max(), nwa.input_to_output.linear.weight.data.min(), network.input_to_output.linear.weight.data.abs().mean(), network.input_to_output.linear.weight.data.max(), network.input_to_output.linear.weight.data.min())
 
                 print(time.time()-t, genome.name, str(genome.specie), id(genome))
 
@@ -217,6 +216,7 @@ class RubiksTask(object):
             done = 0.0
             tries = 0
             max_tries = self.difficulty
+            self.env.seed((i+1)*self.difficulty*(generation+1))
             state = self.env.reset(self.difficulty)
 
             while tries < max_tries and not done:
@@ -224,7 +224,7 @@ class RubiksTask(object):
                 q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
                 action = q_values.max(1)[1].view(1, 1).item()
                 next_state, reward, done, info = self.env.step(int(action))
-                # self.memory.push((state, action, next_state, reward, done))
+                self.memory.push((state, action, next_state, reward, done))
                 state = next_state
                 tries += 1
 
