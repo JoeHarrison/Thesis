@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 def evaluate_individual(item):
     (individual, evaluator, generation) = item
+
     if callable(evaluator):
         individual.stats = evaluator(individual, generation)
     elif hasattr(evaluator, 'evaluate'):
@@ -15,6 +16,7 @@ def evaluate_individual(item):
     else:
         raise Exception("Evaluator must be a callable or object" \
                     "with a callable attribute 'evaluate'.")
+
     return individual
 
 class Population(object):
@@ -95,7 +97,7 @@ class Population(object):
         for specie in self.species:
             specie.reset_stagnation()
         
-    def _find_best(self, population, solution = None):
+    def _find_best(self, population, solution=None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
         self.champions[-1].rl_training = True
         

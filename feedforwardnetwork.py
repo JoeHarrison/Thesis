@@ -67,7 +67,6 @@ def dense_from_coo(shape, conns, dtype=torch.float32, device=torch.device('cpu')
 
     return mat
 
-
 class WeightLinear(nn.Module):
     def __init__(self, in_features, out_features, weights):
         super(WeightLinear, self).__init__()
@@ -114,10 +113,10 @@ class NeuralNetwork(nn.Module):
 
         if self.n_hidden > 0:
             self.n_layers = max([k[3] for k in genome.neuron_genes if k[0] not in genome.output_keys and k[0] not in genome.input_keys])
-            self.hidden_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad=True)
+            self.hidden_biases = nn.Parameter(torch.tensor([genome.neuron_genes[k][2] for k in self.hidden_keys], dtype=dtype, device=self.device, requires_grad=True))
             self.hidden_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.hidden_keys]
 
-        self.output_biases = torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device, requires_grad=True)
+        self.output_biases = nn.Parameter(torch.tensor([genome.neuron_genes[k][2] for k in self.output_keys], dtype=dtype, device=self.device, requires_grad=True))
         self.output_activations = [string_to_activation[genome.neuron_genes[k][1]] for k in self.output_keys]
 
         self.input_key_to_idx = {k: i for i, k in enumerate(self.input_keys)}
@@ -196,15 +195,13 @@ class NeuralNetwork(nn.Module):
 
         activations_for_output = self.activations
         if self.n_hidden > 0:
-            #self.n_hidden needs to be n_hidden_layers
-            # for i in range(1):
             for i in range(self.n_layers):
                 hidden_inputs = self.input_to_hidden(inputs) + \
                                   self.hidden_to_hidden(self.activations) + \
                                   self.output_to_hidden(self.outputs) + \
                                   self.hidden_biases
                 if self.use_single_activation_function:
-                    self.activations = F.relu(hidden_inputs)
+                    self.activations = torch.tanh(hidden_inputs)
                 else:
                     self.activations = torch.cat(([self.hidden_activations[i](hidden_inputs[:, i]).view(-1, 1) for i in range(self.n_hidden)]), dim=1)
 
@@ -215,23 +212,14 @@ class NeuralNetwork(nn.Module):
         if self.n_hidden > 0:
             output_inputs += self.hidden_to_output(activations_for_output)
 
-        output_inputs += self.output_biases
+        output_inputs = output_inputs + self.output_biases
+
         if self.use_single_activation_function:
-            self.outputs = F.relu(output_inputs)
+            self.outputs = torch.tanh(output_inputs)
         else:
             self.outputs = torch.cat(([self.output_activations[i](output_inputs[:, i]).view(-1, 1) for i in range(self.n_outputs)]), dim=1)
 
         return self.outputs
-
-    def act(self, state, epsilon, mask, device):
-        if np.random.rand() > epsilon:
-            state = torch.tensor([state], dtype=torch.float32, device=device)
-            mask = torch.tensor([mask], dtype=torch.float32, device=device)
-            q_values = self.forward(state) + mask
-            action = q_values.max(1)[1].view(1, 1).item()
-        else:
-            action = np.random.randint(self.num_actions)
-        return action
 
 if __name__ == "__main__":
     class Net(nn.Module):

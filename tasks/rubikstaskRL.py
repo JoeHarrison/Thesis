@@ -98,17 +98,10 @@ class RubiksTask(object):
         return loss
 
     def backprop(self, network):
-        # optimiser = torch.optim.Adam(network.parameters())
-        optimiser = torch.optim.RMSprop(params=network.parameters(), momentum=0.95, lr=0.0001)
+        optimiser = torch.optim.Adam(network.parameters())
 
-        if not self.target_network:
-            self.target_network = copy.deepcopy(network)
 
-        epsilon_start = 1.0
-        epsilon_final = 0.01
-        epsilon_decay = 500
-
-        epsilon_by_frame = lambda frame_idx: epsilon_final + (epsilon_start - epsilon_final) * np.exp(-1. * frame_idx / epsilon_decay)
+        self.target_network = copy.deepcopy(network)
 
         for i in range(10000):
             # done = 0
@@ -135,7 +128,6 @@ class RubiksTask(object):
             #     tries += 1
 
             loss = self.b(network, optimiser)
-
 
             if i % 100 == 0 and i > 0:
                 network.reset()
@@ -171,7 +163,6 @@ class RubiksTask(object):
                         q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
                         action = q_values.max(1)[1].view(1, 1).item()
                         next_state, reward, done, info = self.env.step(int(action))
-                        # self.memory.push((state, action, next_state, reward, done))
                         state = next_state
                         tries += 1
 
@@ -200,7 +191,6 @@ class RubiksTask(object):
                         q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
                         action = q_values.max(1)[1].view(1, 1).item()
                         next_state, reward, done, info = self.env.step(int(action))
-                        # self.memory.push((state, action, next_state, reward, done))
 
                         state = next_state
                         tries += 1
@@ -239,8 +229,8 @@ class RubiksTask(object):
 
         return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': self.set_difficulty_next_gen}
 
-    def solve(self, network):
+    def solve(self, genome):
         if self.difficulty == 14:
-            return int(self.evaluate(network, self.generation)['fitness'] > 0.95)
+            return int(genome.stats['fitness'] > 0.95)
         else:
             return 0
