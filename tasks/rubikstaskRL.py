@@ -17,7 +17,7 @@ class RubiksTask(object):
         self.generation = 0
         self.difficulty = 1
 
-        self.set_difficulty_next_gen = False
+        self.set_difficulty_next_gen = 0
         self.memory = memory
         self.discount_factor = discount_factor
 
@@ -104,28 +104,26 @@ class RubiksTask(object):
         self.target_network = copy.deepcopy(network)
 
         for i in range(10000):
-            # done = 0
-            # tries = 0
-            # local_diff = self.curriculum()
-            # max_tries = local_diff
-            # state = self.env.reset(local_diff)
-            #
-            # while tries < max_tries and not done:
-            #     network.reset()
-            #     q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
-            #
-            #     if random.random() > epsilon_by_frame(i):
-            #         action = q_values.max(1)[1].view(1, 1).item()
-            #     else:
-            #         action = random.randint(0, 5)
-            #
-            #     next_state, reward, done, info = self.env.step(int(action))
-            #     self.memory.push((state, action, next_state, reward, done))
-            #
-            #     loss = self.b(network, optimiser)
-            #
-            #     state = next_state
-            #     tries += 1
+            done = 0
+            tries = 0
+            local_diff = self.curriculum()
+            max_tries = local_diff
+            state = self.env.reset(local_diff)
+
+            while tries < max_tries and not done:
+                network.reset()
+                q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
+
+                if random.random() > 0.2:
+                    action = q_values.max(1)[1].view(1, 1).item()
+                else:
+                    action = random.randint(0, 5)
+
+                next_state, reward, done, info = self.env.step(int(action))
+                self.memory.push((state, action, next_state, reward, done))
+
+                state = next_state
+                tries += 1
 
             loss = self.b(network, optimiser)
 
@@ -133,101 +131,53 @@ class RubiksTask(object):
                 network.reset()
                 self.target_network = copy.deepcopy(network)
 
-
-
-
         return network
 
     def evaluate(self, genome, generation):
         if generation > self.generation:
-            if self.set_difficulty_next_gen:
+            if self.set_difficulty_next_gen > 5:
                 self.difficulty += 1
-                self.set_difficulty_next_gen = False
+                self.set_difficulty_next_gen = 0
+            self.set_difficulty_next_gen = 0
             self.generation = generation
 
+        network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
+
         if genome.rl_training and self.baldwin:
-            t = time.time()
-            with torch.no_grad():
-                network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
-                nwa = copy.deepcopy(network)
-                total_done = 0.0
-                for i in range(100):
-                    done = 0.0
-                    tries = 0
-                    max_tries = self.difficulty
-                    self.env.seed(i)
-                    state = self.env.reset(self.difficulty)
-
-                    while tries < max_tries and not done:
-                        network.reset()
-                        q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
-                        action = q_values.max(1)[1].view(1, 1).item()
-                        next_state, reward, done, info = self.env.step(int(action))
-                        state = next_state
-                        tries += 1
-
-                    total_done += done
-                print('before: ', total_done)
-
-            network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
             network = self.backprop(network)
             if self.lamarckism:
                 genome.weights_to_genotype(network)
             genome.rl_training = False
 
-            with torch.no_grad():
-                network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
+        with torch.no_grad():
 
-                total_done = 0.0
-                for i in range(100):
-                    done = 0.0
-                    tries = 0
-                    max_tries = self.difficulty
-                    self.env.seed(i)
-                    state = self.env.reset(self.difficulty)
 
-                    while tries < max_tries and not done:
-                        network.reset()
-                        q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
-                        action = q_values.max(1)[1].view(1, 1).item()
-                        next_state, reward, done, info = self.env.step(int(action))
+            total_done = 0.0
+            for i in range(100):
+                done = 0.0
+                tries = 0
+                max_tries = self.difficulty
+                state = self.env.reset(self.difficulty)
 
-                        state = next_state
-                        tries += 1
+                while tries < max_tries and not done:
+                    network.reset()
+                    q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
+                    action = q_values.max(1)[1].view(1, 1).item()
+                    next_state, reward, done, info = self.env.step(int(action))
+                    self.memory.push((state, action, next_state, reward, done))
+                    state = next_state
+                    tries += 1
 
-                    total_done += done
-                print('After: ', total_done, 'Diff: ', (nwa.input_to_output.linear.weight.data - network.input_to_output.linear.weight.data).abs().sum(), nwa.input_to_output.linear.weight.data.abs().mean(), nwa.input_to_output.linear.weight.data.max(), nwa.input_to_output.linear.weight.data.min(), network.input_to_output.linear.weight.data.abs().mean(), network.input_to_output.linear.weight.data.max(), network.input_to_output.linear.weight.data.min())
+                total_done += done
 
-                print(time.time()-t, genome.name, str(genome.specie), id(genome))
+            percentage_solved = total_done/100.0
 
-        network = NeuralNetwork(genome, batch_size=1, device=self.device, use_single_activation_function=self.use_single_activation_function)
-        total_done = 0.0
-        for i in range(100):
-            done = 0.0
-            tries = 0
-            max_tries = self.difficulty
-            self.env.seed((i+1)*self.difficulty*(generation+1))
-            state = self.env.reset(self.difficulty)
+            if percentage_solved >= 0.95:
+                torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
+                torch.save(network, 'models/network_' + genome.name + str(self.difficulty))
+                self.set_difficulty_next_gen += 1
 
-            while tries < max_tries and not done:
-                network.reset()
-                q_values = network(torch.tensor(state, dtype=torch.float32, device=self.device))
-                action = q_values.max(1)[1].view(1, 1).item()
-                next_state, reward, done, info = self.env.step(int(action))
-                self.memory.push((state, action, next_state, reward, done))
-                state = next_state
-                tries += 1
-
-            total_done += done
-
-        percentage_solved = total_done/100.0
-
-        if percentage_solved >= 0.95:
-            torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
-            torch.save(network, 'models/network_' + genome.name + str(self.difficulty))
-            self.set_difficulty_next_gen = True
-
-        return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': self.set_difficulty_next_gen}
+            return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': int(self.set_difficulty_next_gen>5)}
 
     def solve(self, genome):
         if self.difficulty == 14:

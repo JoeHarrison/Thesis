@@ -131,7 +131,7 @@ class Population(object):
         population = self._evaluate_all(population, evaluator)
 
         self._gather_stats(population)
-        
+
         # Speciation
         for specie in self.species:
             # Choose random specie representative for distance comparison
@@ -139,7 +139,7 @@ class Population(object):
             specie.name = specie.representative.specie
             specie.members = []
             specie.age += 1
-            
+
         # Add each individual to a species
         reset_specie_flag = False
         for individual in population:
@@ -168,10 +168,10 @@ class Population(object):
             self.current_compatibility_threshold -= self.compatibility_threshold_delta
         elif len(self.species) > self.target_species:
             self.current_compatibility_threshold += self.compatibility_threshold_delta
-        
+
         # Find champion and check for solution
         self._find_best(population, solution)
-        
+
         # Recombination
         for specie in self.species:
             if specie.max_fitness > specie.max_fitness_previous:
@@ -204,17 +204,15 @@ class Population(object):
         
         # Remove species without offspring
         self.species = list(filter(lambda sp: sp.offspring > 0, self.species))
-
         for specie in self.species:
             specie.members.sort(key=lambda ind: ind.stats['fitness'], reverse=True)
             keep = max(1, int(round(len(specie.members)*self.survival)))
             pool = specie.members[:keep]
-            
+
             if self.elitism and len(specie.members) > self.minimum_elitism_size:
                 specie.members = specie.members[:1]
             else:
                 specie.members = []
-                
             while len(specie.members) < specie.offspring:
                 k = min(len(pool), self.tournament_selection_k)
                 p1 = max(random.sample(pool, k), key=lambda ind: ind.stats['fitness'])
@@ -223,7 +221,7 @@ class Population(object):
                 child = p1.recombinate(p2)
                 child.mutate(innovations=self.innovations, global_innovation_number=self.global_innovation_number)
                 specie.members.append(child)
-                
+
         if self.innovations:
             self.global_innovation_number = max(self.innovations.values())
 

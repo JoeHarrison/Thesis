@@ -2,6 +2,7 @@ import random
 import numpy as np
 from itertools import product
 from copy import deepcopy
+import time
 
 class Genotype(object):
     def __init__(self, 
@@ -181,8 +182,10 @@ class Genotype(object):
             child.neuron_genes.append(deepcopy(neuron_gene))
 
         self_connections = dict(((c[0], c) for c in self.connection_genes.values()))
+
         other_connections = dict(((c[0], c) for c in other.connection_genes.values()))
         if len(self_connections) > 0 or len(other_connections) > 0:
+
             max_innovation_number = max(list(self_connections.keys()) + list(other_connections.keys()))
 
             for i in range(max_innovation_number + 1):
@@ -216,6 +219,7 @@ class Genotype(object):
 
         child.rl_training = False
         child.name = self.name[:3] + other.name[3:]
+
         return child
 
     def add_neuron(self, maximum_innovation_number, innovations):
@@ -321,7 +325,6 @@ class Genotype(object):
 
                 if np.random.rand() < self.hyperparameter_genes['p_mutate_type'][0]:
                     neuron_gene[1] = random.choice(self.nonlinearities)
-
         return self
         
     def distance(self, other):
@@ -354,7 +357,7 @@ class Genotype(object):
                     
         # Average weight differences of matching genes
         w = (w/m) if m > 0 else w
-        
+
         return (self.distance_excess_weight * e +
                 self.distance_disjoint_weight * d +
                 self.distance_weight * w)

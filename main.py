@@ -276,6 +276,7 @@ def rubikstask(device, batch_size):
     # Genotype Parameters
     inputs = 144
     outputs = 6
+    # nonlinearities = ['tanh']
     nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity', 'elu']
     topology = None
     feedforward = True
@@ -300,7 +301,7 @@ def rubikstask(device, batch_size):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type = 'fully_connected'
+    initialisation_type = 'partially_connected'
     initial_sigma = 0.0
 
     genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
@@ -789,7 +790,7 @@ if __name__ == "__main__":
     # Batch size of training and testing
     batch_size = 100
 
-    xortask(device, batch_size)
+    # xortask(device, batch_size)
 
     # first_name_generator = NameGenerator('naming/names.csv', 3, 12)
     # new_individual_name = first_name_generator.generate_name()
@@ -868,3 +869,5 @@ if __name__ == "__main__":
     rubikstask(device, batch_size)
     # hanoitask(device, batch_size)
     # rubikstasktune(device, batch_size)
+
+
