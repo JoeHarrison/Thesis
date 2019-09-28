@@ -178,7 +178,7 @@ class Population_Deep(object):
                 specie.max_fitness_previous = specie.max_fitness
             specie.average_fitness = np.mean([individual.stats['fitness'] for individual in specie.members])
             specie.max_fitness = np.max([individual.stats['fitness'] for individual in specie.members])
-            if specie.max_fitness <= specie.max_fitness_previous:
+            if specie.max_fitness < specie.max_fitness_previous:
                 specie.stagnation += 1
             else:
                 specie.stagnation = 0

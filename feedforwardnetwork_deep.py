@@ -47,7 +47,11 @@ class NeuralNetwork_Deep(nn.Module):
             # Add column if necessary
             difference = self.modules[-1].weight.data.size(1) - node['weights'].size(1)
             if difference > 0:
-                node['weights'] = torch.cat((node['weights'], torch.zeros(node['weights'].size(0), difference)), 1)
+                try:
+                    node['weights'] = torch.cat((node['weights'], torch.zeros(node['weights'].size(0), difference)), 1)
+                except:
+                    print(node['weights'])
+                    print(torch.zeros(node['weights'].size(0), difference))
 
             self.modules[-1].weight.data = node['weights'][:rows, :cols]
 
@@ -62,6 +66,18 @@ class NeuralNetwork_Deep(nn.Module):
                 node['biases'] = torch.cat((node['biases'], torch.zeros(difference)), 0)
 
             self.modules[-1].bias.data = node['biases'][:cols]
+
+    def create_genome_from_network(self):
+        for layer in range(0, len(self.model) - 2, 2):
+            self.nodes[int(layer/2) + 2]['weights'] = self.model[layer].weight.data
+            self.nodes[int(layer/2) + 2]['biases'] = self.model[layer].bias.data
+
+        self.nodes[1]['weights'] = self.model[-2].weight.data
+        self.nodes[1]['biases'] = self.model[-2].bias.data
+
+
+
+        return self.nodes
 
     def create_network(self, genome):
         # Extract sequence and nodes

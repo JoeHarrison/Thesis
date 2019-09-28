@@ -16,7 +16,7 @@ class RubiksTask_Deep(object):
         self.device = device
 
         self.generation = 0
-        self.difficulty = 7
+        self.difficulty = 1
 
         self.set_difficulty_next_gen = 0
         self.memory = memory
@@ -99,11 +99,9 @@ class RubiksTask_Deep(object):
     def backprop(self, network):
         optimiser = torch.optim.Adam(network.parameters())
 
-
         self.target_network = copy.deepcopy(network)
 
         for i in range(1000):
-
             done = 0
             tries = 0
             local_diff = self.curriculum()
@@ -131,53 +129,65 @@ class RubiksTask_Deep(object):
 
         return network
 
-    def evaluate(self, genome, generation):
-        if generation > self.generation:
-            if self.set_difficulty_next_gen > 5:
-                self.difficulty += 1
-                self.set_difficulty_next_gen = 0
-            self.set_difficulty_next_gen = 0
-            self.generation = generation
-
-        network = NeuralNetwork_Deep()
-        network.create_network(genome)
-        network.to(self.device)
-
-        if genome.rl_training:
-            print(id(genome), genome.stats['fitness'])
-            if self.baldwin:
-                network = self.backprop(network)
-            if self.lamarckism:
-                genome.nodes = network.nodes
-            genome.rl_training = False
-
+    def get_solve_percentage(self, network, store_memory):
         with torch.no_grad():
             total_done = 0.0
             for i in range(100):
                 done = 0.0
                 tries = 0
                 max_tries = self.difficulty
+                self.env.seed(i)
                 state = self.env.reset(self.difficulty)
 
                 while tries < max_tries and not done:
                     q_values = network(torch.tensor([state], dtype=torch.float32, device=self.device))
                     action = q_values.max(1)[1].view(1, 1).item()
                     next_state, reward, done, info = self.env.step(int(action))
-                    self.memory.push((state, action, next_state, reward, done))
+                    if store_memory:
+                        self.memory.push((state, action, next_state, reward, done))
                     state = next_state
                     tries += 1
 
                 total_done += done
 
-            percentage_solved = total_done/100.0
+            return total_done/100.0
 
+    def evaluate(self, genome, generation):
+        if generation > self.generation:
+            if self.set_difficulty_next_gen:
+                self.difficulty += 1
+                self.set_difficulty_next_gen = 0
+            self.generation = generation
 
-            if percentage_solved >= 0.95:
-                torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
-                torch.save(network, 'models/network_' + genome.name + str(self.difficulty))
-                self.set_difficulty_next_gen += 1
+        network = NeuralNetwork_Deep()
+        network.create_network(genome)
+        network.to(self.device)
 
-            return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': int(self.set_difficulty_next_gen>5)}
+        before = self.get_solve_percentage(network, True)
+
+        if self.baldwin:
+            network = self.backprop(network)
+        if self.lamarckism:
+            genome.nodes = network.create_genome_from_network()
+
+        after = self.get_solve_percentage(network, True)
+
+        network = NeuralNetwork_Deep()
+        network.create_network(genome)
+        network.to(self.device)
+
+        after2 = self.get_solve_percentage(network, True)
+
+        print(genome.name, genome.specie, len(genome.nodes), [g['num_nodes'] for g in genome.nodes], id(genome), before, after, after2, self.difficulty)
+
+        percentage_solved = self.get_solve_percentage(network, True)
+
+        if percentage_solved >= 0.95:
+            torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
+            torch.save(network, 'models/network_' + genome.name + str(self.difficulty))
+            self.set_difficulty_next_gen += 1
+
+        return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': int(self.set_difficulty_next_gen)}
 
     def solve(self, genome):
         if self.difficulty == 14:
