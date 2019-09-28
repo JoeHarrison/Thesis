@@ -3,8 +3,7 @@ import torch
 import torch.nn as nn
 from feedforwardnetwork import NeuralNetwork
 from reinforcement_learning.replay_memories import ReplayMemory
-import gym_hanoi
-import gym
+from Misc import gym_hanoi
 import copy
 import numpy as np
 

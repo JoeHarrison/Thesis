@@ -2,8 +2,11 @@ import torch
 import torch.nn as nn
 
 from NEAT.genotype import Genotype
+from NEAT.genotype_deep import Genotype_Deep
+from NEAT.population_deep import Population_Deep
 from naming.namegenerator import NameGenerator
 from NEAT.population import Population
+from tasks.rubikstaskRL_deep import RubiksTask_Deep
 from tasks.xortaskcurriculum import XORTaskCurriculum
 from tasks.rubikstaskRL import RubiksTask
 from tasks.hanoitask import HanoiTask
@@ -352,6 +355,91 @@ def rubikstask(device, batch_size):
     curriculum = 'LBF'
 
     task = RubiksTask(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
+    result = population.epoch(evaluator=task, generations=14*6*100)
+    genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
+    network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
+    test_result = test_rubiks(network, max_tries=1000)
+    print(test_result[2])
+
+def deep_rubikstask(device, batch_size):
+    # Initialise name generators for individuals in NEAT population
+    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
+    new_individual_name = first_name_generator.generate_name()
+    surname_generator = NameGenerator('naming/surnames.csv', 3, 12)
+    new_specie_name = surname_generator.generate_name()
+
+    # Genotype Parameters
+    inputs = 144
+    outputs = 6
+    # nonlinearities = ['tanh']
+    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity', 'elu']
+    topology = None
+    feedforward = True
+    max_depth = None
+    max_nodes = float('inf')
+    bias_as_node = False
+    initial_weight_stdev = 0.01
+    p_add_neuron = 0.1
+    p_add_connection = 0.25
+    p_mutate_weight = 0.1
+    p_reset_weight = 0.1
+    p_reenable_connection = 0.01
+    p_disable_connection = 0.01
+    p_reenable_parent = 0.25
+    p_mutate_bias = 0.1
+    p_mutate_type = 0.01
+    stdev_mutate_weight = 0.01
+    stdev_mutate_bias = 0.01
+    weight_range = (-50.0, 50.0)
+
+    distance_excess_weight = 1.0
+    distance_disjoint_weight = 1.0
+    distance_weight = 0.4
+
+    initialisation_type = 'partially_connected'
+    initial_sigma = 0.0
+
+    genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities)
+
+    # Population parameters
+    population_size = 100
+    elitism = True
+    stop_when_solved = True
+    tournament_selection_k = 3
+    verbose = True
+    max_cores = 1
+
+    compatibility_threshold = 3.0
+    compatibility_threshold_delta = 0.1
+    target_species = 32
+    minimum_elitism_size = 1
+    young_age = 10
+    young_multiplier = 1.2
+    old_age = 30
+    old_multiplier = 0.2
+    stagnation_age = 25
+    reset_innovations = False
+    survival = 0.2
+
+    population = Population_Deep(new_specie_name, genome_factory, population_size, elitism, stop_when_solved,
+                            tournament_selection_k, verbose, max_cores, compatibility_threshold,
+                            compatibility_threshold_delta, target_species, minimum_elitism_size,
+                            young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations,
+                            survival)
+
+    # Reinforcement Learning parameters
+    memory = PrioritizedReplayMemory(100000)
+
+    discount_factor = 0.99
+
+    # Task parameters
+    lamarckism = True
+    baldwin = True
+
+    # Curriculum settings
+    curriculum = 'LBF'
+
+    task = RubiksTask_Deep(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
     result = population.epoch(evaluator=task, generations=14*6*100)
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
     network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
@@ -866,7 +954,7 @@ if __name__ == "__main__":
     # print('Number of Generations', generations[np.argmax(combined_losses)])
 
 
-    rubikstask(device, batch_size)
+    deep_rubikstask(device, batch_size)
     # hanoitask(device, batch_size)
     # rubikstasktune(device, batch_size)
 
