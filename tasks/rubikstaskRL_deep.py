@@ -159,7 +159,7 @@ class RubiksTask_Deep(object):
                 self.set_difficulty_next_gen = 0
             self.generation = generation
 
-        network = NeuralNetwork_Deep()
+        network = NeuralNetwork_Deep(self.device)
         network.create_network(genome)
         network.to(self.device)
 
@@ -172,7 +172,7 @@ class RubiksTask_Deep(object):
 
         after = self.get_solve_percentage(network, True)
 
-        network = NeuralNetwork_Deep()
+        network = NeuralNetwork_Deep(self.device)
         network.create_network(genome)
         network.to(self.device)
 

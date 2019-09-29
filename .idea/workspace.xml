@@ -2,14 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3f90390f-ca98-479d-9cf9-3e418e60dc8b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Code.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/joe.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/NEAT/genotype_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype_deep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NEAT/population_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/population_deep.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/feedforwardnetwork_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/feedforwardnetwork_deep.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gym-hanoi/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gym-hanoi/README.md" beforeDir="false" />
@@ -22,8 +14,6 @@
       <change beforePath="$PROJECT_DIR$/gym-hanoi/images/hanoi_problem.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gym-hanoi/setup.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/gym-hanoi/tryout_env.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tasks/hanoitask.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/hanoitask.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -34,11 +24,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/feedforwardnetwork_deep.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="476">
-              <caret line="53" column="74" selection-start-line="53" selection-start-column="74" selection-end-line="53" selection-end-column="74" />
+              <caret line="28" column="28" selection-start-line="28" selection-start-column="28" selection-end-line="28" selection-end-column="28" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -82,11 +72,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tasks/rubikstaskRL_deep.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="164">
-              <caret line="143" selection-start-line="143" selection-end-line="143" />
+            <state relative-caret-position="415">
+              <caret line="174" column="48" selection-start-line="174" selection-start-column="48" selection-end-line="174" selection-end-column="48" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -131,9 +121,9 @@
         <option value="$PROJECT_DIR$/tasks/hanoitask.py" />
         <option value="$PROJECT_DIR$/NEAT/population_deep.py" />
         <option value="$PROJECT_DIR$/main.py" />
-        <option value="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" />
         <option value="$PROJECT_DIR$/NEAT/genotype_deep.py" />
         <option value="$PROJECT_DIR$/feedforwardnetwork_deep.py" />
+        <option value="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" />
       </list>
     </option>
   </component>
@@ -238,13 +228,12 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13171759" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info anchor="bottom" id="Educational.CheckDetails" />
       <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Terminal" weight="0.32912722" />
       <window_info anchor="bottom" id="Python Console" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32912722" />
@@ -263,7 +252,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/feedforwardnetwork_deep.py</url>
-          <line>71</line>
+          <line>68</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
@@ -297,16 +286,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tasks/rubikstaskRL_deep.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="164">
-          <caret line="143" selection-start-line="143" selection-end-line="143" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -330,9 +309,19 @@
     <entry file="file://$PROJECT_DIR$/feedforwardnetwork_deep.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="476">
-          <caret line="53" column="74" selection-start-line="53" selection-start-column="74" selection-end-line="53" selection-end-column="74" />
+          <caret line="28" column="28" selection-start-line="28" selection-start-column="28" selection-end-line="28" selection-end-column="28" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tasks/rubikstaskRL_deep.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="174" column="48" selection-start-line="174" selection-start-column="48" selection-end-line="174" selection-end-column="48" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>

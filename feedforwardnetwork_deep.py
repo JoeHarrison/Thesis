@@ -23,9 +23,10 @@ string_to_activation = {
 }
 
 class NeuralNetwork_Deep(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(NeuralNetwork_Deep, self).__init__()
 
+        self.device = device
         self.modules = []
         self.model = None
 
@@ -42,16 +43,12 @@ class NeuralNetwork_Deep(nn.Module):
             # Add row if necessary
             difference = self.modules[-1].weight.data.size(0) - node['weights'].size(0)
             if difference > 0:
-                node['weights'] = torch.cat((node['weights'], torch.zeros(difference, node['weights'].size(1))), 0)
+                node['weights'] = torch.cat((node['weights'], torch.zeros(difference, node['weights'].size(1), device=self.device)), 0)
 
             # Add column if necessary
             difference = self.modules[-1].weight.data.size(1) - node['weights'].size(1)
             if difference > 0:
-                try:
-                    node['weights'] = torch.cat((node['weights'], torch.zeros(node['weights'].size(0), difference)), 1)
-                except:
-                    print(node['weights'])
-                    print(torch.zeros(node['weights'].size(0), difference))
+                node['weights'] = torch.cat((node['weights'], torch.zeros(node['weights'].size(0), difference, device=self.device)), 1)
 
             self.modules[-1].weight.data = node['weights'][:rows, :cols]
 
@@ -63,7 +60,7 @@ class NeuralNetwork_Deep(nn.Module):
 
             difference = self.modules[-1].bias.data.size(0) - node['biases'].size(0)
             if difference > 0:
-                node['biases'] = torch.cat((node['biases'], torch.zeros(difference)), 0)
+                node['biases'] = torch.cat((node['biases'], torch.zeros(difference, device=self.device)), 0)
 
             self.modules[-1].bias.data = node['biases'][:cols]
 
