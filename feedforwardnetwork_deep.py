@@ -102,4 +102,14 @@ class NeuralNetwork_Deep(nn.Module):
 
         self.model = nn.Sequential(*self.modules)
 
+    def act(self, state, epsilon, mask, device):
+        if np.random.rand() > epsilon:
+            state = torch.tensor([state], dtype=torch.float32, device=device)
+            mask = torch.tensor([mask], dtype=torch.float32, device=device)
+            q_values = self.forward(state) + mask
+            action = q_values.max(1)[1].view(1, 1).item()
+        else:
+            action = np.random.randint(self.num_actions)
+        return action
+
 

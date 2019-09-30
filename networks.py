@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+
 # Classic DQN. Increase_capacity method adds new nodes to layers according to increment
 # TODO: decrease capacity does not work as of yet
 
@@ -36,41 +37,41 @@ class DQN(nn.Module):
         bias = self.layers[0].bias.data
         weight = self.layers[0].weight.data
         self.layers[0] = nn.Linear(self.num_inputs, self.hidden[0])
-        if increment[0]>0:
-            self.layers[0].weight.data[0:-increment[0],:] = weight
+        if increment[0] > 0:
+            self.layers[0].weight.data[0:-increment[0], :] = weight
             self.layers[0].bias.data[0:-increment[0]] = bias
         else:
-            self.layers[0].weight.data[0:,:] = weight
+            self.layers[0].weight.data[0:, :] = weight
             self.layers[0].weight.data = bias
 
         for i in range(1, len(self.layers) - 1):
             bias = self.layers[i].bias.data
             weight = self.layers[i].weight.data
-            self.layers[i] = nn.Linear(self.hidden[i-1], self.hidden[i])
+            self.layers[i] = nn.Linear(self.hidden[i - 1], self.hidden[i])
             if increment[i] > 0:
-                if increment[i-1] >0:
+                if increment[i - 1] > 0:
                     self.layers[i].bias.data[0:-increment[i]] = bias
-                    self.layers[i].weight.data[0:-increment[i],0:-increment[i-1]] = weight
+                    self.layers[i].weight.data[0:-increment[i], 0:-increment[i - 1]] = weight
                 else:
                     self.layers[i].bias.data[0:-increment[i]] = bias
-                    self.layers[i].weight.data[0:-increment[i],0:] = weight
+                    self.layers[i].weight.data[0:-increment[i], 0:] = weight
             else:
-                if increment[i-1] >0:
+                if increment[i - 1] > 0:
                     self.layers[i].bias.data = bias
-                    self.layers[i].weight.data[0:,0:-increment[i-1]] = weight
+                    self.layers[i].weight.data[0:, 0:-increment[i - 1]] = weight
                 else:
                     self.layers[i].bias.data = bias
-                    self.layers[i].weight.data[0:,0:] = weight
+                    self.layers[i].weight.data[0:, 0:] = weight
 
         bias = self.layers[-1].bias.data
         weight = self.layers[-1].weight.data
         self.layers[-1] = nn.Linear(self.hidden[-1], self.num_actions)
-        if increment[-1] >0:
+        if increment[-1] > 0:
             self.layers[-1].bias.data = bias
-            self.layers[-1].weight.data[:,0:-increment[-1]] = weight
+            self.layers[-1].weight.data[:, 0:-increment[-1]] = weight
         else:
             self.layers[-1].bias.data = bias
-            self.layers[-1].weight.data[:,0:] = weight
+            self.layers[-1].weight.data[:, 0:] = weight
 
     def act(self, state, epsilon, mask, device):
         if np.random.rand() > epsilon:
@@ -81,6 +82,7 @@ class DQN(nn.Module):
         else:
             action = np.random.randint(self.num_actions)
         return action
+
 
 class DuelingDQN(nn.Module):
     def __init__(self, num_inputs, hidden, num_actions, non_linearity):
@@ -108,7 +110,6 @@ class DuelingDQN(nn.Module):
 
     def forward(self, x):
         for i in range(len(self.sharedLayers)):
-
             x = self.non_linearity(self.sharedLayers[i](x))
 
         a = self.non_linearity(self.adv1(x))
@@ -121,7 +122,6 @@ class DuelingDQN(nn.Module):
 
     def policy(self, x):
         for i in range(len(self.sharedLayers)):
-
             x = self.non_linearity(self.sharedLayers[i](x))
 
         a = self.non_linearity(self.adv1(x))
@@ -129,9 +129,8 @@ class DuelingDQN(nn.Module):
 
         return a
 
-    def  value(self, x):
+    def value(self, x):
         for i in range(len(self.sharedLayers)):
-
             x = self.non_linearity(self.sharedLayers[i](x))
 
         v = self.non_linearity(self.v1(x))
@@ -149,26 +148,26 @@ class DuelingDQN(nn.Module):
             weight = self.sharedLayers[0].weight.data
             self.sharedLayers[0] = nn.Linear(self.num_inputs, self.hidden[0])
             self.sharedLayers[0].bias.data[0:-increment[0]] = bias
-            self.sharedLayers[0].weight.data[0:-increment[0],:] = weight
+            self.sharedLayers[0].weight.data[0:-increment[0], :] = weight
 
         for i in range(1, len(self.sharedLayers)):
             bias = self.sharedLayers[i].bias.data
             weight = self.sharedLayers[i].weight.data
-            self.sharedLayers[i] = nn.Linear(self.hidden[i-1], self.hidden[i])
+            self.sharedLayers[i] = nn.Linear(self.hidden[i - 1], self.hidden[i])
             if increment[i] > 0:
-                if increment[i-1] > 0:
+                if increment[i - 1] > 0:
                     self.sharedLayers[i].bias.data[0:-increment[i]] = bias
-                    self.sharedLayers[i].weight.data[0:-increment[i],0:-increment[i-1]] = weight
+                    self.sharedLayers[i].weight.data[0:-increment[i], 0:-increment[i - 1]] = weight
                 else:
                     self.sharedLayers[i].bias.data[0:-increment[i]] = bias
-                    self.sharedLayers[i].weight.data[0:-increment[i],0:] = weight
+                    self.sharedLayers[i].weight.data[0:-increment[i], 0:] = weight
             else:
-                if increment[i-1] > 0:
+                if increment[i - 1] > 0:
                     self.sharedLayers[i].bias.data = bias
-                    self.sharedLayers[i].weight.data[0:,0:-increment[i-1]] = weight
+                    self.sharedLayers[i].weight.data[0:, 0:-increment[i - 1]] = weight
                 else:
                     self.sharedLayers[i].bias.data = bias
-                    self.sharedLayers[i].weight.data[0:,0:] = weight
+                    self.sharedLayers[i].weight.data[0:, 0:] = weight
 
         bias_adv1 = self.adv1.bias.data
         weight_adv1 = self.adv1.weight.data
@@ -180,25 +179,25 @@ class DuelingDQN(nn.Module):
         if increment[-1] > 0:
             if increment[-2] > 0:
                 self.adv1.bias.data[0:-increment[-1]] = bias_adv1
-                self.adv1.weight.data[0:-increment[-1],0:-increment[-2]] = weight_adv1
+                self.adv1.weight.data[0:-increment[-1], 0:-increment[-2]] = weight_adv1
                 self.v1.bias.data[0:-increment[-1]] = bias_v1
-                self.v1.weight.data[0:-increment[-1],0:-increment[-2]] = weight_v1
+                self.v1.weight.data[0:-increment[-1], 0:-increment[-2]] = weight_v1
             else:
                 self.adv1.bias.data[0:-increment[-1]] = bias_adv1
-                self.adv1.weight.data[0:-increment[-1],0:] = weight_adv1
+                self.adv1.weight.data[0:-increment[-1], 0:] = weight_adv1
                 self.v1.bias.data[0:-increment[-1]] = bias_v1
-                self.v1.weight.data[0:-increment[-1],0:] = weight_v1
+                self.v1.weight.data[0:-increment[-1], 0:] = weight_v1
         else:
             if increment[-2] > 0:
                 self.adv1.bias.data = bias_adv1
-                self.adv1.weight.data[0:,0:-increment[-2]] = weight_adv1
+                self.adv1.weight.data[0:, 0:-increment[-2]] = weight_adv1
                 self.v1.bias.data = bias_v1
-                self.v1.weight.data[0:,0:-increment[-2]] = weight_v1
+                self.v1.weight.data[0:, 0:-increment[-2]] = weight_v1
             else:
                 self.adv1.bias.data = bias_adv1
-                self.adv1.weight.data[0:,0:] = weight_adv1
+                self.adv1.weight.data[0:, 0:] = weight_adv1
                 self.v1.bias.data = bias_v1
-                self.v1.weight.data[0:,0:] = weight_v1
+                self.v1.weight.data[0:, 0:] = weight_v1
 
         bias_adv2 = self.adv2.bias.data
         weight_adv2 = self.adv2.weight.data
@@ -210,14 +209,14 @@ class DuelingDQN(nn.Module):
 
         if increment[-1] > 0:
             self.adv2.bias.data = bias_adv2
-            self.adv2.weight.data[:,0:-increment[-1]] = weight_adv2
+            self.adv2.weight.data[:, 0:-increment[-1]] = weight_adv2
             self.v2.bias.data = bias_v2
-            self.v2.weight.data[:,0:-increment[-1]] = weight_v2
+            self.v2.weight.data[:, 0:-increment[-1]] = weight_v2
         else:
             self.adv2.bias.data = bias_adv2
-            self.adv2.weight.data[:,0:] = weight_adv2
+            self.adv2.weight.data[:, 0:] = weight_adv2
             self.v2.bias.data = bias_v2
-            self.v2.weight.data[:,0:] = weight_v2
+            self.v2.weight.data[:, 0:] = weight_v2
 
     def act(self, state, epsilon, mask, device):
         if np.random.rand() > epsilon:
@@ -226,9 +225,8 @@ class DuelingDQN(nn.Module):
             q_values = self.forward(state) + mask
             action = q_values.max(1)[1].view(1, 1).item()
         else:
-            action =  np.random.randint(self.num_actions)
+            action = np.random.randint(self.num_actions)
         return action
-
 
 
 class DuelingDQNHER(nn.Module):
@@ -257,7 +255,6 @@ class DuelingDQNHER(nn.Module):
 
     def forward(self, state, ):
         for i in range(len(self.sharedLayers)):
-
             x = self.non_linearity(self.sharedLayers[i](x))
 
         a = self.non_linearity(self.adv1(x))
@@ -276,21 +273,21 @@ class DuelingDQNHER(nn.Module):
         if increment[0] > 0:
             weight = self.sharedLayers[0].weight.data
             self.sharedLayers[0] = nn.Linear(self.num_inputs, self.hidden[0])
-            self.sharedLayers[0].weight.data[0:-increment[0],:] = weight
+            self.sharedLayers[0].weight.data[0:-increment[0], :] = weight
 
         for i in range(1, len(self.sharedLayers)):
             weight = self.sharedLayers[i].weight.data
-            self.sharedLayers[i] = nn.Linear(self.hidden[i-1], self.hidden[i])
+            self.sharedLayers[i] = nn.Linear(self.hidden[i - 1], self.hidden[i])
             if increment[i] > 0:
-                if increment[i-1] > 0:
-                    self.sharedLayers[i].weight.data[0:-increment[i],0:-increment[i-1]] = weight
+                if increment[i - 1] > 0:
+                    self.sharedLayers[i].weight.data[0:-increment[i], 0:-increment[i - 1]] = weight
                 else:
-                    self.sharedLayers[i].weight.data[0:-increment[i],0:] = weight
+                    self.sharedLayers[i].weight.data[0:-increment[i], 0:] = weight
             else:
-                if increment[i-1] > 0:
-                        self.sharedLayers[i].weight.data[0:,0:-increment[i-1]] = weight
+                if increment[i - 1] > 0:
+                    self.sharedLayers[i].weight.data[0:, 0:-increment[i - 1]] = weight
                 else:
-                    self.sharedLayers[i].weight.data[0:,0:] = weight
+                    self.sharedLayers[i].weight.data[0:, 0:] = weight
 
         weight_adv1 = self.adv1.weight.data
         self.adv1 = nn.Linear(self.hidden[-2], self.hidden[-1])
@@ -299,18 +296,18 @@ class DuelingDQNHER(nn.Module):
         self.v1 = nn.Linear(self.hidden[-2], self.hidden[-1])
         if increment[-1] > 0:
             if increment[-2] > 0:
-                self.adv1.weight.data[0:-increment[-1],0:-increment[-2]] = weight_adv1
-                self.v1.weight.data[0:-increment[-1],0:-increment[-2]] = weight_v1
+                self.adv1.weight.data[0:-increment[-1], 0:-increment[-2]] = weight_adv1
+                self.v1.weight.data[0:-increment[-1], 0:-increment[-2]] = weight_v1
             else:
-                self.adv1.weight.data[0:-increment[-1],0:] = weight_adv1
-                self.v1.weight.data[0:-increment[-1],0:] = weight_v1
+                self.adv1.weight.data[0:-increment[-1], 0:] = weight_adv1
+                self.v1.weight.data[0:-increment[-1], 0:] = weight_v1
         else:
             if increment[-2] > 0:
-                self.adv1.weight.data[0:,0:-increment[-2]] = weight_adv1
-                self.v1.weight.data[0:,0:-increment[-2]] = weight_v1
+                self.adv1.weight.data[0:, 0:-increment[-2]] = weight_adv1
+                self.v1.weight.data[0:, 0:-increment[-2]] = weight_v1
             else:
-                self.adv1.weight.data[0:,0:] = weight_adv1
-                self.v1.weight.data[0:,0:] = weight_v1
+                self.adv1.weight.data[0:, 0:] = weight_adv1
+                self.v1.weight.data[0:, 0:] = weight_v1
 
         weight_adv2 = self.adv2.weight.data
         self.adv2 = nn.Linear(self.hidden[-1], self.num_actions)
@@ -319,11 +316,11 @@ class DuelingDQNHER(nn.Module):
         self.v2 = nn.Linear(self.hidden[-1], 1)
 
         if increment[-1] > 0:
-            self.adv2.weight.data[:,0:-increment[-1]] = weight_adv2
-            self.v2.weight.data[:,0:-increment[-1]] = weight_v2
+            self.adv2.weight.data[:, 0:-increment[-1]] = weight_adv2
+            self.v2.weight.data[:, 0:-increment[-1]] = weight_v2
         else:
-            self.adv2.weight.data[:,0:] = weight_adv2
-            self.v2.weight.data[:,0:] = weight_v2
+            self.adv2.weight.data[:, 0:] = weight_adv2
+            self.v2.weight.data[:, 0:] = weight_v2
 
     def act(self, state, epsilon, mask):
         if np.random.rand() > epsilon:
@@ -332,5 +329,5 @@ class DuelingDQNHER(nn.Module):
             q_values = self.forward(state) + mask
             action = q_values.max(1)[1].view(1, 1).item()
         else:
-            action =  np.random.randint(self.num_actions)
+            action = np.random.randint(self.num_actions)
         return action

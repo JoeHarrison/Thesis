@@ -46,14 +46,15 @@ def maxDistance(arr):
 
     return maxDict, maxFirst_idx
 
-def test_rubiks(network, max_tries=None):
+def test_rubiks(network, device, max_tries=None):
+    network = torch.load('models/network_Palme6')
+
     solve_rate_superflip = np.zeros(14)
     counts_superflip = np.zeros(14)
     seq_len_superflip = np.zeros(14)
     seq_len_superflip_heur = np.zeros(14)
     puzzles = []
     solution_sequences = []
-
 
     try:
         for i in range(14):
@@ -90,8 +91,7 @@ def test_rubiks(network, max_tries=None):
 
                     solution_sequence = []
                     state_hash_seq = []
-
-                    while time.time()-t<1.21 and not done and not stop:
+                    while time.time()-t < 1.21 and not done and not stop:
                         mask = hashes[hash(state.tostring())]
                         state_hash_seq.append(hash(state.tostring()))
                         action = network.act(state, 0.0, mask, device)
@@ -401,7 +401,7 @@ def deep_rubikstask(device, batch_size):
     genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities)
 
     # Population parameters
-    population_size = 25
+    population_size = 100
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -410,13 +410,13 @@ def deep_rubikstask(device, batch_size):
 
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.1
-    target_species = 32
+    target_species = 10
     minimum_elitism_size = 1
     young_age = 10
     young_multiplier = 1.2
     old_age = 30
     old_multiplier = 0.2
-    stagnation_age = 25
+    stagnation_age = 10
     reset_innovations = False
     survival = 0.2
 
@@ -436,10 +436,10 @@ def deep_rubikstask(device, batch_size):
     baldwin = True
 
     # Curriculum settings
-    curriculum = 'LBF'
+    curriculum = 'Naive'
 
     task = RubiksTask_Deep(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-    result = population.epoch(evaluator=task, generations=14*6*100)
+    result = population.epoch(evaluator=task, generations=50)
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
     network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
     test_result = test_rubiks(network, max_tries=1000)
@@ -787,6 +787,9 @@ if __name__ == "__main__":
     print('Using %s' % device)
     if device.type == 'cuda':
         print(torch.cuda.get_device_name(0))
+    # #
+    # test_result = test_rubiks(1, device, max_tries=1000)
+    # print(test_result[2])
 
     # Batch size of training and testing
     batch_size = 100

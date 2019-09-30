@@ -182,7 +182,7 @@ class RubiksTask_Deep(object):
 
         percentage_solved = self.get_solve_percentage(network, True)
 
-        if percentage_solved >= 0.95:
+        if percentage_solved >= 0.99:
             torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
             torch.save(network, 'models/network_' + genome.name + str(self.difficulty))
             self.set_difficulty_next_gen += 1
@@ -191,6 +191,6 @@ class RubiksTask_Deep(object):
 
     def solve(self, genome):
         if self.difficulty == 14:
-            return int(genome.stats['fitness'] > 0.95)
+            return int(genome.stats['fitness'] > 0.99)
         else:
             return 0
