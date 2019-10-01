@@ -4,9 +4,8 @@
     <list default="true" id="0af60f52-46d3-4cf9-9813-60777f80b172" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feedforwardnetwork_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/feedforwardnetwork_deep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/genotype_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype_deep.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/networks.py" beforeDir="false" afterPath="$PROJECT_DIR$/networks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -30,7 +29,7 @@
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/NEAT" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>

@@ -24,7 +24,7 @@ class RubiksTask_Deep(object):
 
         self.baldwin = baldwin
         self.lamarckism = lamarckism
-        self.memory = ReplayMemory(14*10000)
+        self.memory = ReplayMemory(14*100000)
 
         self.use_single_activation_function = use_single_activation_function
 
@@ -132,7 +132,7 @@ class RubiksTask_Deep(object):
     def get_solve_percentage(self, network, store_memory):
         with torch.no_grad():
             total_done = 0.0
-            for i in range(100):
+            for i in range(1000):
                 done = 0.0
                 tries = 0
                 max_tries = self.difficulty
@@ -150,7 +150,7 @@ class RubiksTask_Deep(object):
 
                 total_done += done
 
-            return total_done/100.0
+            return total_done/1000.0
 
     def evaluate(self, genome, generation):
         if generation > self.generation:
@@ -163,24 +163,14 @@ class RubiksTask_Deep(object):
         network.create_network(genome)
         network.to(self.device)
 
-        before = self.get_solve_percentage(network, True)
-
         if self.baldwin:
             network = self.backprop(network)
         if self.lamarckism:
             genome.nodes = network.create_genome_from_network()
 
-        after = self.get_solve_percentage(network, True)
-
-        network = NeuralNetwork_Deep(self.device)
-        network.create_network(genome)
-        network.to(self.device)
-
-        after2 = self.get_solve_percentage(network, True)
-
-        print(genome.name, genome.specie, len(genome.nodes), [g['num_nodes'] for g in genome.nodes], id(genome), before, after, after2, self.difficulty)
-
         percentage_solved = self.get_solve_percentage(network, True)
+
+        print(genome.name, genome.specie, percentage_solved)
 
         if percentage_solved >= 0.99:
             torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
