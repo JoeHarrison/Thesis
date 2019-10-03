@@ -401,7 +401,7 @@ def deep_rubikstask(device, batch_size):
     genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities)
 
     # Population parameters
-    population_size = 4
+    population_size = 100
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3

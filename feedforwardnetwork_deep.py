@@ -29,78 +29,98 @@ class NeuralNetwork_Deep(nn.Module):
         self.device = device
         self.modules = []
         self.model = None
+        self.nodes = None
+        self.connections = None
 
     def forward(self, x):
-        return self.model(x)
+        intermediate_inputs = {}
 
-    def apply_weights(self, node):
-        if node['weights'] is None:
-            node['weights'] = self.modules[-1].weight.data
+        # All enabled connections from the input
+        conn_mods = [(input_node, output_node) for (input_node, output_node) in self.connections.keys()
+                     if input_node == 0 and self.connections[(input_node, output_node)][3]]
+
+        for conn in conn_mods:
+            input_neuron, output_neuron = conn
+            intermediate_inputs[output_neuron] = self.activ[str(conn)](self.conn[str(conn)](x))
+
+        copy_nodes = copy.deepcopy(self.nodes)
+        copy_nodes.sort(key=lambda k: k['fforder'])
+        for node in copy_nodes[1:]:
+            node_id = node['node_id']
+
+            # Retrieve all connection modules that share the same input node and are enabled
+            conn_mods = [(input_node, output_node) for (input_node, output_node) in self.connections.keys()
+                         if input_node == node_id and self.connections[(input_node, output_node)][3]]
+
+            for conn in conn_mods:
+                input_neuron, output_neuron = conn
+
+                if output_neuron not in intermediate_inputs.keys():
+                    intermediate_inputs[output_neuron] = self.conn[str(conn)](intermediate_inputs[(input_neuron)])
+                else:
+                    # If input for upcoming node already exists: add the inputs together
+                    intermediate_inputs[output_neuron] += self.conn[str(conn)](intermediate_inputs[(input_neuron)])
+
+        return intermediate_inputs[1]
+
+    def apply_weights(self, connection):
+        if self.connections[connection][4] is None:
+            self.connections[connection][4] = self.conn[str(connection)].weight.data
         else:
-            rows = self.modules[-1].weight.data.size(0)
-            cols = self.modules[-1].weight.data.size(1)
+            rows = self.conn[str(connection)].weight.data.size(0)
+            cols = self.conn[str(connection)].weight.data.size(1)
 
             # Add row if necessary
-            difference = self.modules[-1].weight.data.size(0) - node['weights'].size(0)
+            difference = rows - self.connections[connection][4].size(0)
             if difference > 0:
-                node['weights'] = torch.cat((node['weights'], torch.zeros(difference, node['weights'].size(1), device=self.device)), 0)
+                self.connections[connection][4] = torch.cat((self.connections[connection][4], torch.zeros(difference, self.connections[connection][4].size(1), device=self.device)), 0)
 
             # Add column if necessary
-            difference = self.modules[-1].weight.data.size(1) - node['weights'].size(1)
+            difference = cols - self.connections[connection][4].size(1)
             if difference > 0:
-                node['weights'] = torch.cat((node['weights'], torch.zeros(node['weights'].size(0), difference, device=self.device)), 1)
+                self.connections[connection][4] = torch.cat((self.connections[connection][4], torch.zeros(self.connections[connection][4].size(0), difference, device=self.device)), 1)
 
-            self.modules[-1].weight.data = node['weights'][:rows, :cols]
+            self.conn[str(connection)].weight.data = self.connections[connection][4][:rows, :cols]
 
-    def apply_bias(self, node):
-        if node['biases'] is None:
-            node['biases'] = self.modules[-1].bias.data
+    def apply_bias(self, connection):
+        if self.connections[connection][5] is None:
+            self.connections[connection][5] = self.conn[str(connection)].bias.data
         else:
-            cols = self.modules[-1].bias.data.size(0)
+            cols = self.conn[str(connection)].bias.data.size(0)
 
-            difference = self.modules[-1].bias.data.size(0) - node['biases'].size(0)
+            difference = cols - self.connections[connection][5].size(0)
             if difference > 0:
-                node['biases'] = torch.cat((node['biases'], torch.zeros(difference, device=self.device)), 0)
+                self.connections[connection][5] = torch.cat((self.connections[connection][5], torch.zeros(difference, device=self.device)), 0)
 
-            self.modules[-1].bias.data = node['biases'][:cols]
+            self.conn[str(connection)].bias.data = self.connections[connection][5][:cols]
 
     def create_genome_from_network(self):
-        for layer in range(0, len(self.model) - 2, 2):
-            self.nodes[int(layer/2) + 2]['weights'] = self.model[layer].weight.data
-            self.nodes[int(layer/2) + 2]['biases'] = self.model[layer].bias.data
+        for connection in self.connections.keys():
+            if self.connections[connection][3]:
+                self.connections[connection][4] = self.conn[str(connection)].weight.data
+                self.connections[connection][5] = self.conn[str(connection)].bias.data
 
-        self.nodes[1]['weights'] = self.model[-2].weight.data
-        self.nodes[1]['biases'] = self.model[-2].bias.data
-
-
-
-        return self.nodes
+        return self.connections
 
     def create_network(self, genome):
-        # Extract sequence and nodes
-        self.nodes = genome.nodes
+        self.nodes = copy.deepcopy(genome.nodes)
 
-        # Keep track of the size of the previous layer
-        previous_input_size = self.nodes[0]['num_nodes']
+        self.connections = genome.connections
 
-        # 0 and 1 are reserved for the input and output layer and are fixed
-        for i in range(2, len(self.nodes)):
-            self.modules.append(nn.Linear(previous_input_size, self.nodes[i]['num_nodes']))
+        # Initialise separate Module dictionaries for the connection weights and activations
+        self.conn = nn.ModuleDict({})
+        self.activ = nn.ModuleDict({})
 
-            self.apply_weights(self.nodes[i])
-            self.apply_bias(self.nodes[i])
+        for connection in self.connections.keys():
+            if not self.connections[connection][3]:
+                continue
 
-            self.modules.append(string_to_activation[self.nodes[i]['activation_function']])
-            previous_input_size = self.nodes[i]['num_nodes']
+            input_neuron, output_neuron = connection
 
-        self.modules.append(nn.Linear(previous_input_size, self.nodes[1]['num_nodes']))
-
-        self.apply_weights(self.nodes[1])
-        self.apply_bias(self.nodes[1])
-
-        self.modules.append(string_to_activation[self.nodes[1]['activation_function']])
-
-        self.model = nn.Sequential(*self.modules)
+            self.conn[str(connection)] = nn.Linear(self.nodes[input_neuron]['num_nodes'], self.nodes[output_neuron]['num_nodes'])
+            self.activ[str(connection)] = string_to_activation[self.nodes[output_neuron]['activation_function']]
+            self.apply_weights(connection)
+            self.apply_bias(connection)
 
     def act(self, state, epsilon, mask, device):
         if np.random.rand() > epsilon:
@@ -111,5 +131,4 @@ class NeuralNetwork_Deep(nn.Module):
         else:
             action = np.random.randint(self.num_actions)
         return action
-
 

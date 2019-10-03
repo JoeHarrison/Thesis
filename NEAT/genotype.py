@@ -4,35 +4,36 @@ from itertools import product
 from copy import deepcopy
 import time
 
+
 class Genotype(object):
-    def __init__(self, 
+    def __init__(self,
                  new_individual_name,
                  inputs=144,
                  outputs=12,
                  nonlinearities=['tanh', 'relu', 'sigmoid', 'identity'],
-                 topology = None,
-                 feedforward = True,
-                 max_depth = None,
-                 max_nodes = float('inf'),
-                 initial_weight_stdev = 2.0,
-                 bias_as_node = False,
-                 p_add_neuron = 0.03,
-                 p_add_connection = 0.3,
-                 p_mutate_weight = 0.8,
-                 p_reset_weight = 0.1,
-                 p_reenable_connection = 0.01,
-                 p_disable_connection = 0.01,
-                 p_reenable_parent = 0.25,
-                 p_mutate_bias = 0.2,
-                 p_mutate_type = 0.2,
-                 stdev_mutate_weight = 1.5,
-                 stdev_mutate_bias = 0.5,
-                 weight_range = (-50.,50.),
-                 distance_excess_weight = 1.0,
-                 distance_disjoint_weight = 1.0,
-                 distance_weight = 0.4,
+                 topology=None,
+                 feedforward=True,
+                 max_depth=None,
+                 max_nodes=float('inf'),
+                 initial_weight_stdev=2.0,
+                 bias_as_node=False,
+                 p_add_neuron=0.03,
+                 p_add_connection=0.3,
+                 p_mutate_weight=0.8,
+                 p_reset_weight=0.1,
+                 p_reenable_connection=0.01,
+                 p_disable_connection=0.01,
+                 p_reenable_parent=0.25,
+                 p_mutate_bias=0.2,
+                 p_mutate_type=0.2,
+                 stdev_mutate_weight=1.5,
+                 stdev_mutate_bias=0.5,
+                 weight_range=(-50., 50.),
+                 distance_excess_weight=1.0,
+                 distance_disjoint_weight=1.0,
+                 distance_weight=0.4,
                  initialisation_type='partially_connected',
-                 initial_sigma = 0.01):
+                 initial_sigma=0.01):
 
         self.name = next(new_individual_name)
         self.specie = None
@@ -96,7 +97,8 @@ class Genotype(object):
         self.hyperparameter_genes['p_mutate_type'] = [self.p_mutate_type, self.initial_sigma, True]
 
         self.hyperparameter_genes['distance_excess_weight'] = [self.distance_excess_weight, self.initial_sigma, False]
-        self.hyperparameter_genes['distance_disjoint_weight'] = [self.distance_disjoint_weight, self.initial_sigma, False]
+        self.hyperparameter_genes['distance_disjoint_weight'] = [self.distance_disjoint_weight, self.initial_sigma,
+                                                                 False]
         self.hyperparameter_genes['distance_weight'] = [self.distance_weight, self.initial_sigma, False]
 
     def _np_sigmoid(self, x):
@@ -105,8 +107,8 @@ class Genotype(object):
     def _update_hyperparameters(self):
         for hk in self.hyperparameter_genes:
             before = self.hyperparameter_genes[hk][0]
-            self.hyperparameter_genes[hk][1] = self.hyperparameter_genes[hk][1]*np.exp(0.005*np.random.randn())
-            self.hyperparameter_genes[hk][0] += np.random.randn()*self.hyperparameter_genes[hk][1]
+            self.hyperparameter_genes[hk][1] = self.hyperparameter_genes[hk][1] * np.exp(0.005 * np.random.randn())
+            self.hyperparameter_genes[hk][0] += np.random.randn() * self.hyperparameter_genes[hk][1]
 
             # If hyperparameter is a probability or clip between zero and one
             if self.hyperparameter_genes[hk][2]:
@@ -119,7 +121,7 @@ class Genotype(object):
         self.specie = specie
 
     def _initialise_topology(self, topology, initialisation_type):
-        self.max_layer = 2**10 if (self.max_depth is None) else (self.max_depth - 1)
+        self.max_layer = 2 ** 10 if (self.max_depth is None) else (self.max_depth - 1)
 
         # Initialise inputs
         for i in range(self.inputs):
@@ -149,15 +151,15 @@ class Genotype(object):
             for i in range(self.inputs, self.inputs + self.outputs):
                 random_input_neuron = np.random.randint(0, self.inputs)
                 weight = self._initialise_weight(self.inputs)
-                self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight, True]
+                self.connection_genes[(random_input_neuron, i)] = [innovation_number, random_input_neuron, i, weight,
+                                                                   True]
                 innovation_number += 1
-
 
     def _initialise_weight(self, n=None):
         if n is None:
             n = self.inputs
 
-        u = 1/np.sqrt(n)
+        u = 1 / np.sqrt(n)
 
         return np.random.uniform(-u, u)
 
@@ -202,11 +204,13 @@ class Genotype(object):
                         enabled = connection_gene[4]
                 if connection_gene is not None:
                     child.connection_genes[(connection_gene[1], connection_gene[2])] = deepcopy(connection_gene)
-                    child.connection_genes[(connection_gene[1], connection_gene[2])][4] = enabled or np.random.rand() < self.p_reenable_parent
+                    child.connection_genes[(connection_gene[1], connection_gene[2])][
+                        4] = enabled or np.random.rand() < self.p_reenable_parent
 
                 def is_feedforward(item):
                     ((fr, to), cg) = item
-                    return child.neuron_genes[fr][3] < child.neuron_genes[to][3] and child.neuron_genes[fr][4] < child.neuron_genes[to][4]
+                    return child.neuron_genes[fr][3] < child.neuron_genes[to][3] and child.neuron_genes[fr][4] < \
+                           child.neuron_genes[to][4]
 
                 if self.feedforward:
                     child.connection_genes = dict(filter(is_feedforward, child.connection_genes.items()))
@@ -214,7 +218,7 @@ class Genotype(object):
         # Child gets average of hyperparameter gene value and sigmas
         for hk in self.hyperparameter_genes:
             parameter_value = np.random.choice([self.hyperparameter_genes[hk][0], other.hyperparameter_genes[hk][0]])
-            sigma = (self.hyperparameter_genes[hk][1] + other.hyperparameter_genes[hk][1])/2
+            sigma = (self.hyperparameter_genes[hk][1] + other.hyperparameter_genes[hk][1]) / 2
             child.hyperparameter_genes[hk] = [parameter_value, sigma, True]
 
         child.rl_training = False
@@ -226,7 +230,8 @@ class Genotype(object):
         possible_to_split = self.connection_genes.keys()
 
         if self.max_depth is not None:
-            possible_to_split = [(fr, to) for (fr, to) in possible_to_split if self.neuron_genes[fr][3] + 1 < self.neuron_genes[to][3]]
+            possible_to_split = [(fr, to) for (fr, to) in possible_to_split if
+                                 self.neuron_genes[fr][3] + 1 < self.neuron_genes[to][3]]
         else:
             possible_to_split = list(possible_to_split)
         # possible_to_split = [(fr,to) for (fr, to) in possible_to_split if self.neuron_genes[fr][3] + 1 < self.neuron_genes[to][3]]
@@ -241,7 +246,6 @@ class Genotype(object):
             fforder = (self.neuron_genes[input_neuron][4] + self.neuron_genes[output_neuron][4]) * 0.5
             nonlinearity = random.choice(self.nonlinearities)
             layer = self.neuron_genes[input_neuron][3] + 1
-
 
             new_id = len(self.neuron_genes)
 
@@ -268,10 +272,13 @@ class Genotype(object):
 
     def add_connection(self, maximum_innovation_number, innovations):
         potential_connections = product(range(len(self.neuron_genes)), range(self.inputs, len(self.neuron_genes)))
-        potential_connections = (connection for connection in potential_connections if connection not in self.connection_genes)
+        potential_connections = (connection for connection in potential_connections if
+                                 connection not in self.connection_genes)
 
         if self.feedforward:
-            potential_connections = ((f, t) for (f, t) in potential_connections if self.neuron_genes[f][3] < self.neuron_genes[t][3] and self.neuron_genes[f][4] < self.neuron_genes[t][4])
+            potential_connections = ((f, t) for (f, t) in potential_connections if
+                                     self.neuron_genes[f][3] < self.neuron_genes[t][3] and self.neuron_genes[f][4] <
+                                     self.neuron_genes[t][4])
 
         potential_connections = list(potential_connections)
 
@@ -292,7 +299,8 @@ class Genotype(object):
         maximum_innovation_number = global_innovation_number
 
         if len(self.connection_genes.values()):
-            maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connection_genes.values()))
+            maximum_innovation_number = max(global_innovation_number,
+                                            max(cg[0] for cg in self.connection_genes.values()))
 
         if len(self.neuron_genes) < self.max_nodes and np.random.rand() < self.hyperparameter_genes['p_add_neuron'][0]:
             self.add_neuron(maximum_innovation_number, innovations)
@@ -326,7 +334,7 @@ class Genotype(object):
                 if np.random.rand() < self.hyperparameter_genes['p_mutate_type'][0]:
                     neuron_gene[1] = random.choice(self.nonlinearities)
         return self
-        
+
     def distance(self, other):
         self_connections = dict(((c[0], c) for c in self.connection_genes.values()))
         other_connections = dict(((c[0], c) for c in other.connection_genes.values()))
@@ -337,12 +345,12 @@ class Genotype(object):
             return 0
 
         minimum_innovation = min(all_innovations)
-        
+
         e = 0
         d = 0
         w = 0.0
         m = 0
-        
+
         for innovation_key in all_innovations:
             if innovation_key in self_connections and innovation_key in other_connections:
                 w += np.abs(self_connections[innovation_key][3] - other_connections[innovation_key][3])
@@ -354,9 +362,9 @@ class Genotype(object):
                 # Excess genes
                 else:
                     e += 1
-                    
+
         # Average weight differences of matching genes
-        w = (w/m) if m > 0 else w
+        w = (w / m) if m > 0 else w
 
         return (self.distance_excess_weight * e +
                 self.distance_disjoint_weight * d +
@@ -389,17 +397,23 @@ class Genotype(object):
                 output_node = key_to_idx(output_node_og)
 
                 if layer_input == 0 and layer_output == self.max_layer:
-                    self.connection_genes[cg][3] = network.input_to_output.linear.weight.data[output_node, input_node].item()
+                    self.connection_genes[cg][3] = network.input_to_output.linear.weight.data[
+                        output_node, input_node].item()
                 elif layer_input == 0:
-                    self.connection_genes[cg][3] = network.input_to_hidden.linear.weight.data[output_node, input_node].item()
+                    self.connection_genes[cg][3] = network.input_to_hidden.linear.weight.data[
+                        output_node, input_node].item()
                 elif layer_input != self.max_layer and layer_output != self.max_layer:
-                    self.connection_genes[cg][3] = network.hidden_to_hidden.linear.weight.data[output_node, input_node].item()
+                    self.connection_genes[cg][3] = network.hidden_to_hidden.linear.weight.data[
+                        output_node, input_node].item()
                 elif layer_input == self.max_layer and layer_output != self.max_layer:
-                    self.connection_genes[cg][3] = network.output_to_hidden.linear.weight.data[output_node, input_node].item()
+                    self.connection_genes[cg][3] = network.output_to_hidden.linear.weight.data[
+                        output_node, input_node].item()
                 elif layer_input != self.max_layer and layer_output == self.max_layer:
-                    self.connection_genes[cg][3] = network.hidden_to_output.linear.weight.data[output_node, input_node].item()
+                    self.connection_genes[cg][3] = network.hidden_to_output.linear.weight.data[
+                        output_node, input_node].item()
                 elif layer_input == self.max_layer and layer_output == self.max_layer:
-                    self.connection_genes[cg][3] = network.output_to_output.linear.weight.data[output_node, input_node].item()
+                    self.connection_genes[cg][3] = network.output_to_output.linear.weight.data[
+                        output_node, input_node].item()
                 else:
                     raise Exception('One of the layers does not exist')
 
@@ -407,4 +421,3 @@ class Genotype(object):
                     self.neuron_genes[output_node_og][2] = network.output_biases[output_node].item()
                 elif layer_output > 0:
                     self.neuron_genes[output_node_og][2] = network.hidden_biases[output_node].item()
-

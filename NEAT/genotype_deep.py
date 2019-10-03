@@ -78,19 +78,19 @@ class Genotype_Deep(object):
 
         nonlinearity = random.choice(self.nonlinearities)
         self.nodes.append(
-            {'node_id': 0, 'num_nodes': self.inputs, 'activation_function': nonlinearity, 'weights': None, 'biases': None,
+            {'node_id': 0, 'num_nodes': self.inputs, 'activation_function': nonlinearity,
              'p_mutate_interlayer_weights': self.initial_p_mutate_interlayer_weights,
              'p_mutate_weights': self.initial_p_mutate_weights,
              'sigma_mutation_weights': self.initial_sigma_mutation_weights, 'fforder': 0})
 
         nonlinearity = random.choice(self.nonlinearities)
         self.nodes.append(
-            {'node_id': 1, 'num_nodes': self.outputs, 'activation_function': nonlinearity, 'weights': None, 'biases': None,
+            {'node_id': 1, 'num_nodes': self.outputs, 'activation_function': nonlinearity,
              'p_mutate_interlayer_weights': self.initial_p_mutate_interlayer_weights,
              'p_mutate_weights': self.initial_p_mutate_weights,
              'sigma_mutation_weights': self.initial_sigma_mutation_weights, 'fforder': 2048})
 
-        self.connections[(0, 1)] = [0, 0, 1, True]
+        self.connections[(0, 1)] = [0, 0, 1, True, None, None]
 
     def _update_parameters(self):
         for node in self.nodes:
@@ -98,8 +98,6 @@ class Genotype_Deep(object):
             node['p_mutate_weights'] += np.random.randn()*node['sigma_mutation_weights']
 
     def add_node(self, maximum_innovation_number, innovations):
-
-
 
         possible_to_split = [(fr, to) for (fr, to) in self.connections.keys() if self.nodes[fr]['fforder'] + 1 < self.nodes[to]['fforder']]
 
@@ -112,13 +110,11 @@ class Genotype_Deep(object):
             input_neuron, output_neuron = split_neuron[1:3]
 
             fforder = (self.nodes[input_neuron]['fforder'] + self.nodes[output_neuron]['fforder']) * 0.5
-
-            position = random.randint(2, len(self.nodes))
             nonlinearity = random.choice(self.nonlinearities)
             num_nodes = random.randint(self.min_initial_nodes, self.max_initial_nodes)
             new_node_id = len(self.nodes)
-            self.nodes.insert(position, {'node_id': new_node_id, 'num_nodes': num_nodes, 'activation_function': nonlinearity, 'weights': None,
-                                         'biases': None,
+
+            self.nodes.append({'node_id': new_node_id, 'num_nodes': num_nodes, 'activation_function': nonlinearity,
                                          'p_mutate_interlayer_weights': self.initial_p_mutate_interlayer_weights,
                                          'p_mutate_weights': self.initial_p_mutate_weights,
                                          'sigma_mutation_weights': self.initial_sigma_mutation_weights, 'fforder': fforder})
@@ -129,7 +125,16 @@ class Genotype_Deep(object):
                 maximum_innovation_number += 1
                 innovation_number = innovations[(input_neuron, new_node_id)] = maximum_innovation_number
 
-            self.connections[(input_neuron, new_node_id)] = [innovation_number, input_neuron, new_node_id, True]
+            self.connections[(input_neuron, new_node_id)] = [innovation_number, input_neuron, new_node_id, True, None, None]
+
+            if (new_node_id, output_neuron) in innovations:
+                innovation_number = innovations[(new_node_id, output_neuron)]
+            else:
+                maximum_innovation_number += 1
+                innovation_number = innovations[(new_node_id, output_neuron)] = maximum_innovation_number
+
+            self.connections[(new_node_id, output_neuron)] = [innovation_number, new_node_id, output_neuron, True, None, None]
+
 
     def add_connection(self, maximum_innovation_number, innovations):
         potential_connections = product(range(len(self.nodes)), range(self.inputs, len(self.nodes)))
@@ -148,7 +153,7 @@ class Genotype_Deep(object):
                 maximum_innovation_number += 1
                 innovation = innovations[(fr, to)] = maximum_innovation_number
 
-            connection_gene = [innovation, fr, to, True]
+            connection_gene = [innovation, fr, to, True, None, None]
             self.connections[(fr, to)] = connection_gene
 
     def delete_node(self):
@@ -164,12 +169,11 @@ class Genotype_Deep(object):
             position = random.randint(1, len(self.nodes) - 1)
             self.nodes[position]['activation_function'] = random.choice(self.nonlinearities)
 
-        for i in range(1, len(self.nodes)):
-            if random.random() < self.nodes[i]['p_mutate_interlayer_weights']:
-                if self.nodes[i]['weights'] is not None:
-                    t = torch.rand_like(self.nodes[i]['weights'])
-                    self.nodes[i]['weights'] += (t < self.nodes[i]['p_mutate_weights']).float() * torch.randn_like(
-                        self.nodes[i]['weights']) * 0.1
+        for conn in self.connections.keys():
+            if random.random() < 0.1:
+                if self.connections[conn][4] is not None:
+                    t = torch.rand_like(self.connections[conn][4])
+                    self.connections[conn][4] += (t < 0.1).float() * torch.randn_like(self.connections[conn][4]) * 0.1
 
     def mutate(self, innovations={}, global_innovation_number=0):
         self._update_parameters()
@@ -187,6 +191,7 @@ class Genotype_Deep(object):
             self.mutate_node()
 
     def recombinate(self, other):
+        # TODO recombination can revert to old method.
         best = self if self.stats['fitness'] > other.stats['fitness'] else other
         worst = self if self.stats['fitness'] < other.stats['fitness'] else other
 
@@ -211,61 +216,56 @@ class Genotype_Deep(object):
         return child
 
     def distance(self, other):
-        e = 0.0
-        d = 0.0
+        self_connections = dict(((c[0], c) for c in self.connections.values()))
+        other_connections = dict(((c[0], c) for c in other.connections.values()))
+
+        all_innovations = list(self_connections.keys()) + list(other_connections.keys())
+
+        if len(all_innovations) == 0:
+            return 0
+
+        minimum_innovation = min(all_innovations)
+
+        e = 0
+        d = 0
         w = 0.0
-        m_w = 0
+        m = 0
 
-        max_layers = max(len(self.nodes), len(other.nodes))
-        min_layers = min(len(self.nodes), len(other.nodes))
+        for innovation_key in all_innovations:
+            if innovation_key in self_connections and innovation_key in other_connections:
+                # TODO!!
 
-        for i in range(1, min_layers):
-            min_row = min(self.nodes[i]['weights'].size(0), other.nodes[i]['weights'].size(0))
-            min_column = min(self.nodes[i]['weights'].size(1), other.nodes[i]['weights'].size(1))
 
-            m_w += min_row * min_column
-            w += torch.abs(
-                self.nodes[i]['weights'].data[:min_row, :min_column] - other.nodes[i]['weights'].data[:min_row,
-                                                                       :min_column]).sum().item()
+                w += np.abs(self_connections[innovation_key][3] - other_connections[innovation_key][3])
+                m += 1
+            elif innovation_key in self_connections or innovation_key in other_connections:
+                # Disjoint genes
+                if innovation_key < minimum_innovation:
+                    d += 1
+                # Excess genes
+                else:
+                    e += 1
 
-            e += self.nodes[i]['weights'].data.size(0) - self.nodes[i]['weights'].data[:min_row, :min_column].size(0)
-            e += self.nodes[i]['weights'].data.size(1) - self.nodes[i]['weights'].data[:min_row, :min_column].size(1)
-            e += other.nodes[i]['weights'].data.size(0) - other.nodes[i]['weights'].data[:min_row, :min_column].size(0)
-            e += other.nodes[i]['weights'].data.size(1) - other.nodes[i]['weights'].data[:min_row, :min_column].size(1)
+        # Average weight differences of matching genes
+        w = (w / m) if m > 0 else w
 
-        for i in range(min_layers, max_layers):
-            if len(self.nodes) == len(other.nodes):
-                break
-            else:
-                d += 1
-
-        w = (w / m_w) if m_w > 0 else w
-
-        return w * self.distance_weight + e * self.distance_excess_weight + d * self.distance_disjoint_weight
-
+        return (self.distance_excess_weight * e +
+                self.distance_disjoint_weight * d +
+                self.distance_weight * w)
 
 if __name__ == "__main__":
     first_name_generator = NameGenerator('../naming/names.csv', 3, 12)
     new_individual_name = first_name_generator.generate_name()
 
     g1 = Genotype_Deep(new_individual_name, 144, 6)
-    g2 = Genotype_Deep(new_individual_name, 144, 6)
 
     from feedforwardnetwork_deep import NeuralNetwork_Deep
 
-    n1 = NeuralNetwork_Deep()
-    n2 = NeuralNetwork_Deep()
+    n1 = NeuralNetwork_Deep('cpu')
 
     n1.create_network(g1)
-    n2.create_network(g2)
 
-    g1.add_node()
-    g2.add_node()
+    g1.connections = n1.create_genome_from_network()
 
-    n1 = NeuralNetwork_Deep()
-    n2 = NeuralNetwork_Deep()
+    print(n1(torch.tensor([0.0]*144)))
 
-    n1.create_network(g1)
-    n2.create_network(g2)
-
-    print(g1.recombinate(g2).nodes)

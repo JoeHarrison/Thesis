@@ -163,14 +163,17 @@ class RubiksTask_Deep(object):
         network.create_network(genome)
         network.to(self.device)
 
+        print([(conn, genome.connections[conn][:4]) for conn in genome.connections])
+
         if self.baldwin:
             network = self.backprop(network)
         if self.lamarckism:
-            genome.nodes = network.create_genome_from_network()
+            genome.connections = network.create_genome_from_network()
 
         percentage_solved = self.get_solve_percentage(network, True)
 
         print(genome.name, genome.specie, percentage_solved)
+
 
         if percentage_solved >= 0.99:
             torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
