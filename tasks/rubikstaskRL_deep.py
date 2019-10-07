@@ -70,10 +70,10 @@ class RubiksTask_Deep(object):
         return reward.view(-1, 1) + self.discount_factor * torch.gather(target_model(next_state), 1, model(next_state).max(1)[1].view(-1, 1)) * (1-done).view(-1, 1)
 
     def b(self, network, optimiser):
-        if len(self.memory) < 128:
+        if len(self.memory) < self.batch_size:
             return
 
-        batch, _, _ = self.memory.sample(32, 1, self.device)
+        batch, _, _ = self.memory.sample(self.batch_size, 1, self.device)
         state, action, next_state, reward, done = zip(*batch)
 
         state = torch.tensor(state, dtype=torch.float32, device=self.device)
@@ -97,6 +97,7 @@ class RubiksTask_Deep(object):
         return loss
 
     def backprop(self, network):
+        torch.autograd.set_detect_anomaly(True)
         optimiser = torch.optim.Adam(network.parameters())
 
         self.target_network = copy.deepcopy(network)
@@ -162,8 +163,6 @@ class RubiksTask_Deep(object):
         network = NeuralNetwork_Deep(self.device)
         network.create_network(genome)
         network.to(self.device)
-
-        print([(conn, genome.connections[conn][:4]) for conn in genome.connections])
 
         if self.baldwin:
             network = self.backprop(network)

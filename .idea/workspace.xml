@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0af60f52-46d3-4cf9-9813-60777f80b172" name="Default Changelist" comment="">
+    <list default="true" id="831d38e1-7f5e-44c8-90b7-313044ef0925" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Experiments/NEAT.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Experiments/Reinforcement_learning_experiments.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/Reinforcement_learning_experiments.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/neat.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/neat.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/genotype.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/NEAT/genotype_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype_deep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/population_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/population_deep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feedforwardnetwork_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/feedforwardnetwork_deep.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/naming/namegenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/naming/namegenerator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,39 +31,15 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1PdTa0ZXG1Aut77wm8ERDj2iJVb" />
+  <component name="ProjectId" id="1RdzuafUlcHgUa99VrBdmo8BURx" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" />
-    <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
-  </component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/NEAT" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/tasks" />
-      <recent name="$PROJECT_DIR$/peas/peas" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/Hanoi" />
-      <recent name="$PROJECT_DIR$/Misc" />
-      <recent name="$PROJECT_DIR$/NEAT" />
-      <recent name="$PROJECT_DIR$/reinforcement_learning" />
-      <recent name="$PROJECT_DIR$" />
-    </key>
+    <property name="last_opened_file_path" value="$USER_HOME$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -61,65 +54,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.main">
-    <configuration name="Code" type="JupiterNotebook" factoryName="Jupyter Notebook">
-      <module name="Code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="additionalOptions" value="" />
-      <option name="ipnbHost" value="127.0.0.1" />
-      <option name="ipnbPort" value="8888" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Hanoi_RL" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Hanoi/Hanoi_RL.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="genotype" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Code" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/NEAT" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NEAT/genotype.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="genotype_deep" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -141,7 +75,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="gym_hanoi" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Code" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -153,27 +87,6 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Misc/gym_hanoi.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Thesis" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -183,20 +96,32 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <list>
-      <item itemvalue="Python.Hanoi_RL" />
-      <item itemvalue="Python.gym_hanoi" />
-      <item itemvalue="Python.genotype_deep" />
-      <item itemvalue="Python.genotype" />
-      <item itemvalue="Python.main" />
-    </list>
+    <configuration name="namegenerator" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/naming" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/naming/namegenerator.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
         <item itemvalue="Python.genotype_deep" />
-        <item itemvalue="Python.genotype" />
-        <item itemvalue="Python.Hanoi_RL" />
-        <item itemvalue="Python.gym_hanoi" />
+        <item itemvalue="Python.namegenerator" />
       </list>
     </recent_temporary>
   </component>
@@ -215,41 +140,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/noio/peas/tasks/xor.py</url>
-          <line>274</line>
-          <option name="timeStamp" value="70" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/noio/peas/tasks/xor.py</url>
-          <line>186</line>
-          <option name="timeStamp" value="73" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tasks/xortaskcurriculum.py</url>
-          <line>61</line>
-          <option name="timeStamp" value="98" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dqnagent.py</url>
-          <line>102</line>
-          <option name="timeStamp" value="99" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dqnagent.py</url>
-          <line>61</line>
-          <option name="timeStamp" value="102" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tasks/rubikstaskRL.py</url>
-          <line>136</line>
-          <option name="timeStamp" value="204" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

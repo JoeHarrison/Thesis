@@ -7,9 +7,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import time
 
+# I'm sorry I can't remember who to credit for this piece of code. Hope you'll forgive me
 class Identity(nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__()
+
     def forward(self, x):
         return x
 
@@ -58,8 +60,9 @@ class NeuralNetwork_Deep(nn.Module):
                 if output_neuron not in intermediate_inputs.keys():
                     intermediate_inputs[output_neuron] = self.conn[str(conn)](intermediate_inputs[(input_neuron)])
                 else:
-                    # If input for upcoming node already exists: add the inputs together
-                    intermediate_inputs[output_neuron] += self.conn[str(conn)](intermediate_inputs[(input_neuron)])
+                    # If input for upcoming node already exists: add the inputs together.
+                    # Apparantly in place operations can mess up the graph for some operators (Tanh,sigmoid)
+                    intermediate_inputs[output_neuron] = intermediate_inputs[output_neuron] + self.conn[str(conn)](intermediate_inputs[(input_neuron)])
 
         return intermediate_inputs[1]
 

@@ -1,4 +1,4 @@
-import pandas as pd;
+import pandas as pd
 from collections import defaultdict
 from random import choice
 import numpy as np

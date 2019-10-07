@@ -99,7 +99,6 @@ class Population_Deep(object):
 
     def _find_best(self, population, solution=None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
-        self.champions[-1].rl_training = True
 
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -124,9 +123,6 @@ class Population_Deep(object):
         while len(population) < self.population_size:
             individual = self.genome_factory()
             population.append(individual)
-
-        # rando = random.choice(population)
-        # rando.rl_training = True
 
         population = self._evaluate_all(population, evaluator)
 
@@ -220,7 +216,7 @@ class Population_Deep(object):
 
 
                 child = p1.recombinate(p2)
-                child.mutate()
+                child.mutate(innovations=self.innovations, global_innovation_number=self.global_innovation_number)
                 specie.members.append(child)
 
         if self.innovations:

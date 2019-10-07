@@ -339,7 +339,8 @@ class Genotype(object):
         self_connections = dict(((c[0], c) for c in self.connection_genes.values()))
         other_connections = dict(((c[0], c) for c in other.connection_genes.values()))
 
-        all_innovations = list(self_connections.keys()) + list(other_connections.keys())
+        # Changed to intersection
+        all_innovations = list(set(list(self_connections.keys()) + list(other_connections.keys())))
 
         if len(all_innovations) == 0:
             return 0
