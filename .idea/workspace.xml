@@ -2,14 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="831d38e1-7f5e-44c8-90b7-313044ef0925" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/NEAT.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/Reinforcement_learning_experiments.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/Reinforcement_learning_experiments.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" afterDir="false" />
@@ -17,13 +10,7 @@
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NEAT/genotype.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NEAT/genotype_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype_deep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/NEAT/population_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/population_deep.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/feedforwardnetwork_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/feedforwardnetwork_deep.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/naming/namegenerator.py" beforeDir="false" afterPath="$PROJECT_DIR$/naming/namegenerator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

@@ -420,178 +420,6 @@ def deep_rubikstask(device, batch_size):
     test_result = test_rubiks(network, max_tries=1000)
     print(test_result[2])
 
-def rubikstasktune(device, batch_size):
-    # Initialise name generators for individuals in NEAT population
-    first_name_generator = NameGenerator('naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-    surname_generator = NameGenerator('naming/surnames.csv', 3, 12)
-    new_specie_name = surname_generator.generate_name()
-
-    # Immutable parameters genotype
-    inputs = 144
-    outputs = 6
-    nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity', 'elu']
-    topology = None
-    feedforward = True
-    max_depth = None
-    max_nodes = float('inf')
-    response_default = 1.0
-    bias_as_node = False
-    p_mutate_response = 0.0
-    initial_sigma = 0.00
-
-    # Immutable parameters population
-    verbose = False
-    max_cores = 1
-    reset_innovations = False
-    stop_when_solved = True
-
-    baldwin = False
-    lamarckism = False
-    discount_factor = 0.99
-    memory = None
-    curriculum = 'Naive'
-
-    best_level = 0
-    best_fitness = 0.0
-    best_geno = None
-    best_pop = None
-
-    try:
-        for i in tqdm(range(100)):
-            # Tunable parameters genotype
-            initial_weight_stdev = np.random.uniform(0.1, 2.0)
-            p_add_neuron = np.random.rand()
-            p_add_connection = np.random.rand()
-            p_mutate_weight = np.random.rand()
-            p_reset_weight = np.random.rand()
-            p_reenable_connection = np.random.rand()
-            p_disable_connection = np.random.rand()
-            p_reenable_parent = np.random.rand()
-            p_mutate_bias = np.random.rand()
-
-            p_mutate_type = np.random.rand()
-            stdev_mutate_weight = np.random.uniform(0.1, 2.0)
-            stdev_mutate_bias = np.random.uniform(0.1, 2.0)
-            stdev_mutate_response = np.random.uniform(0.1, 2.0)
-            weight_range = (-np.random.uniform(0.5, 2.0), np.random.uniform(0.5, 2.0))
-
-            distance_excess_weight = np.random.rand()
-            distance_disjoint_weight = np.random.rand()
-            distance_weight = np.random.rand()
-
-            initialisation_type = np.random.choice(['partially_connected', 'fully_connected'])
-
-            print('initial_weight_stdev', initial_weight_stdev)
-            print('p_add_neuron', p_add_neuron)
-            print('p_add_connection', p_add_connection)
-            print('p_mutate_weight', p_mutate_weight)
-            print('p_reset_weight', p_reset_weight)
-            print('p_reenable_connection', p_reenable_connection)
-            print('p_disable_connection', p_disable_connection)
-            print('p_reenable_parent', p_reenable_parent)
-            print('p_mutate_bias', p_mutate_bias)
-
-            print('p_mutate_type', p_mutate_type)
-            print('stdev_mutate_weight', stdev_mutate_weight)
-            print('stdev_mutate_bias', stdev_mutate_bias)
-            print('stdev_mutate_response', stdev_mutate_response)
-            print('weight_range', weight_range)
-
-            print('distance_excess_weight', distance_excess_weight)
-            print('distance_disjoint_weight', distance_disjoint_weight)
-            print('distance_weight', distance_weight)
-            print('initialisation_type', initialisation_type)
-
-
-            # Tunable parameters population
-            population_size = np.random.randint(50, 151)
-            elitism = np.random.choice([True, False])
-            tournament_selection_k = np.random.randint(1, 5)
-
-            compatibility_threshold = np.random.uniform(1.0, 5.0)
-            compatibility_threshold_delta = np.random.rand()
-            target_species = np.random.randint(5, 21)
-            minimum_elitism_size = np.random.randint(1, 11)
-            young_age = np.random.randint(5, 16)
-            young_multiplier = 1.0 + np.random.rand()
-            old_age = np.random.randint(20, 41)
-            old_multiplier = np.random.rand()
-            stagnation_age = np.random.randint(10, 31)
-            survival = np.random.rand()
-
-            print('population_size', population_size)
-            print('elitism', elitism)
-            print('tournament_selection_k', tournament_selection_k)
-
-            print('compatibility_threshold', compatibility_threshold)
-            print('compatibility_threshold_delta', compatibility_threshold_delta)
-            print('target_species', target_species)
-            print('minimum_elitism_size', minimum_elitism_size)
-            print('young_age', young_age)
-            print('young_multiplier', young_multiplier)
-            print('old_age', old_age)
-            print('old_multiplier', old_multiplier)
-            print('stagnation_age', stagnation_age)
-            print('survival', survival)
-
-
-            genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
-                                      max_depth, max_nodes, response_default, initial_weight_stdev,
-                                      bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
-                                      p_reset_weight, p_reenable_connection, p_disable_connection,
-                                      p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
-                                      stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
-                                      weight_range, distance_excess_weight, distance_disjoint_weight,
-                                      distance_weight, initialisation_type, initial_sigma)
-
-            population = Population(new_specie_name, genome_factory, population_size, elitism, stop_when_solved,
-                                tournament_selection_k, verbose, max_cores, compatibility_threshold,
-                                compatibility_threshold_delta, target_species, minimum_elitism_size,
-                                young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations,
-                                survival)
-
-            task = RubiksTask(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-            result = population.epoch(evaluator=task, generations=100, solution=task)
-            print('Level: ', result['stats']['info_max'][-1])
-            print('Fitness: ', result['stats']['fitness_max'][-1])
-            if result['stats']['info_max'][-1] > best_level:
-                best_level = result['stats']['info_max'][-1]
-                best_fitness = result['stats']['fitness_max'][-1]
-                best_geno = (new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
-                                      max_depth, max_nodes, response_default, initial_weight_stdev,
-                                      bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
-                                      p_reset_weight, p_reenable_connection, p_disable_connection,
-                                      p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
-                                      stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
-                                      weight_range, distance_excess_weight, distance_disjoint_weight,
-                                      distance_weight, initialisation_type, initial_sigma)
-                best_pop = (new_specie_name, genome_factory, population_size, elitism, stop_when_solved,
-                                tournament_selection_k, verbose, max_cores, compatibility_threshold,
-                                compatibility_threshold_delta, target_species, minimum_elitism_size,
-                                young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations,
-                                survival)
-            if result['stats']['info_max'][-1] == best_level and result['stats']['fitness_max'][-1]> best_fitness:
-                best_fitness = result['stats']['fitness_max'][-1]
-                best_geno = (new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
-                                      max_depth, max_nodes, response_default, initial_weight_stdev,
-                                      bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
-                                      p_reset_weight, p_reenable_connection, p_disable_connection,
-                                      p_reenable_parent, p_mutate_bias, p_mutate_response, p_mutate_type,
-                                      stdev_mutate_weight, stdev_mutate_bias, stdev_mutate_response,
-                                      weight_range, distance_excess_weight, distance_disjoint_weight,
-                                      distance_weight, initialisation_type, initial_sigma)
-                best_pop = (new_specie_name, genome_factory, population_size, elitism, stop_when_solved,
-                                tournament_selection_k, verbose, max_cores, compatibility_threshold,
-                                compatibility_threshold_delta, target_species, minimum_elitism_size,
-                                young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations,
-                                survival)
-    except:
-        pass
-    print(best_level, best_fitness)
-    print(best_geno)
-    print(best_pop)
-
 def xortask(device, batch_size):
     batch_size = 4
     first_name_generator = NameGenerator('naming/names.csv', 3, 12)
@@ -681,7 +509,7 @@ if __name__ == "__main__":
     # Batch size of training and testing
     batch_size = 32
 
-    # xortask(device, batch_size)
+    xortask(device, batch_size)
 
     # first_name_generator = NameGenerator('naming/names.csv', 3, 12)
     # new_individual_name = first_name_generator.generate_name()
@@ -758,7 +586,5 @@ if __name__ == "__main__":
 
 
     deep_rubikstask(device, batch_size)
-    # hanoitask(device, batch_size)
-    # rubikstasktune(device, batch_size)
 
 
