@@ -72,6 +72,11 @@ class Population(object):
         
         self.reset_innovations = reset_innovations
         self.survival = survival
+
+        self.previous_difficulty = 1
+        self.fitnesses = []
+        self.generations = []
+        self.changes = []
         
     def _evaluate_all(self, population, evaluator):
         to_eval = [(individual, evaluator, self.generation) for individual in population]
@@ -172,6 +177,12 @@ class Population(object):
         # Find champion and check for solution
         self._find_best(population, solution)
 
+        self.fitnesses.append(self.champions[-1].stats['fitness'])
+        self.generations.append(self.generation)
+        if self.previous_difficulty < self.champions[-1].stats['info']:
+            self.previous_difficulty = self.champions[-1].stats['info']
+            self.changes.append(self.generation)
+
         # Recombination
         for specie in self.species:
             if specie.max_fitness > specie.max_fitness_previous:
@@ -243,7 +254,7 @@ class Population(object):
             if self.solved_at is not None and self.stop_when_solved:
                 break
         
-        return {'stats': self.stats, 'champions': self.champions}
+        return {'stats': self.stats, 'champions': self.champions, 'generations': self.generations, 'changes': self.changes, 'fitnesses': self.fitnesses}
     
     def _gather_stats(self, population):
         for key in population[0].stats:

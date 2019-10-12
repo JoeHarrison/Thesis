@@ -10,7 +10,7 @@ import copy
 import numpy as np
 
 class RubiksTask_Deep(object):
-    def __init__(self, batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum, use_single_activation_function=False):
+    def __init__(self, batch_size, device, baldwin, lamarckism, discount_factor, curriculum, use_single_activation_function=False):
         self.criterion = torch.nn.SmoothL1Loss()
         self.batch_size = batch_size
         self.device = device
@@ -19,7 +19,6 @@ class RubiksTask_Deep(object):
         self.difficulty = 1
 
         self.set_difficulty_next_gen = 0
-        self.memory = memory
         self.discount_factor = discount_factor
 
         self.baldwin = baldwin
@@ -50,13 +49,13 @@ class RubiksTask_Deep(object):
         if random_number > 0.2:
             return self.difficulty
         else:
-            return random.randint(1, 15)
+            return random.randint(1, 1000)
 
     def _uniform(self):
-        return random.randint(1, 15)
+        return random.randint(1, 1000)
 
     def _no_curriculum(self):
-        return 14
+        return 1000
 
     def compute_q_val(self, model, state, action):
         qactions = model(state)
@@ -106,13 +105,13 @@ class RubiksTask_Deep(object):
             done = 0
             tries = 0
             local_diff = self.curriculum()
-            max_tries = local_diff
+            max_tries = min(local_diff, 14)
             state = self.env.reset(local_diff)
 
             while tries < max_tries and not done:
                 q_values = network(torch.tensor([state], dtype=torch.float32, device=self.device))
 
-                if random.random() > 0.2:
+                if random.random() > 0.1:
                     action = q_values.max(1)[1].view(1, 1).item()
                 else:
                     action = random.randint(0, 5)
@@ -133,11 +132,10 @@ class RubiksTask_Deep(object):
     def get_solve_percentage(self, network, store_memory):
         with torch.no_grad():
             total_done = 0.0
-            for i in range(1000):
+            for i in range(100):
                 done = 0.0
                 tries = 0
                 max_tries = self.difficulty
-                self.env.seed(i)
                 state = self.env.reset(self.difficulty)
 
                 while tries < max_tries and not done:
@@ -151,7 +149,7 @@ class RubiksTask_Deep(object):
 
                 total_done += done
 
-            return total_done/1000.0
+            return total_done/100.0
 
     def evaluate(self, genome, generation):
         if generation > self.generation:
@@ -171,12 +169,9 @@ class RubiksTask_Deep(object):
 
         percentage_solved = self.get_solve_percentage(network, True)
 
-        print(genome.name, genome.specie, percentage_solved)
-
-
         if percentage_solved >= 0.99:
-            torch.save(genome, 'models/genome_' + genome.name + str(self.difficulty))
-            torch.save(network, 'models/network_' + genome.name + str(self.difficulty))
+            torch.save(genome, 'models/Deep_NEAT_genome_' + genome.name + str(self.difficulty))
+            torch.save(network, 'models/Deep_NEAT_network_' + genome.name + str(self.difficulty))
             self.set_difficulty_next_gen += 1
 
         return {'fitness': percentage_solved, 'info': self.difficulty, 'generation': generation, 'reset_species': int(self.set_difficulty_next_gen)}

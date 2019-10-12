@@ -17,13 +17,17 @@ class Genotype_Deep(object):
                  outputs=6,
                  nonlinearities=['tanh', 'relu', 'sigmoid', 'identity', 'elu'],
                  feedforward=True,
+                 p_add_node=0.1,
                  p_add_connection=0.3,
-                 p_add_node=0.5,
-                 p_mutate_node=0.8,
+                 p_mutate_weight=0.8,
+                 p_mutate_bias=0.2,
+                 p_mutate_size=0.1,
+                 p_mutate_non_linearity=0.2,
                  p_add_interlayer_node=0.1,
                  p_change_layer_nonlinearity=0.01,
                  initial_p_mutate_weights=0.03,
-                 initial_sigma_mutation_weights=0.1,
+                 initial_sigma=0.1,
+                 initial_p_mutate_biases=0.03,
                  distance_excess_weight=1.0,
                  distance_disjoint_weight=1.0,
                  distance_weight=0.4,
@@ -35,40 +39,60 @@ class Genotype_Deep(object):
         self.name = next(new_individual_name)
         self.specie = None
 
-
+        # Variables pertaining to network structure
         self.inputs = inputs
         self.outputs = outputs
         self.nonlinearities = nonlinearities
         self.feedforward = feedforward
 
+        self.initial_sigma = initial_sigma
+        self.sigma_epsilon = 0.01
+
+        # Variables pertaining to the three large ways of changing the network
         self.p_add_node = p_add_node
         self.p_add_connection = p_add_connection
-        self.p_mutate_node = p_mutate_node
+        self.p_mutate_weight = p_mutate_weight
+        self.p_mutate_bias = p_mutate_bias
+        self.p_mutate_non_linearity = p_mutate_non_linearity
+        self.p_mutate_size = p_mutate_size
 
         # Distance variables
         self.distance_excess_weight = distance_excess_weight
         self.distance_disjoint_weight = distance_disjoint_weight
         self.distance_weight = distance_weight
 
+        # Mutating nodes
         self.p_add_interlayer_node = p_add_interlayer_node
         self.p_change_layer_nonlinearity = p_change_layer_nonlinearity
 
+        # Node specific parameters
         self.initial_p_mutate_interlayer_weights = initial_p_mutate_interlayer_weights
         self.min_initial_nodes = min_initial_nodes
         self.max_initial_nodes = max_initial_nodes
 
+        # Connection specific parameters
         self.initial_p_mutate_weights = initial_p_mutate_weights
-        self.initial_sigma_mutation_weights = initial_sigma_mutation_weights
-
+        self.initial_p_mutate_biases = initial_p_mutate_biases
         self.nodes = []
 
         # Innovation number, input node, output node, enabled, Weights, Biases
         self.connections = {}
+
         self.global_hyperparameters = {}
 
+        self._initialise_hyperparameters()
         self._initialise_topology()
 
         self.specie = 'Initial surname'
+
+    def get_tau(self):
+        return 1 / np.sqrt(len(self.connections))
+
+    def get_tau_n(self):
+        return 1 / np.sqrt(2 * np.sqrt(len(self.connections)))
+
+    def get_tau_n_prime(self):
+        return 1 / np.sqrt(2 * len(self.connections))
 
     def change_specie(self, specie):
         """Changes the specie of the individual. This happens when a specie representative is picked with a different surname"""
@@ -86,30 +110,58 @@ class Genotype_Deep(object):
         self.nodes.append(
             {'node_id': 1, 'num_nodes': self.outputs, 'activation_function': nonlinearity, 'fforder': 2048})
 
-        self.connections[(0, 1)] = [0, 0, 1, True, None, None]
+        self.connections[(0, 1)] = [0, 0, 1, True, None, None, self.initial_p_mutate_weights,
+                                    self.initial_sigma, self.initial_p_mutate_biases,
+                                    self.initial_sigma]
+
+    def _initialise_hyperparameters(self):
+        self.global_hyperparameters['p_add_node'] = [self.p_add_node, self.initial_sigma, True]
+        self.global_hyperparameters['p_add_connection'] = [self.p_add_node, self.initial_sigma, True]
+        self.global_hyperparameters['p_mutate_weight'] = [self.p_mutate_weight, self.initial_sigma, True]
+        self.global_hyperparameters['p_mutate_bias'] = [self.p_mutate_bias, self.initial_sigma, True]
+        self.global_hyperparameters['p_mutate_non_linearity'] = [self.p_mutate_non_linearity, self.initial_sigma, True]
+        self.global_hyperparameters['p_mutate_size'] = [self.p_mutate_size, self.initial_sigma, True]
 
     def _update_parameters(self):
+        tau = self.get_tau()
+        tau_n = self.get_tau_n()
+        tau_n_prime = self.get_tau_n_prime()
+
+        single_r = np.random.randn()
         for connection in self.connections:
-            pass
+            self.connections[connection][7] = self.connections[connection][7] * np.exp(
+                tau_n_prime * single_r + tau_n * np.random.randn())
+            self.connections[connection][7] = self.sigma_epsilon if self.connections[connection][
+                                                                        7] < self.sigma_epsilon else \
+                self.connections[connection][7]
+            self.connections[connection][6] += self.connections[connection][7] * np.random.randn()
 
-        for k in self.global_hyperparameters:
-            pass
+            self.connections[connection][9] = self.connections[connection][9] * np.exp(
+                tau_n_prime * single_r + tau_n * np.random.randn())
+            self.connections[connection][9] = self.sigma_epsilon if self.connections[connection][
+                                                                        9] < self.sigma_epsilon else \
+                self.connections[connection][9]
+            self.connections[connection][8] += self.connections[connection][8] * np.random.randn()
 
+        for hk in self.global_hyperparameters:
+            self.global_hyperparameters[hk][1] = self.global_hyperparameters[hk][1] * np.exp(tau * np.random.randn())
+            self.global_hyperparameters[hk][1] = self.sigma_epsilon if self.global_hyperparameters[hk][
+                                                                         1] < self.sigma_epsilon else \
+                self.global_hyperparameters[hk][1]
+            self.global_hyperparameters[hk][0] += np.random.randn() * self.global_hyperparameters[hk][1]
+
+            # If hyperparameter is a probability or clip between zero and one
+            if self.global_hyperparameters[hk][2]:
+                self.global_hyperparameters[hk][0] = np.clip(self.global_hyperparameters[hk][0], 0.0, 1.0)
+            else:
+                self.global_hyperparameters[hk][0] = np.clip(self.global_hyperparameters[hk][0], 0.0)
 
     def add_node(self, maximum_innovation_number, innovations):
-        if len(innovations.values())!=len(set(innovations.values())):
-            print('Add node 1')
-            print('max innov:', maximum_innovation_number)
-            print('innovs:', innovations)
-            print([conn[:4] for conn in self.connections.values()])
-            raise IndexError
-
         possible_to_split = [(fr, to) for (fr, to) in self.connections.keys() if
                              self.nodes[fr]['fforder'] + 1 < self.nodes[to]['fforder']]
 
         if possible_to_split:
             random_node = random.choice(possible_to_split)
-            print(random_node)
             split_node = self.connections[random_node]
 
             # Disable old connection
@@ -122,7 +174,8 @@ class Genotype_Deep(object):
             num_nodes = random.randint(self.min_initial_nodes, self.max_initial_nodes)
             new_node_id = len(self.nodes)
 
-            self.nodes.append({'node_id': new_node_id, 'num_nodes': num_nodes, 'activation_function': nonlinearity, 'fforder': fforder})
+            self.nodes.append({'node_id': new_node_id, 'num_nodes': num_nodes, 'activation_function': nonlinearity,
+                               'fforder': fforder})
 
             if (input_node, new_node_id) in innovations:
                 innovation_number = innovations[(input_node, new_node_id)]
@@ -131,22 +184,11 @@ class Genotype_Deep(object):
                 innovations[(input_node, new_node_id)] = maximum_innovation_number
                 innovation_number = maximum_innovation_number
 
-            if len(innovations.values())!=len(set(innovations.values())):
-                print('Add node 2')
-                print('max innov:', maximum_innovation_number)
-                print('innovs:', innovations)
-                print([conn[:4] for conn in self.connections.values()])
-                raise IndexError
-
-
-            self.connections[(input_node, new_node_id)] = [innovation_number, input_node, new_node_id, True, None, None]
-
-            if len(innovations.values())!=len(set(innovations.values())):
-                print('Add node 3')
-                print('max innov:', maximum_innovation_number)
-                print('innovs:', innovations)
-                print([conn[:4] for conn in self.connections.values()])
-                raise IndexError
+            self.connections[(input_node, new_node_id)] = [innovation_number, input_node, new_node_id, True, None, None,
+                                                           self.initial_p_mutate_weights,
+                                                           self.initial_sigma,
+                                                           self.initial_p_mutate_biases,
+                                                           self.initial_sigma]
 
             if (new_node_id, output_node) in innovations:
                 innovation_number = innovations[(new_node_id, output_node)]
@@ -155,31 +197,14 @@ class Genotype_Deep(object):
                 innovations[(new_node_id, output_node)] = maximum_innovation_number
                 innovation_number = maximum_innovation_number
 
-            if len(innovations.values())!=len(set(innovations.values())):
-                print('Add node 4')
-                print('max innov:', maximum_innovation_number)
-                print('innovs:', innovations)
-                print([conn[:4] for conn in self.connections.values()])
-                raise IndexError
-
             self.connections[(new_node_id, output_node)] = [innovation_number, new_node_id, output_node, True, None,
-                                                            None]
-
-            if len(innovations.values())!=len(set(innovations.values())):
-                print('Add node 5')
-                print('max innov:', maximum_innovation_number)
-                print('innovs:', innovations)
-                print([conn[:4] for conn in self.connections.values()])
-                raise IndexError
+                                                            None,
+                                                            self.initial_p_mutate_weights,
+                                                            self.initial_sigma,
+                                                            self.initial_p_mutate_biases,
+                                                            self.initial_sigma]
 
     def add_connection(self, maximum_innovation_number, innovations):
-        if len(innovations.values())!=len(set(innovations.values())):
-            print('Add connection 1')
-            print('max innov:', maximum_innovation_number)
-            print('innovs:', innovations)
-            print([conn[:4] for conn in self.connections.values()])
-            raise IndexError
-
         potential_connections = product(range(len(self.nodes)), range(1, len(self.nodes)))
         potential_connections = (connection for connection in potential_connections if
                                  connection not in self.connections)
@@ -199,56 +224,33 @@ class Genotype_Deep(object):
                 innovations[(fr, to)] = maximum_innovation_number
                 innovation = maximum_innovation_number
 
-
-            if len(innovations.values())!=len(set(innovations.values())):
-                print('Add connection 2')
-                print('max innov:', maximum_innovation_number)
-                print('innovs:', innovations)
-                print([conn[:4] for conn in self.connections.values()])
-                raise IndexError
-
-            connection_gene = [innovation, fr, to, True, None, None]
+            connection_gene = [innovation, fr, to, True, None, None, self.initial_p_mutate_weights,
+                               self.initial_sigma, self.initial_p_mutate_biases,
+                               self.initial_sigma]
             self.connections[(fr, to)] = connection_gene
 
-            if len(innovations.values())!=len(set(innovations.values())):
-                print('Add connection 3')
-                print('max innov:', maximum_innovation_number)
-                print('innovs:', innovations)
-                print([conn[:4] for conn in self.connections.values()])
-                raise IndexError
-
     def mutate_node(self):
-        if random.random() < self.p_add_interlayer_node and len(self.nodes) - 1 > 2:
-            position = random.randint(2, len(self.nodes) - 1)
-            # Ensure that no more nodes can be deleted than there exist.
-            self.nodes[position]['num_nodes'] += random.randint(-min(self.nodes[position]['num_nodes'] - 1, 1), 1)
-
-        if random.random() < self.p_change_layer_nonlinearity:
-            position = random.randint(1, len(self.nodes) - 1)
-            self.nodes[position]['activation_function'] = random.choice(self.nonlinearities)
-
         for conn in self.connections.keys():
             # p_mutate_weight
-            if random.random() < 0.1:
+            if random.random() < self.global_hyperparameters['p_mutate_weight'][0]:
                 # Mutate Weights by multiplying a mask with random numbers
                 if self.connections[conn][4] is not None:
                     t = torch.rand_like(self.connections[conn][4])
-                    self.connections[conn][4] += (t < 0.1).float() * torch.randn_like(self.connections[conn][4]) * 0.1
+                    self.connections[conn][4] += (t < 0.1).float() * torch.randn_like(self.connections[conn][4]) * self.connections[conn][6]
 
             # p_mutate_bias (In NEAT this happens in the node loop)
-            if random.random() < 0.1:
+            if random.random() < self.global_hyperparameters['p_mutate_bias'][0]:
                 if self.connections[conn][5] is not None:
                     t = torch.rand_like(self.connections[conn][5])
-                    self.connections[conn][5] += (t < 0.1).float() * torch.randn_like(self.connections[conn][5]) * 0.1
+                    self.connections[conn][5] += (t < 0.1).float() * torch.randn_like(self.connections[conn][5]) * self.connections[conn][8]
 
         for node in self.nodes:
             # p_mutate_non_linearity
-            if random.random() < 0.1:
+            if random.random() < self.global_hyperparameters['p_mutate_non_linearity'][0]:
                 node['activation_function'] = random.choice(self.nonlinearities)
 
-            # p_mutate_number_of_nodes
             # Ensure that only the number of neurons within a hidden layer are changed
-            if random.random() < 0.1 and node['node_id'] not in [0, 1]:
+            if random.random() < self.global_hyperparameters['p_mutate_size'][0] and node['node_id'] not in [0, 1]:
                 node['num_nodes'] += random.randint(-5, 5)
                 node['num_nodes'] = np.clip(node['num_nodes'], a_min=1, a_max=None)
 
@@ -256,20 +258,16 @@ class Genotype_Deep(object):
         # Update local hyperparameters stored in connections and nodes and global hyperparameters.
         self._update_parameters()
 
-        if random.random() < self.p_add_node:
+        if random.random() < self.global_hyperparameters['p_add_node'][0]:
             global_innovation_number = max([global_innovation_number] + list(innovations.values()))
             maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connections.values()))
             self.add_node(maximum_innovation_number, innovations)
-        elif random.random() < self.p_add_connection:
+        elif random.random() < self.global_hyperparameters['p_add_connection'][0]:
             global_innovation_number = max([global_innovation_number] + list(innovations.values()))
             maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connections.values()))
             self.add_connection(maximum_innovation_number, innovations)
         else:
             self.mutate_node()
-
-        if len([c[0] for c in self.connections.values()])!=len(set([c[0] for c in self.connections.values()])):
-            print('mutate')
-            raise IndexError
 
     def recombinate(self, other):
         child = deepcopy(self)
@@ -322,10 +320,6 @@ class Genotype_Deep(object):
                     child.connections = dict(filter(is_feedforward, child.connections.items()))
 
         child.name = self.name[:3] + other.name[3:]
-
-        if len([c[0] for c in self.connections.values()])!=len(set([c[0] for c in self.connections.values()])):
-            print('recombinate')
-            raise IndexError
 
         return child
 
@@ -380,10 +374,12 @@ if __name__ == "__main__":
 
     g1 = Genotype_Deep(new_individual_name, 144, 6)
 
-    g1.connections = {(0, 1): [0, 0, 1, False, None, None], (0, 2): [1, 0, 2, False, None, None], (2, 1): [2, 2, 1, False, None, None], (2, 3): [3, 2, 3, True, None, None],
-                      (3, 1): [4, 3, 1, True, None, None], (0, 3): [5, 0, 3, True, None, None], (0, 4): [7, 0, 4, True, None, None], (4, 2): [8, 4, 2, True, None, None],
-                      (0, 5): [9, 0, 5, True, None, None], (5, 1): [13, 5, 1, True, None, None], (4, 1): [8, 4, 1, True, None, None]}
-
+    g1.connections = {(0, 1): [0, 0, 1, False, None, None], (0, 2): [1, 0, 2, False, None, None],
+                      (2, 1): [2, 2, 1, False, None, None], (2, 3): [3, 2, 3, True, None, None],
+                      (3, 1): [4, 3, 1, True, None, None], (0, 3): [5, 0, 3, True, None, None],
+                      (0, 4): [7, 0, 4, True, None, None], (4, 2): [8, 4, 2, True, None, None],
+                      (0, 5): [9, 0, 5, True, None, None], (5, 1): [13, 5, 1, True, None, None],
+                      (4, 1): [8, 4, 1, True, None, None]}
 
     g1.nodes.append(
         {'node_id': 4, 'num_nodes': random.randint(5, 300), 'activation_function': 'tanh', 'fforder': 512})

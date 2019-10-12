@@ -35,34 +35,39 @@ class NeuralNetwork_Deep(nn.Module):
         self.connections = None
 
     def forward(self, x):
-        intermediate_inputs = {}
+        try:
+            intermediate_inputs = {}
 
-        # All enabled connections from the input
-        conn_mods = [(input_node, output_node) for (input_node, output_node) in self.connections.keys()
-                     if input_node == 0 and self.connections[(input_node, output_node)][3]]
-
-        for conn in conn_mods:
-            input_neuron, output_neuron = conn
-            intermediate_inputs[output_neuron] = self.activ[str(conn)](self.conn[str(conn)](x))
-
-        copy_nodes = copy.deepcopy(self.nodes)
-        copy_nodes.sort(key=lambda k: k['fforder'])
-        for node in copy_nodes[1:]:
-            node_id = node['node_id']
-
-            # Retrieve all connection modules that share the same input node and are enabled
+            # All enabled connections from the input
             conn_mods = [(input_node, output_node) for (input_node, output_node) in self.connections.keys()
-                         if input_node == node_id and self.connections[(input_node, output_node)][3]]
+                         if input_node == 0 and self.connections[(input_node, output_node)][3]]
 
             for conn in conn_mods:
                 input_neuron, output_neuron = conn
+                intermediate_inputs[output_neuron] = self.activ[str(conn)](self.conn[str(conn)](x))
 
-                if output_neuron not in intermediate_inputs.keys():
-                    intermediate_inputs[output_neuron] = self.conn[str(conn)](intermediate_inputs[(input_neuron)])
-                else:
-                    # If input for upcoming node already exists: add the inputs together.
-                    # Apparantly in place operations can mess up the graph for some operators (Tanh,sigmoid)
-                    intermediate_inputs[output_neuron] = intermediate_inputs[output_neuron] + self.conn[str(conn)](intermediate_inputs[(input_neuron)])
+            copy_nodes = copy.deepcopy(self.nodes)
+            copy_nodes.sort(key=lambda k: k['fforder'])
+            for node in copy_nodes[1:]:
+                node_id = node['node_id']
+
+                # Retrieve all connection modules that share the same input node and are enabled
+                conn_mods = [(input_node, output_node) for (input_node, output_node) in self.connections.keys()
+                             if input_node == node_id and self.connections[(input_node, output_node)][3]]
+
+                for conn in conn_mods:
+                    input_neuron, output_neuron = conn
+
+                    if output_neuron not in intermediate_inputs.keys():
+                        intermediate_inputs[output_neuron] = self.conn[str(conn)](intermediate_inputs[input_neuron])
+                    else:
+                        # If input for upcoming node already exists: add the inputs together.
+                        # Apparantly in place operations can mess up the graph for some operators (Tanh,sigmoid)
+                        intermediate_inputs[output_neuron] = intermediate_inputs[output_neuron] + self.conn[str(conn)](intermediate_inputs[
+                                                                                                                           input_neuron])
+        except:
+            print('Something went wrong during the forward pass of an individual')
+            pass
 
         return intermediate_inputs[1]
 

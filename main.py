@@ -1,148 +1,40 @@
 import torch
-import torch.nn as nn
 
 from NEAT.genotype import Genotype
 from NEAT.genotype_deep import Genotype_Deep
 from NEAT.population_deep import Population_Deep
 from naming.namegenerator import NameGenerator
 from NEAT.population import Population
+from results import test_rubiks
 from tasks.rubikstaskRL_deep import RubiksTask_Deep
 from tasks.xortaskcurriculum import XORTaskCurriculum
 from tasks.rubikstaskRL import RubiksTask
-from tasks.cartpoletask import CartpoleTask
 from tasks.xortask import XORTask
 
-from reinforcement_learning.replay_memories import ReplayMemory, PrioritizedReplayMemory
 from feedforwardnetwork import NeuralNetwork
+import feedforwardnetwork_deep
 import numpy as np
-import random
-from tqdm import tqdm
-from collections import defaultdict
-from superflip import superflip_set
-import rubiks2
-import time
+import matplotlib.pyplot as plt
+import pickle
 
-def maxDistance(arr):
+def make_plots(result):
+    plt.figure()
+    plt.plot(result['generations'], result['fitnesses'])
+    plt.xlabel('Generations')
+    plt.ylabel('Fitness')
+    for change in result['changes']:
+        idx = result['generations'].index(change)
+        plt.plot(result['generations'][idx], result['fitnesses'][idx], 'ro')
+    plt.show()
 
-    # Used to store element to first index mapping
-    mp = {}
-
-    # Traverse elements and find maximum distance between
-    # same occurrences with the help of map.
-    maxDict = 0
-    maxFirst_idx = 0
-    for i in range(len(arr)):
-
-        # If this is first occurrence of element, insert its
-        # index in map
-        if arr[i] not in mp.keys():
-            mp[arr[i]] = i
-
-        # Else update max distance
-        else:
-            if i-mp[arr[i]]>maxDict:
-                maxDict = max(maxDict, i-mp[arr[i]])
-                maxFirst_idx = mp[arr[i]]
-
-    return maxDict, maxFirst_idx
-
-def test_rubiks(network, device, max_tries=None):
-    network = torch.load('models/network_Palme6')
-
-    solve_rate_superflip = np.zeros(14)
-    counts_superflip = np.zeros(14)
-    seq_len_superflip = np.zeros(14)
-    seq_len_superflip_heur = np.zeros(14)
-    puzzles = []
-    solution_sequences = []
-
-    try:
-        for i in range(14):
-            hashes_seqs = []
-            if i > 0:
-                if solve_rate_superflip[i-1] == 0:
-                    break
-
-            for sequence in tqdm(superflip_set):
-                env = rubiks2.RubiksEnv2(2, unsolved_reward=-1.0)
-
-                hashed_sequence = hash(str(sequence[:i+1]))
-
-                if hashed_sequence not in hashes_seqs:
-
-                    hashes_seqs.append(hashed_sequence)
-
-                    counts_superflip[i] += 1
-
-                    puzzle = []
-                    for j in range(i + 1):
-                        env.step(int(sequence[j]))
-                        puzzle.append(sequence[j])
-
-                    puzzles.append(puzzle)
-
-                    hashes = defaultdict(list)
-                    done = 0
-                    tries = 0
-                    t = time.time()
-                    state = env.get_observation()
-                    hashes[hash(state.tostring())] = [0]*env.action_space.n
-                    stop = False
-
-                    solution_sequence = []
-                    state_hash_seq = []
-                    while time.time()-t < 1.21 and not done and not stop:
-                        mask = hashes[hash(state.tostring())]
-                        state_hash_seq.append(hash(state.tostring()))
-                        action = network.act(state, 0.0, mask, device)
-                        solution_sequence.append(action)
-
-                        next_state, reward, done, info = env.step(action)
-
-                        hstate = state.copy()
-                        state = next_state
-                        h = hash(state.tostring())
-                        if h in hashes.keys():
-                            hashes[hash(hstate.tostring())][action] = -999
-                        else:
-                            hashes[h] = [0]*env.action_space.n
-
-                        tries += 1
-                        if max_tries:
-                            if tries >= max_tries:
-                                stop = True
-
-                    length, first_idx = maxDistance(state_hash_seq)
-
-                    while length > 0:
-                        state_hash_seq = state_hash_seq[:first_idx] + state_hash_seq[first_idx + length:]
-                        solution_sequence = solution_sequence[:first_idx] + solution_sequence[first_idx + length:]
-                        length, first_idx = maxDistance(state_hash_seq)
-
-                    solution_sequences.append(solution_sequence)
-                    solve_rate_superflip[i] += done
-
-                    if done:
-                        seq_len_superflip[i] += tries
-                        seq_len_superflip_heur[i] += len(solution_sequence)
-
-    except KeyboardInterrupt:
-        pass
-
-    score = np.zeros(14)
-    solve_rate = np.divide(solve_rate_superflip, counts_superflip)
-    seq_len = np.divide(seq_len_superflip, solve_rate_superflip)
-    for i in range(14):
-        score[i] = solve_rate[i] / (1+(seq_len[i] - (i+1)))
-
-    score = np.mean(score) - np.std(score)
-
-    return (np.mean(np.divide(solve_rate_superflip, counts_superflip))-np.std(np.divide(solve_rate_superflip, counts_superflip)),
-            score,
-            np.divide(solve_rate_superflip, counts_superflip),
-np.divide(seq_len_superflip, solve_rate_superflip),
-            np.divide(seq_len_superflip_heur, solve_rate_superflip),
-           puzzles, solution_sequences)
+    plt.figure()
+    plt.plot(result['generations'], result['weights'])
+    plt.xlabel('Generations')
+    plt.ylabel('Weight Parameters')
+    for change in result['changes']:
+        idx = result['generations'].index(change)
+        plt.plot(result['generations'][idx], result['weights'][idx], 'ro')
+    plt.show()
 
 def required_for_output(inputs, outputs, connections):
     """
@@ -278,9 +170,7 @@ def rubikstask(device, batch_size):
     # Genotype Parameters
     inputs = 144
     outputs = 6
-    # nonlinearities = ['tanh']
     nonlinearities = ['tanh', 'relu', 'sigmoid', 'identity', 'elu']
-    topology = None
     feedforward = True
     max_depth = None
     max_nodes = float('inf')
@@ -303,10 +193,10 @@ def rubikstask(device, batch_size):
     distance_disjoint_weight = 1.0
     distance_weight = 0.4
 
-    initialisation_type = 'partially_connected'
+    initialisation_type = 'fully_connected'
     initial_sigma = 0.0
 
-    genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, topology, feedforward,
+    genome_factory = lambda: Genotype(new_individual_name, inputs, outputs, nonlinearities, feedforward,
                                   max_depth, max_nodes, initial_weight_stdev,
                                   bias_as_node, p_add_neuron, p_add_connection, p_mutate_weight,
                                   p_reset_weight, p_reenable_connection, p_disable_connection,
@@ -316,7 +206,7 @@ def rubikstask(device, batch_size):
                                   distance_weight, initialisation_type, initial_sigma)
 
     # Population parameters
-    population_size = 250
+    population_size = 100
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -325,7 +215,7 @@ def rubikstask(device, batch_size):
 
     compatibility_threshold = 3.0
     compatibility_threshold_delta = 0.1
-    target_species = 32
+    target_species = 16
     minimum_elitism_size = 1
     young_age = 10
     young_multiplier = 1.2
@@ -341,23 +231,21 @@ def rubikstask(device, batch_size):
                             young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations,
                             survival)
 
-    # Reinforcement Learning parameters
-    memory = PrioritizedReplayMemory(100000)
-
     discount_factor = 0.99
 
     # Task parameters
-    lamarckism = True
-    baldwin = True
+    lamarckism = False
+    baldwin = False
 
     # Curriculum settings
     curriculum = 'LBF'
+    task = RubiksTask(batch_size, device, baldwin, lamarckism, discount_factor, curriculum)
+    result = population.epoch(evaluator=task, generations=4)
+    make_plots(result)
 
-    task = RubiksTask(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-    result = population.epoch(evaluator=task, generations=14*6*100)
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
     network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
-    test_result = test_rubiks(network, max_tries=1000)
+    test_result = test_rubiks(network, device, max_tries=1000)
     print(test_result[2])
 
 def deep_rubikstask(device, batch_size):
@@ -376,7 +264,7 @@ def deep_rubikstask(device, batch_size):
     genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities, feedforward)
 
     # Population parameters
-    population_size = 4
+    population_size = 100
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -401,9 +289,6 @@ def deep_rubikstask(device, batch_size):
                             young_age, young_multiplier, old_age, old_multiplier, stagnation_age, reset_innovations,
                             survival)
 
-    # Reinforcement Learning parameters
-    memory = PrioritizedReplayMemory(100000)
-
     discount_factor = 0.99
 
     # Task parameters
@@ -413,12 +298,19 @@ def deep_rubikstask(device, batch_size):
     # Curriculum settings
     curriculum = 'LBF'
 
-    task = RubiksTask_Deep(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-    result = population.epoch(evaluator=task, generations=50)
+    task = RubiksTask_Deep(batch_size, device, baldwin, lamarckism, discount_factor, curriculum)
+    result = population.epoch(evaluator=task, generations=100)
+    make_plots(result)
+
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
-    network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
-    test_result = test_rubiks(network, max_tries=1000)
-    print(test_result[2])
+    network = feedforwardnetwork_deep.NeuralNetwork_Deep(device)
+    network.create_network(genome)
+    torch.save(genome, 'elites/Deep_NEAT_genome_' + genome.name + curriculum + str(baldwin) + str(lamarckism))
+    torch.save(network, 'elites/Deep_NEAT_network_' + genome.name + curriculum + str(baldwin) + str(lamarckism))
+    test_result = test_rubiks(network, max_tries=1000, device=device)
+
+    pickle.dump(test_result, open('elites/test_result' + genome.name + curriculum + str(baldwin) + str(lamarckism) + '.p', "wb"))
+
 
 def xortask(device, batch_size):
     batch_size = 4
@@ -489,7 +381,6 @@ def xortask(device, batch_size):
     print(result['champions'][-1].neuron_genes)
     print(result['champions'][-1].connection_genes)
     net = NeuralNetwork(result['champions'][-1], device=device)
-    print(type(result['champions'][-1]))
     output = net(torch.tensor([[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]]))
     print(output)
 
@@ -509,14 +400,9 @@ if __name__ == "__main__":
     # Batch size of training and testing
     batch_size = 32
 
-    xortask(device, batch_size)
-
     # first_name_generator = NameGenerator('naming/names.csv', 3, 12)
     # new_individual_name = first_name_generator.generate_name()
     # genome = Genotype(new_individual_name, inputs = 3, outputs = 1)
-    #
-    #
-    #
     #
     # OR_losses = []
     # XOR_losses = []
@@ -583,8 +469,6 @@ if __name__ == "__main__":
     # number_enabled_connections = np.sum([1 for conn in best_individual.connection_genes.values() if conn[4]])
     # print('Total number of Enabled connections: ', number_enabled_connections)
     # print('Number of Generations', generations[np.argmax(combined_losses)])
-
-
     deep_rubikstask(device, batch_size)
 
 
