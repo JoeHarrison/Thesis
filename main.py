@@ -401,7 +401,7 @@ def deep_rubikstask(device, batch_size):
     genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities)
 
     # Population parameters
-    population_size = 100
+    population_size = 10
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -781,6 +781,7 @@ def xortask(device, batch_size):
 if __name__ == "__main__":
     # Checks whether CUDA is available. If it is the program will run on the GPU, otherwise on the CPU.
     device = torch.device('cpu')
+    print(torch.cuda.is_available())
     if torch.cuda.is_available():
         device = torch.device('cuda')
 

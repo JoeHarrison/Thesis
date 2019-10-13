@@ -163,22 +163,18 @@ class RubiksTask_Deep(object):
         network.create_network(genome)
         network.to(self.device)
 
-        before = self.get_solve_percentage(network, True)
 
         if self.baldwin:
             network = self.backprop(network)
         if self.lamarckism:
             genome.nodes = network.create_genome_from_network()
 
-        after = self.get_solve_percentage(network, True)
 
         network = NeuralNetwork_Deep(self.device)
         network.create_network(genome)
         network.to(self.device)
 
-        after2 = self.get_solve_percentage(network, True)
 
-        print(genome.name, genome.specie, len(genome.nodes), [g['num_nodes'] for g in genome.nodes], id(genome), before, after, after2, self.difficulty)
 
         percentage_solved = self.get_solve_percentage(network, True)
 
