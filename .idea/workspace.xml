@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="831d38e1-7f5e-44c8-90b7-313044ef0925" name="Default Changelist" comment="">
+    <list default="true" id="08feacfa-de64-47b7-8899-f2bcd7585c09" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Experiments/RL plots.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Experiments/RL plots.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/examples/xor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/methods/evolution.py" afterDir="false" />
@@ -11,8 +10,299 @@
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/networks/rnn.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Misc/noio/peas/tasks/xor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ja1" beforeDir="false" afterPath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ja1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ja1" beforeDir="false" afterPath="$PROJECT_DIR$/models/Deep_NEAT_network_Ja1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/genotype_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/genotype_deep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/NEAT/population_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/NEAT/population_deep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/feedforwardnetwork_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/feedforwardnetwork_deep.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Al1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Albi1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Alik1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Alviano1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Anahirl1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Anais1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Aritza1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Art2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Arte2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Artin1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Artin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Aur1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Berne1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Bertrac1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Calv1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Can1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Can2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Cana2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Canin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Carl1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Cat1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Chardyn1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Cri2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Cria2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Crii2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Criramonty2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Cris1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Del1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Din1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Donte1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Eara2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Earin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Earlind1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_EarlossLBFTrueTrue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Earncer1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_El1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_El2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ela2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ele2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Elin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Elncer2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Els2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Else1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Else2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Elske2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Elsncer2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Evierray1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Fra1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Frar2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Gabri1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ger2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Gera1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Gerin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Gerke2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Gra1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ike1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ike2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ikeke2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ja1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Jaq1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Jayde1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Jeffr1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Jenac1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ke1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kee2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kee3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kein2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kele2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kell1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ker2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kev2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Keva2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kevin1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Kevr2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Laia2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Laie3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Laiin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lairamonty1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lairamonty2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lak1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lar1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lar2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lare2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lari2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Larin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Larj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Larle2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lean1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_LeanLBFTrueTrue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Lend1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Loni1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mal1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Man1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mar2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mara2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marcus1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mare2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mari1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marin4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marj1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marncer2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marr2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Marramonty2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Maryl1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Maryn1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Math1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Meda1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mede2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Medin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Medke2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Mig1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Napol1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Od1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Or1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pat1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pat2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pata2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pate2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Patin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Patj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Patr1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pini2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pinj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pinke1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Pins2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ran1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ree1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Rom1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Rossi1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Russe1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ruthe1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Scot1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Sh1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Syb2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Sybe2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Sybin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Syble1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Ther1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Tonyas1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Vera1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_genome_Viram1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Al1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Albi1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Alik1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Alviano1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Anahirl1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Anais1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Aritza1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Art2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Arte2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Artin1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Artin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Aur1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Berne1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Bertrac1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Calv1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Can1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Can2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Cana2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Canin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Carl1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Cat1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Chardyn1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Cri2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Cria2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Crii2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Criramonty2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Cris1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Del1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Din1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Donte1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Eara2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Earin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Earlind1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_EarlossLBFTrueTrue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Earncer1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_El1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_El2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ela2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ele2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Elin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Elncer2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Els2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Else1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Else2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Elske2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Elsncer2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Evierray1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Fra1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Frar2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Gabri1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ger2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Gera1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Gerin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Gerke2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Gra1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ike1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ike2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ikeke2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ja1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Jaq1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Jayde1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Jeffr1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Jenac1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ke1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kee2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kee3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kein2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kele2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kell1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ker2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kev2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Keva2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kevin1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Kevr2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Laia2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Laie3" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Laiin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lairamonty1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lairamonty2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lak1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lar1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lar2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lare2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lari2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Larin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Larj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Larle2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lean1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_LeanLBFTrueTrue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Lend1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Loni1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mal1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Man1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mar2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mara2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marcus1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mare2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mari1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marin4" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marj1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marncer2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marr2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Marramonty2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Maryl1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Maryn1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Math1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Meda1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mede2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Medin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Medke2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Mig1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Napol1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Od1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Or1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pat1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pat2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pata2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pate2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Patin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Patj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Patr1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pini2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pinj2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pinke1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Pins2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ran1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ree1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Rom1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Rossi1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Russe1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ruthe1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Scot1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Sh1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Syb2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Sybe2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Sybin2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Syble1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Ther1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Tonyas1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Vera1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Deep_NEAT_network_Viram1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" beforeDir="false" afterPath="$PROJECT_DIR$/tasks/rubikstaskRL_deep.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,15 +310,39 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectId" id="1RdzuafUlcHgUa99VrBdmo8BURx" />
+  <component name="ProjectId" id="1PdTa0ZXG1Aut77wm8ERDj2iJVb" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/NEAT" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/tasks" />
+      <recent name="$PROJECT_DIR$/peas/peas" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Hanoi" />
+      <recent name="$PROJECT_DIR$/Misc" />
+      <recent name="$PROJECT_DIR$/NEAT" />
+      <recent name="$PROJECT_DIR$/reinforcement_learning" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -43,6 +357,65 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.main">
+    <configuration name="Code" type="JupiterNotebook" factoryName="Jupyter Notebook">
+      <module name="Code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="additionalOptions" value="" />
+      <option name="ipnbHost" value="127.0.0.1" />
+      <option name="ipnbPort" value="8888" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="Thesis" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="genotype" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/NEAT" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NEAT/genotype.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="genotype_deep" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Code" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -56,6 +429,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/NEAT/genotype_deep.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="gym_hanoi" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Code" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Misc/gym_hanoi.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -85,60 +479,69 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="namegenerator" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Code" />
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <module name="Thesis" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/naming" />
+      <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/naming/namegenerator.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="results" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Code" />
+    <configuration default="true" type="ccruntests" factoryName="Run Study Tests">
+      <module name="Thesis" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/results.py" />
+      <option name="SCRIPT_NAME" value="" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
+      <option name="studyTest" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <module name="Thesis" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.namegenerator" />
-      <item itemvalue="Python.results" />
+      <item itemvalue="Python.gym_hanoi" />
       <item itemvalue="Python.genotype_deep" />
+      <item itemvalue="Python.genotype" />
       <item itemvalue="Python.main" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.results" />
         <item itemvalue="Python.genotype_deep" />
-        <item itemvalue="Python.namegenerator" />
+        <item itemvalue="Python.genotype" />
+        <item itemvalue="Python.gym_hanoi" />
       </list>
     </recent_temporary>
   </component>
@@ -157,5 +560,41 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/noio/peas/tasks/xor.py</url>
+          <line>274</line>
+          <option name="timeStamp" value="70" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/noio/peas/tasks/xor.py</url>
+          <line>186</line>
+          <option name="timeStamp" value="73" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tasks/xortaskcurriculum.py</url>
+          <line>61</line>
+          <option name="timeStamp" value="98" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dqnagent.py</url>
+          <line>102</line>
+          <option name="timeStamp" value="99" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dqnagent.py</url>
+          <line>61</line>
+          <option name="timeStamp" value="102" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tasks/rubikstaskRL.py</url>
+          <line>136</line>
+          <option name="timeStamp" value="204" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

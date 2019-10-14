@@ -99,20 +99,15 @@ class Genotype_Deep(object):
         self.specie = specie
 
     def _initialise_topology(self):
-        """Initialises the topology. The input layer's weight and biases are never changed.
-        The weights and biases of the output layer are initialised in the feedforward_deep module."""
+        nonlinearity = random.choice(self.nonlinearities)
+        self.nodes.append(
+            {'num_nodes': self.inputs, 'activation_function': nonlinearity, 'weights': None, 'biases': None,
+             'p_mutate_interlayer_weights': self.initial_p_mutate_interlayer_weights})
 
         nonlinearity = random.choice(self.nonlinearities)
         self.nodes.append(
-            {'node_id': 0, 'num_nodes': self.inputs, 'activation_function': nonlinearity, 'fforder': 0})
-
-        nonlinearity = random.choice(self.nonlinearities)
-        self.nodes.append(
-            {'node_id': 1, 'num_nodes': self.outputs, 'activation_function': nonlinearity, 'fforder': 2048})
-
-        self.connections[(0, 1)] = [0, 0, 1, True, None, None, self.initial_p_mutate_weights,
-                                    self.initial_sigma, self.initial_p_mutate_biases,
-                                    self.initial_sigma]
+            {'num_nodes': self.outputs, 'activation_function': nonlinearity, 'weights': None, 'biases': None,
+             'p_mutate_interlayer_weights': self.initial_p_mutate_interlayer_weights})
 
     def _initialise_hyperparameters(self):
         self.global_hyperparameters['p_add_node'] = [self.p_add_node, self.initial_sigma, True]
@@ -123,292 +118,133 @@ class Genotype_Deep(object):
         self.global_hyperparameters['p_mutate_size'] = [self.p_mutate_size, self.initial_sigma, True]
 
     def _update_parameters(self):
-        tau = self.get_tau()
-        tau_n = self.get_tau_n()
-        tau_n_prime = self.get_tau_n_prime()
+        pass
+        # tau = self.get_tau()
+        # tau_n = self.get_tau_n()
+        # tau_n_prime = self.get_tau_n_prime()
+        #
+        # single_r = np.random.randn()
+        # for connection in self.connections:
+        #     self.connections[connection][7] = self.connections[connection][7] * np.exp(
+        #         tau_n_prime * single_r + tau_n * np.random.randn())
+        #     self.connections[connection][7] = self.sigma_epsilon if self.connections[connection][
+        #                                                                 7] < self.sigma_epsilon else \
+        #         self.connections[connection][7]
+        #     self.connections[connection][6] += self.connections[connection][7] * np.random.randn()
+        #
+        #     self.connections[connection][9] = self.connections[connection][9] * np.exp(
+        #         tau_n_prime * single_r + tau_n * np.random.randn())
+        #     self.connections[connection][9] = self.sigma_epsilon if self.connections[connection][
+        #                                                                 9] < self.sigma_epsilon else \
+        #         self.connections[connection][9]
+        #     self.connections[connection][8] += self.connections[connection][8] * np.random.randn()
+        #
+        # for hk in self.global_hyperparameters:
+        #     self.global_hyperparameters[hk][1] = self.global_hyperparameters[hk][1] * np.exp(tau * np.random.randn())
+        #     self.global_hyperparameters[hk][1] = self.sigma_epsilon if self.global_hyperparameters[hk][
+        #                                                                  1] < self.sigma_epsilon else \
+        #         self.global_hyperparameters[hk][1]
+        #     self.global_hyperparameters[hk][0] += np.random.randn() * self.global_hyperparameters[hk][1]
+        #
+        #     # If hyperparameter is a probability or clip between zero and one
+        #     if self.global_hyperparameters[hk][2]:
+        #         self.global_hyperparameters[hk][0] = np.clip(self.global_hyperparameters[hk][0], 0.0, 1.0)
+        #     else:
+        #         self.global_hyperparameters[hk][0] = np.clip(self.global_hyperparameters[hk][0], 0.0)
 
-        single_r = np.random.randn()
-        for connection in self.connections:
-            self.connections[connection][7] = self.connections[connection][7] * np.exp(
-                tau_n_prime * single_r + tau_n * np.random.randn())
-            self.connections[connection][7] = self.sigma_epsilon if self.connections[connection][
-                                                                        7] < self.sigma_epsilon else \
-                self.connections[connection][7]
-            self.connections[connection][6] += self.connections[connection][7] * np.random.randn()
+    def add_node(self):
+        position = random.randint(2, len(self.nodes))
+        nonlinearity = random.choice(self.nonlinearities)
+        num_nodes = random.randint(self.min_initial_nodes, self.max_initial_nodes)
 
-            self.connections[connection][9] = self.connections[connection][9] * np.exp(
-                tau_n_prime * single_r + tau_n * np.random.randn())
-            self.connections[connection][9] = self.sigma_epsilon if self.connections[connection][
-                                                                        9] < self.sigma_epsilon else \
-                self.connections[connection][9]
-            self.connections[connection][8] += self.connections[connection][8] * np.random.randn()
-
-        for hk in self.global_hyperparameters:
-            self.global_hyperparameters[hk][1] = self.global_hyperparameters[hk][1] * np.exp(tau * np.random.randn())
-            self.global_hyperparameters[hk][1] = self.sigma_epsilon if self.global_hyperparameters[hk][
-                                                                         1] < self.sigma_epsilon else \
-                self.global_hyperparameters[hk][1]
-            self.global_hyperparameters[hk][0] += np.random.randn() * self.global_hyperparameters[hk][1]
-
-            # If hyperparameter is a probability or clip between zero and one
-            if self.global_hyperparameters[hk][2]:
-                self.global_hyperparameters[hk][0] = np.clip(self.global_hyperparameters[hk][0], 0.0, 1.0)
-            else:
-                self.global_hyperparameters[hk][0] = np.clip(self.global_hyperparameters[hk][0], 0.0)
-
-    def add_node(self, maximum_innovation_number, innovations):
-        possible_to_split = [(fr, to) for (fr, to) in self.connections.keys() if
-                             self.nodes[fr]['fforder'] + 1 < self.nodes[to]['fforder']]
-
-        if possible_to_split:
-            random_node = random.choice(possible_to_split)
-            split_node = self.connections[random_node]
-
-            # Disable old connection
-            split_node[3] = False
-
-            input_node, output_node = split_node[1:3]
-
-            fforder = (self.nodes[input_node]['fforder'] + self.nodes[output_node]['fforder']) * 0.5
-            nonlinearity = random.choice(self.nonlinearities)
-            num_nodes = random.randint(self.min_initial_nodes, self.max_initial_nodes)
-            new_node_id = len(self.nodes)
-
-            self.nodes.append({'node_id': new_node_id, 'num_nodes': num_nodes, 'activation_function': nonlinearity,
-                               'fforder': fforder})
-
-            if (input_node, new_node_id) in innovations:
-                innovation_number = innovations[(input_node, new_node_id)]
-            else:
-                maximum_innovation_number += 1
-                innovations[(input_node, new_node_id)] = maximum_innovation_number
-                innovation_number = maximum_innovation_number
-
-            self.connections[(input_node, new_node_id)] = [innovation_number, input_node, new_node_id, True, None, None,
-                                                           self.initial_p_mutate_weights,
-                                                           self.initial_sigma,
-                                                           self.initial_p_mutate_biases,
-                                                           self.initial_sigma]
-
-            if (new_node_id, output_node) in innovations:
-                innovation_number = innovations[(new_node_id, output_node)]
-            else:
-                maximum_innovation_number += 1
-                innovations[(new_node_id, output_node)] = maximum_innovation_number
-                innovation_number = maximum_innovation_number
-
-            self.connections[(new_node_id, output_node)] = [innovation_number, new_node_id, output_node, True, None,
-                                                            None,
-                                                            self.initial_p_mutate_weights,
-                                                            self.initial_sigma,
-                                                            self.initial_p_mutate_biases,
-                                                            self.initial_sigma]
-
-    def add_connection(self, maximum_innovation_number, innovations):
-        potential_connections = product(range(len(self.nodes)), range(1, len(self.nodes)))
-        potential_connections = (connection for connection in potential_connections if
-                                 connection not in self.connections)
-
-        if self.feedforward:
-            potential_connections = ((f, t) for (f, t) in potential_connections if
-                                     self.nodes[f]['fforder'] < self.nodes[t]['fforder'])
-
-        potential_connections = list(potential_connections)
-
-        if potential_connections:
-            (fr, to) = random.choice(potential_connections)
-            if (fr, to) in innovations:
-                innovation = innovations[(fr, to)]
-            else:
-                maximum_innovation_number += 1
-                innovations[(fr, to)] = maximum_innovation_number
-                innovation = maximum_innovation_number
-
-            connection_gene = [innovation, fr, to, True, None, None, self.initial_p_mutate_weights,
-                               self.initial_sigma, self.initial_p_mutate_biases,
-                               self.initial_sigma]
-            self.connections[(fr, to)] = connection_gene
+        self.nodes.insert(position, {'num_nodes': num_nodes, 'activation_function': nonlinearity, 'weights': None,
+                                     'biases': None,
+                                     'p_mutate_interlayer_weights': self.initial_p_mutate_interlayer_weights})
 
     def mutate_node(self):
-        for conn in self.connections.keys():
-            # p_mutate_weight
-            if random.random() < self.global_hyperparameters['p_mutate_weight'][0]:
-                # Mutate Weights by multiplying a mask with random numbers
-                if self.connections[conn][4] is not None:
-                    t = torch.rand_like(self.connections[conn][4])
-                    self.connections[conn][4] += (t < 0.1).float() * torch.randn_like(self.connections[conn][4]) * self.connections[conn][6]
+        if random.random() < self.p_add_interlayer_node and len(self.nodes) - 1 > 2:
+            position = random.randint(2, len(self.nodes) - 1)
+            # Ensure that no more nodes can be deleted than there exist.
+            self.nodes[position]['num_nodes'] += random.randint(-min(self.nodes[position]['num_nodes'] - 1, 1), 1)
 
-            # p_mutate_bias (In NEAT this happens in the node loop)
-            if random.random() < self.global_hyperparameters['p_mutate_bias'][0]:
-                if self.connections[conn][5] is not None:
-                    t = torch.rand_like(self.connections[conn][5])
-                    self.connections[conn][5] += (t < 0.1).float() * torch.randn_like(self.connections[conn][5]) * self.connections[conn][8]
+        if random.random() < self.p_change_layer_nonlinearity:
+            position = random.randint(1, len(self.nodes) - 1)
+            self.nodes[position]['activation_function'] = random.choice(self.nonlinearities)
 
-        for node in self.nodes:
-            # p_mutate_non_linearity
-            if random.random() < self.global_hyperparameters['p_mutate_non_linearity'][0]:
-                node['activation_function'] = random.choice(self.nonlinearities)
-
-            # Ensure that only the number of neurons within a hidden layer are changed
-            if random.random() < self.global_hyperparameters['p_mutate_size'][0] and node['node_id'] not in [0, 1]:
-                node['num_nodes'] += random.randint(-5, 5)
-                node['num_nodes'] = np.clip(node['num_nodes'], a_min=1, a_max=None)
+        for i in range(1, len(self.nodes)):
+            if random.random() < self.nodes[i]['p_mutate_interlayer_weights']:
+                if self.nodes[i]['weights'] is not None:
+                    t = torch.rand_like(self.nodes[i]['weights'])
+                    self.nodes[i]['weights'] += (t < 0.01).float() * torch.randn_like(self.nodes[i]['weights']) * 0.1
 
     def mutate(self, innovations={}, global_innovation_number=0):
         # Update local hyperparameters stored in connections and nodes and global hyperparameters.
         self._update_parameters()
 
         if random.random() < self.global_hyperparameters['p_add_node'][0]:
-            global_innovation_number = max([global_innovation_number] + list(innovations.values()))
-            maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connections.values()))
-            self.add_node(maximum_innovation_number, innovations)
-        elif random.random() < self.global_hyperparameters['p_add_connection'][0]:
-            global_innovation_number = max([global_innovation_number] + list(innovations.values()))
-            maximum_innovation_number = max(global_innovation_number, max(cg[0] for cg in self.connections.values()))
-            self.add_connection(maximum_innovation_number, innovations)
+            self.add_node()
         else:
             self.mutate_node()
 
     def recombinate(self, other):
-        child = deepcopy(self)
+        best = self if self.stats['fitness'] > other.stats['fitness'] else other
+        worst = self if self.stats['fitness'] < other.stats['fitness'] else other
+
+        child = deepcopy(best)
+        child.name = best.name[:3] + worst.name[3:]
         child.nodes = []
-        child.connections = {}
 
-        max_nodes = max(len(self.nodes), len(other.nodes))
-        min_nodes = min(len(self.nodes), len(other.nodes))
+        min_layers = min(len(best.nodes), len(worst.nodes))
+        max_layers = max(len(best.nodes), len(worst.nodes))
 
-        for i in range(max_nodes):
+        for i in range(max_layers):
             node = None
-            if i < min_nodes:
-                node = random.choice((self.nodes[i], other.nodes[i]))
+            if i < min_layers:
+                node = random.choice((best.nodes[i], worst.nodes[i]))
             else:
                 try:
-                    node = self.nodes[i]
+                    node = best.nodes[i]
                 except IndexError:
-                    node = other.nodes[i]
+                    node = worst.nodes[i]
             child.nodes.append(deepcopy(node))
-
-        self_connections = dict(((c[0], c) for c in self.connections.values()))
-        other_connections = dict(((c[0], c) for c in other.connections.values()))
-
-        if len(self_connections) > 0 or len(other_connections) > 0:
-            max_innovation_number = max(list(self_connections.keys()) + list(other_connections.keys()))
-
-            for i in range(max_innovation_number + 1):
-                connection = None
-                if i in self_connections and i in other_connections:
-                    connection = random.choice((self_connections[i], other_connections[i]))
-                    enabled = self_connections[i][3] and other_connections[i][3]
-                else:
-                    if i in self_connections:
-                        connection = self_connections[i]
-                        enabled = connection[3]
-                    elif i in other_connections:
-                        connection = other_connections[i]
-                        enabled = connection[3]
-                if connection is not None:
-                    child.connections[(connection[1], connection[2])] = deepcopy(connection)
-                    child.connections[(connection[1], connection[2])][
-                        3] = enabled
-
-                def is_feedforward(item):
-                    ((fr, to), cg) = item
-                    # add layers?
-                    return child.nodes[fr]['fforder'] < child.nodes[to]['fforder']
-
-                if self.feedforward:
-                    child.connections = dict(filter(is_feedforward, child.connections.items()))
-
-        child.name = self.name[:3] + other.name[3:]
 
         return child
 
     def distance(self, other):
-        self_connections = dict(((c[0], c) for c in self.connections.values()))
-        other_connections = dict(((c[0], c) for c in other.connections.values()))
-
-        all_innovations = list(set(list(self_connections.keys()) + list(other_connections.keys())))
-
-        if len(all_innovations) == 0:
-            return 0
-
-        minimum_innovation = min(all_innovations)
-
-        e = 0
-        d = 0
+        e = 0.0
+        d = 0.0
         w = 0.0
-        m = 0
+        m_w = 0
 
-        for innovation_key in all_innovations:
-            if innovation_key in self_connections and innovation_key in other_connections:
+        max_layers = max(len(self.nodes), len(other.nodes))
+        min_layers = min(len(self.nodes), len(other.nodes))
 
-                min_row = min(self_connections[innovation_key][4].size(0), other_connections[innovation_key][4].size(0))
-                min_column = min(self_connections[innovation_key][4].size(1),
-                                 other_connections[innovation_key][4].size(1))
+        for i in range(1, min_layers):
 
-                m += min_row * min_column
-                w += torch.abs(
-                    self_connections[innovation_key][4].data[:min_row, :min_column] - other_connections[innovation_key][
-                                                                                          4].data[:min_row,
-                                                                                      :min_column]).sum().item()
+            min_row = min(self.nodes[i]['weights'].size(0), other.nodes[i]['weights'].size(0))
+            min_column = min(self.nodes[i]['weights'].size(1), other.nodes[i]['weights'].size(1))
 
-            elif innovation_key in self_connections or innovation_key in other_connections:
-                # Disjoint genes
-                if innovation_key < minimum_innovation:
-                    d += 1
-                # Excess genes
-                else:
-                    e += 1
+            m_w += min_row * min_column
+            w += torch.abs(
+                self.nodes[i]['weights'].data[:min_row, :min_column] - other.nodes[i]['weights'].data[:min_row,
+                                                                       :min_column]).sum().item()
 
-        # Average weight differences of matching genes
-        w = (w / m) if m > 0 else w
+            e += self.nodes[i]['weights'].data.size(0) - self.nodes[i]['weights'].data[:min_row, :min_column].size(0)
+            e += self.nodes[i]['weights'].data.size(1) - self.nodes[i]['weights'].data[:min_row, :min_column].size(1)
+            e += other.nodes[i]['weights'].data.size(0) - other.nodes[i]['weights'].data[:min_row, :min_column].size(0)
+            e += other.nodes[i]['weights'].data.size(1) - other.nodes[i]['weights'].data[:min_row, :min_column].size(1)
+
+        for i in range(min_layers, max_layers):
+            if len(self.nodes) == len(other.nodes):
+                break
+            else:
+                d += 1
+
+        w = (w / m_w) if m_w > 0 else w
+
+        return w * self.distance_weight + e * self.distance_excess_weight + d * self.distance_disjoint_weight
+
 
         return (self.distance_excess_weight * e +
                 self.distance_disjoint_weight * d +
                 self.distance_weight * w)
-
-
-if __name__ == "__main__":
-    first_name_generator = NameGenerator('../naming/names.csv', 3, 12)
-    new_individual_name = first_name_generator.generate_name()
-
-    g1 = Genotype_Deep(new_individual_name, 144, 6)
-
-    g1.connections = {(0, 1): [0, 0, 1, False, None, None], (0, 2): [1, 0, 2, False, None, None],
-                      (2, 1): [2, 2, 1, False, None, None], (2, 3): [3, 2, 3, True, None, None],
-                      (3, 1): [4, 3, 1, True, None, None], (0, 3): [5, 0, 3, True, None, None],
-                      (0, 4): [7, 0, 4, True, None, None], (4, 2): [8, 4, 2, True, None, None],
-                      (0, 5): [9, 0, 5, True, None, None], (5, 1): [13, 5, 1, True, None, None],
-                      (4, 1): [8, 4, 1, True, None, None]}
-
-    g1.nodes.append(
-        {'node_id': 4, 'num_nodes': random.randint(5, 300), 'activation_function': 'tanh', 'fforder': 512})
-
-    g1.nodes.append(
-        {'node_id': 2, 'num_nodes': random.randint(5, 300), 'activation_function': 'sigmoid', 'fforder': 1024})
-
-    g1.nodes.append(
-        {'node_id': 3, 'num_nodes': random.randint(5, 300), 'activation_function': 'tanh', 'fforder': 1024})
-
-    g1.nodes.append(
-        {'node_id': 5, 'num_nodes': random.randint(5, 300), 'activation_function': 'tanh', 'fforder': 1024})
-
-    from feedforwardnetwork_deep import NeuralNetwork_Deep
-
-    n2 = NeuralNetwork_Deep('cpu')
-    n2.create_network(g1)
-    g1.connections = n2.create_genome_from_network()
-
-    child = g1.recombinate(g1)
-
-    n1 = NeuralNetwork_Deep('cpu')
-
-    n1.create_network(child)
-
-    child.connections = n1.create_genome_from_network()
-
-    rl = RubiksTask_Deep(128, 'cpu', True, True, 0.99, None, 'LBF', use_single_activation_function=False)
-
-    rl.evaluate(child, 0)
-
-    print(n1(torch.tensor([-1.0] * 144)))

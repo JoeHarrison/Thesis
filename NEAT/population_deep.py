@@ -172,7 +172,7 @@ class Population_Deep(object):
 
         self.fitnesses.append(self.champions[-1].stats['fitness'])
         self.generations.append(self.generation)
-        self.weights.append(np.sum([self.champions[-1].connections[conn][4].size(0)*self.champions[-1].connections[conn][4].size(1) if self.champions[-1].connections[conn][3] else 0 for conn in self.champions[-1].connections]))
+        self.weights.append(np.sum([self.champions[-1].nodes[n]['weights'].size(0)*self.champions[-1].nodes[n]['weights'].size(1) if self.champions[-1].nodes[n]['weights'] is not None else 0 for n in range(len(self.champions[-1].nodes))]))
         if self.previous_difficulty < self.champions[-1].stats['info']:
             self.previous_difficulty = self.champions[-1].stats['info']
             self.changes.append(self.generation)
@@ -229,7 +229,7 @@ class Population_Deep(object):
 
 
                 child = p1.recombinate(p2)
-                child.mutate(innovations=self.innovations, global_innovation_number=self.global_innovation_number)
+                child.mutate()
                 specie.members.append(child)
 
         if self.innovations:

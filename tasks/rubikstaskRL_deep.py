@@ -152,6 +152,7 @@ class RubiksTask_Deep(object):
             return total_done/100.0
 
     def evaluate(self, genome, generation):
+        print(genome.name)
         if generation > self.generation:
             if self.set_difficulty_next_gen:
                 self.difficulty += 1
