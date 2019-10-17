@@ -401,7 +401,7 @@ def deep_rubikstask(device, batch_size):
     genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities)
 
     # Population parameters
-    population_size = 10
+    population_size = 100
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -436,10 +436,10 @@ def deep_rubikstask(device, batch_size):
     baldwin = True
 
     # Curriculum settings
-    curriculum = 'Naive'
+    curriculum = 'LBF'
 
     task = RubiksTask_Deep(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-    result = population.epoch(evaluator=task, generations=50)
+    result = population.epoch(evaluator=task, generations=1000)
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
     network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
     test_result = test_rubiks(network, max_tries=1000)

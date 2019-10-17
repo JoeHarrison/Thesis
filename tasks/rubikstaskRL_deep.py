@@ -70,7 +70,7 @@ class RubiksTask_Deep(object):
         return reward.view(-1, 1) + self.discount_factor * torch.gather(target_model(next_state), 1, model(next_state).max(1)[1].view(-1, 1)) * (1-done).view(-1, 1)
 
     def b(self, network, optimiser):
-        if len(self.memory) < 128:
+        if len(self.memory) < 32:
             return
 
         batch, _, _ = self.memory.sample(32, 1, self.device)
@@ -111,7 +111,7 @@ class RubiksTask_Deep(object):
             while tries < max_tries and not done:
                 q_values = network(torch.tensor([state], dtype=torch.float32, device=self.device))
 
-                if random.random() > 0.2:
+                if random.random() < i/1000:
                     action = q_values.max(1)[1].view(1, 1).item()
                 else:
                     action = random.randint(0, 5)
@@ -136,7 +136,7 @@ class RubiksTask_Deep(object):
                 done = 0.0
                 tries = 0
                 max_tries = self.difficulty
-                self.env.seed(i)
+                self.env.seed(i*self.generation)
                 state = self.env.reset(self.difficulty)
 
                 while tries < max_tries and not done:

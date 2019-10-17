@@ -24,8 +24,8 @@ class Genotype_Deep(object):
                  distance_disjoint_weight=1.0,
                  distance_weight=0.4,
                  initial_p_mutate_interlayer_weights=0.1,
-                 min_initial_nodes=1,
-                 max_initial_nodes=128):
+                 min_initial_nodes=128,
+                 max_initial_nodes=512):
 
         # Name the new individual
         self.name = next(new_individual_name)
@@ -86,17 +86,17 @@ class Genotype_Deep(object):
         if random.random() < self.p_add_interlayer_node and len(self.nodes) - 1 > 2:
             position = random.randint(2, len(self.nodes) - 1)
             # Ensure that no more nodes can be deleted than there exist.
-            self.nodes[position]['num_nodes'] += random.randint(-min(self.nodes[position]['num_nodes'] - 1, 1), 1)
+            self.nodes[position]['num_nodes'] += random.randint(1, 128)
 
-        if random.random() < self.p_change_layer_nonlinearity:
-            position = random.randint(1, len(self.nodes) - 1)
-            self.nodes[position]['activation_function'] = random.choice(self.nonlinearities)
-
-        for i in range(1, len(self.nodes)):
-            if random.random() < self.nodes[i]['p_mutate_interlayer_weights']:
-                if self.nodes[i]['weights'] is not None:
-                    t = torch.rand_like(self.nodes[i]['weights'])
-                    self.nodes[i]['weights'] += (t < 0.01).float() * torch.randn_like(self.nodes[i]['weights']) * 0.1
+        # if random.random() < self.p_change_layer_nonlinearity:
+        #     position = random.randint(1, len(self.nodes) - 1)
+        #     self.nodes[position]['activation_function'] = random.choice(self.nonlinearities)
+        #
+        # for i in range(1, len(self.nodes)):
+        #     if random.random() < self.nodes[i]['p_mutate_interlayer_weights']:
+        #         if self.nodes[i]['weights'] is not None:
+        #             t = torch.rand_like(self.nodes[i]['weights'])
+        #             self.nodes[i]['weights'] += (t < 0.01).float() * torch.randn_like(self.nodes[i]['weights']) * 0.1
 
     def mutate(self):
         if random.random() < self.p_add_node:
