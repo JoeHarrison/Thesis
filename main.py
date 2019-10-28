@@ -1,6 +1,9 @@
+import pickle
+
 import torch
 import torch.nn as nn
 
+import feedforwardnetwork_deep
 from NEAT.genotype import Genotype
 from NEAT.genotype_deep import Genotype_Deep
 from NEAT.population_deep import Population_Deep
@@ -21,6 +24,35 @@ from collections import defaultdict
 from superflip import superflip_set
 import rubiks2
 import time
+import matplotlib.pyplot as plt
+
+def make_plots(result):
+    plt.figure()
+    plt.plot(result['generations'], result['fitnesses'])
+    plt.xlabel('Generations')
+    plt.ylabel('Fitness')
+    for change in result['changes']:
+        idx = result['generations'].index(change)
+        plt.plot(result['generations'][idx], result['fitnesses'][idx], 'ro')
+    plt.show()
+
+    plt.figure()
+    plt.plot(result['generations'], result['weights'])
+    plt.xlabel('Generations')
+    plt.ylabel('Weight Parameters')
+    for change in result['changes']:
+        idx = result['generations'].index(change)
+        plt.plot(result['generations'][idx], result['weights'][idx], 'ro')
+    plt.show()
+
+    plt.figure()
+    plt.plot(result['generations'], result['nodes'])
+    plt.xlabel('Generations')
+    plt.ylabel('# Nodes')
+    for change in result['changes']:
+        idx = result['generations'].index(change)
+        plt.plot(result['generations'][idx], result['weights'][idx], 'ro')
+    plt.show()
 
 def maxDistance(arr):
 
@@ -47,7 +79,8 @@ def maxDistance(arr):
     return maxDict, maxFirst_idx
 
 def test_rubiks(network, device, max_tries=None):
-    network = torch.load('models/network_Palme6')
+    network = torch.load('network_Ch10_NAIVEDEEPNEAT', map_location='cpu')
+    network.to(device)
 
     solve_rate_superflip = np.zeros(14)
     counts_superflip = np.zeros(14)
@@ -401,7 +434,7 @@ def deep_rubikstask(device, batch_size):
     genome_factory = lambda: Genotype_Deep(new_individual_name, inputs, outputs, nonlinearities)
 
     # Population parameters
-    population_size = 100
+    population_size = 20
     elitism = True
     stop_when_solved = True
     tournament_selection_k = 3
@@ -436,14 +469,20 @@ def deep_rubikstask(device, batch_size):
     baldwin = True
 
     # Curriculum settings
-    curriculum = 'LBF'
+    curriculum = 'Naive'
 
     task = RubiksTask_Deep(batch_size, device, baldwin, lamarckism, discount_factor, memory, curriculum)
-    result = population.epoch(evaluator=task, generations=1000)
+    result = population.epoch(evaluator=task, generations=100)
     genome = result['champions'][np.argmax(np.multiply(result['stats']['fitness_max'], result['stats']['info_max']))]
-    network = NeuralNetwork(genome, batch_size=1, device=device, use_single_activation_function=False)
-    test_result = test_rubiks(network, max_tries=1000)
-    print(test_result[2])
+    network = feedforwardnetwork_deep.NeuralNetwork_Deep(device)
+    network.create_network(genome)
+    torch.save(genome, 'elites/Deep_NEAT_genome_' + genome.name + curriculum + str(baldwin) + str(lamarckism))
+    torch.save(network, 'elites/Deep_NEAT_network_' + genome.name + curriculum + str(baldwin) + str(lamarckism))
+    torch.save(result, 'elites/Deep_NEAT_result_' + genome.name + curriculum + str(baldwin) + str(lamarckism))
+    test_result = test_rubiks(network, max_tries=1000, device=device)
+
+    pickle.dump(test_result, open('elites/test_result' + genome.name + curriculum + str(baldwin) + str(lamarckism) + '.p', "wb"))
+
 
 def rubikstasktune(device, batch_size):
     # Initialise name generators for individuals in NEAT population

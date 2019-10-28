@@ -73,6 +73,13 @@ class Population_Deep(object):
         self.reset_innovations = reset_innovations
         self.survival = survival
 
+        self.previous_difficulty = 1
+        self.fitnesses = []
+        self.generations = []
+        self.changes = []
+        self.weights = []
+        self.nodes = []
+
     def _evaluate_all(self, population, evaluator):
         to_eval = [(individual, evaluator, self.generation) for individual in population]
         if self.pool is not None:
@@ -93,13 +100,11 @@ class Population_Deep(object):
         self.current_compatibility_threshold = self.compatibility_threshold
 
     def _reset_stagnation(self):
-        print('resetting species')
         for specie in self.species:
             specie.reset_stagnation()
 
     def _find_best(self, population, solution=None):
         self.champions.append(max(population, key=lambda individual: individual.stats['fitness']))
-        self.champions[-1].rl_training = True
 
         if solution is not None:
             if isinstance(solution, (int, float)):
@@ -124,9 +129,6 @@ class Population_Deep(object):
         while len(population) < self.population_size:
             individual = self.genome_factory()
             population.append(individual)
-
-        # rando = random.choice(population)
-        # rando.rl_training = True
 
         population = self._evaluate_all(population, evaluator)
 
@@ -168,6 +170,14 @@ class Population_Deep(object):
 
         # Find champion and check for solution
         self._find_best(population, solution)
+
+        self.fitnesses.append(self.champions[-1].stats['fitness'])
+        self.generations.append(self.generation)
+        self.weights.append(np.sum([node['weights'].size(1)*node['weights'].size(0) if node['weights'] is not None else 0 for node in self.champions[-1].nodes]))
+        self.nodes.append(len(self.champions[-1].nodes))
+        if self.previous_difficulty < self.champions[-1].stats['info']:
+            self.previous_difficulty = self.champions[-1].stats['info']
+            self.changes.append(self.generation)
 
         if reset_specie_flag:
             self._reset_stagnation()
@@ -244,7 +254,7 @@ class Population_Deep(object):
             if self.solved_at is not None and self.stop_when_solved:
                 break
 
-        return {'stats': self.stats, 'champions': self.champions}
+        return {'stats': self.stats, 'champions': self.champions, 'generations': self.generations, 'changes': self.changes, 'fitnesses': self.fitnesses, 'weights': self.weights, 'nodes': self.nodes}
 
     def _gather_stats(self, population):
         for key in population[0].stats:
